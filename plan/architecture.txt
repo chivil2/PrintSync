@@ -133,7 +133,7 @@
       "title_description": "Determines the type of service jobs that can be assigned - printing staff handles printing jobs, technical staff handles technical service jobs",
       "views": [
         "dashboard",
-        "jobs"
+        "service_jobs"
       ],
       "dashboard": {
         "description": "Basic employee details and overview",
@@ -146,7 +146,7 @@
           "recent_activity"
         ]
       },
-      "jobs": {
+      "service_jobs": {
         "description": "View and manage assigned service jobs based on title",
         "content": [
           "pending_service_jobs",
@@ -169,6 +169,56 @@
         "cannot_manage_users",
         "printing_staff_cannot_handle_technical_jobs",
         "technical_staff_cannot_handle_printing_jobs"
+      ]
+    },
+    "owner": {
+      "description": "Business owner who manages employees, service jobs, and services",
+      "access_level": "admin",
+      "views": [
+        "dashboard",
+        "employees",
+        "service_jobs",
+        "services"
+      ],
+      "employees": {
+        "description": "View list of all employees",
+        "content": [
+          "employee_list",
+          "employee_details",
+          "employee_title",
+          "assigned_jobs_count"
+        ]
+      },
+      "service_jobs": {
+        "description": "View current jobs and their details",
+        "content": [
+          "all_service_jobs",
+          "service_job_details",
+          "job_status",
+          "assigned_employee",
+          "customer_details"
+        ]
+      },
+      "services": {
+        "description": "View list of all services (printing and technical)",
+        "content": [
+          "printing_services_list",
+          "technical_services_list",
+          "service_details",
+          "service_pricing",
+          "service_availability"
+        ]
+      },
+      "permissions": [
+        "view_all_employees",
+        "view_all_service_jobs",
+        "view_all_services"
+      ],
+      "restrictions": [
+        "cannot_modify_employee_data",
+        "cannot_assign_service_jobs",
+        "cannot_modify_pricing",
+        "cannot_modify_services"
       ]
     }
   },

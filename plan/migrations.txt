@@ -290,7 +290,7 @@
         }
       ],
       "foreign_keys": [],
-      "status": "pending"
+      "status": "completed"
     },
     {
       "name": "seed_employee_role_and_permissions",
@@ -320,7 +320,7 @@
           ]
         }
       ],
-      "status": "pending"
+      "status": "completed"
     }
   ],
   "notes": "Migrations for printing_services, technical_services, service_jobs tables, and role/permission seeding based on architecture design"
