@@ -44,6 +44,7 @@ class CustomerController extends Controller
 
         return view('customer.profile', [
             'user' => $user,
+            'message' => "lol",
             'hasUnverifiedEmail' => $hasUnverifiedEmail,
         ]);
     }
@@ -62,7 +63,7 @@ class CustomerController extends Controller
 
         $user->save();
 
-        return redirect()->route('customer.profile')->with('success', 'Profile updated successfully.');
+        return redirect()->route('customer.profile')->with('success', 'LOL. Profile updated successfully.');
     }
 
     public function resendVerification(Request $request)

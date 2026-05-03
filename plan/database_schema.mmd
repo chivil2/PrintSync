@@ -1,0 +1,136 @@
+erDiagram
+    users ||--o{ service_jobs : "creates as customer"
+    users ||--o{ service_jobs : "assigned as employee"
+    users ||--o{ model_has_permissions : ""
+    users ||--o{ model_has_roles : ""
+
+    printing_services ||--o{ service_jobs : ""
+    technical_services ||--o{ service_jobs : ""
+
+    permissions ||--o{ model_has_permissions : ""
+    permissions ||--o{ role_has_permissions : ""
+
+    roles ||--o{ model_has_roles : ""
+    roles ||--o{ role_has_permissions : ""
+
+    users {
+        biginteger id PK
+        string first_name
+        string last_name
+        string email UK
+        string phone
+        timestamp email_verified_at
+        string password
+        text two_factor_secret
+        text two_factor_recovery_codes
+        timestamp two_factor_confirmed_at
+        string title
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    printing_services {
+        biginteger id PK
+        string name
+        text description
+        decimal price
+        string image
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    technical_services {
+        biginteger id PK
+        string name
+        text description
+        decimal price
+        string image
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    service_jobs {
+        biginteger id PK
+        string name
+        text description
+        string type
+        biginteger customer_id FK
+        biginteger employee_id FK
+        biginteger service_id
+        string service_type
+        string status
+        string priority
+        timestamp started_at
+        timestamp completed_at
+        timestamp deadline
+        text notes
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    permissions {
+        biginteger id PK
+        string name
+        string guard_name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    roles {
+        biginteger id PK
+        string name
+        string guard_name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    model_has_permissions {
+        biginteger permission_id FK
+        string model_type
+        biginteger model_id
+    }
+
+    model_has_roles {
+        biginteger role_id FK
+        string model_type
+        biginteger model_id
+    }
+
+    role_has_permissions {
+        biginteger permission_id FK
+        biginteger role_id FK
+    }
+
+    password_reset_tokens {
+        string email PK
+        string token
+        timestamp created_at
+    }
+
+    sessions {
+        string id PK
+        biginteger user_id FK
+        string ip_address
+        text user_agent
+        longtext payload
+        integer last_activity
+    }
+
+    jobs {
+        biginteger id PK
+        string queue
+        longtext payload
+        integer attempts
+        integer reserved_at
+        integer available_at
+        integer created_at
+    }
+
+    cache {
+        string key PK
+        mediumtext value
+        integer expiration
+    }

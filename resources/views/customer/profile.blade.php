@@ -79,6 +79,7 @@
                         autocomplete="email"
                         class="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#E8743B] focus:border-[#E8743B] outline-none transition-colors text-black"
                     >
+                  
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
