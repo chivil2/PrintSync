@@ -1,0 +1,179 @@
+{
+  "application_name": "PrintSync",
+  "overview": "A web application for managing print-related tasks and workflows",
+  "technology_stack": {
+    "backend_framework": "Laravel 13",
+    "frontend": "Livewire 4 with Flux UI components",
+    "authentication": "Laravel Fortify",
+    "database": "MySQL",
+    "testing": "PHPUnit",
+    "styling": "Tailwind CSS v4"
+  },
+  "core_features": {
+    "store": {
+      "printing_services": {
+        "products": [
+          "signage",
+          "trapaulin",
+          "invitations",
+          "brochure",
+          "tshirts",
+          "mugs"
+        ]
+      },
+      "technical_services": {
+        "products": [
+          "installation",
+          "repair"
+        ]
+      }
+    }
+  },
+  "system_architecture": {},
+  "database_schema": {
+    "users": {
+      "table_name": "users",
+      "fields": [
+        "id",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "password",
+        "title",
+        "email_verified_at",
+        "remember_token",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "printing_services": {
+      "table_name": "printing_services",
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "price",
+        "image",
+        "is_active",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "technical_services": {
+      "table_name": "technical_services",
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "price",
+        "image",
+        "is_active",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "service_jobs": {
+      "table_name": "service_jobs",
+      "fields": [
+        "id",
+        "name",
+        "description",
+        "type",
+        "customer_id",
+        "employee_id",
+        "service_id",
+        "service_type",
+        "status",
+        "priority",
+        "started_at",
+        "completed_at",
+        "deadline",
+        "notes",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  },
+  "user_roles_permissions": {
+    "customer": {
+      "description": "End users who submit service requests and manage their orders",
+      "access_level": "limited",
+      "views": [
+        "dashboard",
+        "store",
+        "store_printing_services",
+        "store_technical_services",
+        "submit_service_request",
+        "order_history",
+        "order_tracking",
+        "profile_settings"
+      ],
+      "permissions": [
+        "create_service_requests",
+        "view_own_orders",
+        "cancel_own_orders",
+        "update_own_profile",
+        "upload_service_files"
+      ],
+      "restrictions": [
+        "cannot_view_other_customers_orders",
+        "cannot_manage_pricing",
+        "cannot_access_admin_functions",
+        "cannot_manage_users"
+      ]
+    },
+    "employee": {
+      "description": "Staff members who handle service jobs assigned by the owner",
+      "access_level": "staff",
+      "titles": [
+        "printing_staff",
+        "technical_staff"
+      ],
+      "title_description": "Determines the type of service jobs that can be assigned - printing staff handles printing jobs, technical staff handles technical service jobs",
+      "views": [
+        "dashboard",
+        "jobs"
+      ],
+      "dashboard": {
+        "description": "Basic employee details and overview",
+        "content": [
+          "employee_profile_summary",
+          "employee_title",
+          "assigned_service_jobs_count",
+          "completed_service_jobs_count",
+          "pending_service_jobs_count",
+          "recent_activity"
+        ]
+      },
+      "jobs": {
+        "description": "View and manage assigned service jobs based on title",
+        "content": [
+          "pending_service_jobs",
+          "assigned_service_jobs",
+          "service_job_details",
+          "service_job_status_updates"
+        ]
+      },
+      "permissions": [
+        "view_assigned_service_jobs",
+        "update_service_job_status",
+        "add_service_job_notes",
+        "view_own_profile"
+      ],
+      "restrictions": [
+        "cannot_view_all_service_jobs",
+        "cannot_assign_service_jobs",
+        "cannot_manage_pricing",
+        "cannot_access_owner_functions",
+        "cannot_manage_users",
+        "printing_staff_cannot_handle_technical_jobs",
+        "technical_staff_cannot_handle_printing_jobs"
+      ]
+    }
+  },
+  "api_endpoints": {},
+  "frontend_components": {},
+  "security_considerations": {},
+  "deployment_strategy": {}
+}

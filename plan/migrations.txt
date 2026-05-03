@@ -1,0 +1,327 @@
+{
+  "migrations": [
+    {
+      "name": "create_printing_services_table",
+      "description": "Create table for printing service products",
+      "table": "printing_services",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigIncrements",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 255,
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "price",
+          "type": "decimal",
+          "precision": 10,
+          "scale": 2,
+          "nullable": false
+        },
+        {
+          "name": "image",
+          "type": "string",
+          "length": 255,
+          "nullable": true
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": true,
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "printing_services_name_index",
+          "columns": ["name"],
+          "type": "index"
+        },
+        {
+          "name": "printing_services_is_active_index",
+          "columns": ["is_active"],
+          "type": "index"
+        }
+      ],
+      "foreign_keys": [],
+      "status": "pending"
+    },
+    {
+      "name": "create_technical_services_table",
+      "description": "Create table for technical service products",
+      "table": "technical_services",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigIncrements",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 255,
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "price",
+          "type": "decimal",
+          "precision": 10,
+          "scale": 2,
+          "nullable": false
+        },
+        {
+          "name": "image",
+          "type": "string",
+          "length": 255,
+          "nullable": true
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": true,
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "technical_services_name_index",
+          "columns": ["name"],
+          "type": "index"
+        },
+        {
+          "name": "technical_services_is_active_index",
+          "columns": ["is_active"],
+          "type": "index"
+        }
+      ],
+      "foreign_keys": [],
+      "status": "pending"
+    },
+    {
+      "name": "create_service_jobs_table",
+      "description": "Create table for printing and technical service jobs",
+      "table": "service_jobs",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigIncrements",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "length": 255,
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "type",
+          "type": "enum",
+          "values": ["printing", "technical"],
+          "nullable": false
+        },
+        {
+          "name": "customer_id",
+          "type": "unsignedBigInteger",
+          "nullable": false
+        },
+        {
+          "name": "employee_id",
+          "type": "unsignedBigInteger",
+          "nullable": true
+        },
+        {
+          "name": "service_id",
+          "type": "unsignedBigInteger",
+          "nullable": false
+        },
+        {
+          "name": "service_type",
+          "type": "enum",
+          "values": ["printing_service", "technical_service"],
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "values": ["pending", "in_progress", "completed", "cancelled"],
+          "default": "pending",
+          "nullable": false
+        },
+        {
+          "name": "priority",
+          "type": "enum",
+          "values": ["low", "medium", "high", "urgent"],
+          "default": "medium",
+          "nullable": false
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "deadline",
+          "type": "timestamp",
+          "nullable": true
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "nullable": false
+        }
+      ],
+      "indexes": [
+        {
+          "name": "service_jobs_customer_id_index",
+          "columns": ["customer_id"],
+          "type": "index"
+        },
+        {
+          "name": "service_jobs_employee_id_index",
+          "columns": ["employee_id"],
+          "type": "index"
+        },
+        {
+          "name": "service_jobs_status_index",
+          "columns": ["status"],
+          "type": "index"
+        },
+        {
+          "name": "service_jobs_type_index",
+          "columns": ["type"],
+          "type": "index"
+        },
+        {
+          "name": "service_jobs_deadline_index",
+          "columns": ["deadline"],
+          "type": "index"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "service_jobs_customer_id_foreign",
+          "column": "customer_id",
+          "references": "id",
+          "on": "users",
+          "onDelete": "cascade"
+        },
+        {
+          "name": "service_jobs_employee_id_foreign",
+          "column": "employee_id",
+          "references": "id",
+          "on": "users",
+          "onDelete": "set null"
+        }
+      ],
+      "status": "pending"
+    },
+    {
+      "name": "add_title_to_users_table",
+      "description": "Add title field to users table for employee classification (printing_staff, technical_staff)",
+      "table": "users",
+      "columns": [
+        {
+          "name": "title",
+          "type": "enum",
+          "values": ["printing_staff", "technical_staff"],
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "users_title_index",
+          "columns": ["title"],
+          "type": "index"
+        }
+      ],
+      "foreign_keys": [],
+      "status": "pending"
+    },
+    {
+      "name": "seed_employee_role_and_permissions",
+      "description": "Seed employee role and permissions for the application",
+      "table": "roles_and_permissions",
+      "columns": [],
+      "indexes": [],
+      "foreign_keys": [],
+      "seeds": [
+        {
+          "role": "employee",
+          "permissions": [
+            "view_assigned_service_jobs",
+            "update_service_job_status",
+            "add_service_job_notes",
+            "view_own_profile"
+          ]
+        },
+        {
+          "role": "customer",
+          "permissions": [
+            "create_service_requests",
+            "view_own_orders",
+            "cancel_own_orders",
+            "update_own_profile",
+            "upload_service_files"
+          ]
+        }
+      ],
+      "status": "pending"
+    }
+  ],
+  "notes": "Migrations for printing_services, technical_services, service_jobs tables, and role/permission seeding based on architecture design"
+}
