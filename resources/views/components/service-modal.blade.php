@@ -92,11 +92,21 @@ style="display: none;">
 
                         <!-- Notes -->
                         <div class="mb-6">
-                            <h4 class="text-lg font-semibold text-zinc-900 mb-2">Notes</h4>
-                            <p class="text-zinc-600 text-sm">
-                                Please contact us for custom requirements or bulk orders. 
-                                Prices may vary based on specifications and quantity.
+                            <h4 class="text-lg font-semibold text-zinc-900 mb-2">Additional Notes</h4>
+                            <p class="text-zinc-600 text-sm mb-3">
+                                Please provide any specific requirements or details for your service request.
                             </p>
+                            <form action="{{ route('customer.request-service') }}" method="POST" id="service-request-form">
+                                @csrf
+                                <input type="hidden" name="service_id" :value="service?.id">
+                                <input type="hidden" name="service_type" :value="service?.type">
+                                <textarea
+                                    name="notes"
+                                    rows="3"
+                                    class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8743B] focus:border-transparent text-gray-900"
+                                    placeholder="Describe your specific requirements, quantity, timeline, or any other details..."
+                                ></textarea>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -104,8 +114,8 @@ style="display: none;">
 
             <!-- Footer Actions -->
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" 
-                        @click="close()"
+                <button type="submit" 
+                        form="service-request-form"
                         class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm transition-colors"
                         :class="service?.type === 'printing' ? 'bg-[#E8743B] hover:bg-[#d66532]' : 'bg-[#19A7CE] hover:bg-[#1596b8]'">
                     Request Service

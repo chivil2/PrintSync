@@ -46,6 +46,33 @@ class CustomerController extends Controller
         ]);
     }
 
+    public function requestService(Request $request)
+    {
+        $validated = $request->validate([
+            'service_id' => 'required|integer',
+            'service_type' => 'required|in:printing,technical',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $service = $validated['service_type'] === 'printing'
+            ? PrintingService::findOrFail($validated['service_id'])
+            : TechnicalService::findOrFail($validated['service_id']);
+
+        $serviceJob = ServiceJob::create([
+            'name' => $service->name,
+            'description' => $service->description,
+            'type' => $validated['service_type'],
+            'customer_id' => auth()->id(),
+            'service_id' => $service->id,
+            'service_type' => $validated['service_type'] === 'printing' ? 'printing_service' : 'technical_service',
+            'status' => null,
+            'priority' => null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return redirect()->route('customer.orders')->with('success', 'Service request submitted successfully!');
+    }
+
     public function orders()
     {
         $orders = ServiceJob::where('customer_id', auth()->id())
@@ -58,6 +85,17 @@ class CustomerController extends Controller
         ]);
     }
 
+    public function destroyOrder(ServiceJob $order)
+    {
+        if ($order->customer_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $order->delete();
+
+        return redirect()->route('customer.orders')->with('success', 'Order deleted successfully.');
+    }
+
     public function profile()
     {
         $user = Auth::user();
@@ -65,7 +103,7 @@ class CustomerController extends Controller
 
         return view('customer.profile', [
             'user' => $user,
-            'message' => "lol",
+            'message' => 'lol',
             'hasUnverifiedEmail' => $hasUnverifiedEmail,
         ]);
     }

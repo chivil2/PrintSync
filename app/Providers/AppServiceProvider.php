@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\PrintingService;
+use App\Models\TechnicalService;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -36,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
+
+        Relation::morphMap([
+            'printing_service' => PrintingService::class,
+            'technical_service' => TechnicalService::class,
+        ]);
 
         Password::defaults(fn (): ?Password => app()->isProduction()
             ? Password::min(12)
