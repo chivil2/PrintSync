@@ -16,12 +16,22 @@ class CustomerController extends Controller
 
     public function dashboard()
     {
-        $printingServices = PrintingService::where('is_active', true)->get();
-        $technicalServices = TechnicalService::where('is_active', true)->get();
+        $orders = ServiceJob::where('customer_id', auth()->id())
+            ->with(['service', 'employee'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalOrders = $orders->count();
+        $completedOrders = $orders->where('status', 'completed')->count();
+        $totalSpent = $orders->where('status', 'completed')->sum('price');
+
+        $recentOrders = $orders->take(5);
 
         return view('customer.dashboard', [
-            'printingServices' => $printingServices,
-            'technicalServices' => $technicalServices,
+            'totalOrders' => $totalOrders,
+            'completedOrders' => $completedOrders,
+            'totalSpent' => $totalSpent,
+            'recentOrders' => $recentOrders,
         ]);
     }
 

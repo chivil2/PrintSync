@@ -22,6 +22,16 @@
                     </a>
 
                     <a 
+                        href="{{ route('customer.store') }}" 
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('customer.store') ? 'text-[#E8743B] bg-orange-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50' }}"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span class="font-medium">Store</span>
+                    </a>
+
+                    <a 
                         href="{{ route('customer.orders') }}" 
                         class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('customer.orders') ? 'text-[#E8743B] bg-orange-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50' }}"
                     >
