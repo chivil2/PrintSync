@@ -13,7 +13,30 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['first_name', 'last_name', 'email', 'phone', 'password', 'title'])]
+#[Fillable([
+    'first_name',
+    'last_name',
+    'email',
+    'phone',
+    'password',
+    'title',
+    // Owner-specific fields
+    'company_name',
+    'tax_id',
+    'business_address',
+    // Employee-specific fields
+    'employee_id',
+    'hire_date',
+    'specialization',
+    'hourly_rate',
+    'employee_status',
+    // Customer-specific fields
+    'customer_id',
+    'billing_address',
+    'shipping_address',
+    'credit_limit',
+    'preferred_payment_method',
+])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {

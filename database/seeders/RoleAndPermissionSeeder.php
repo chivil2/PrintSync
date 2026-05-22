@@ -19,19 +19,30 @@ class RoleAndPermissionSeeder extends Seeder
 
         // Create permissions
         $permissions = [
+            // Service job permissions (existing)
             'view_assigned_service_jobs',
             'update_service_job_status',
             'add_service_job_notes',
-            'view_own_profile',
             'create_service_requests',
             'view_own_orders',
             'cancel_own_orders',
-            'update_own_profile',
             'upload_service_files',
             'manage_all_service_jobs',
             'assign_service_jobs',
             'manage_pricing',
             'manage_users',
+            // Quote permissions (new)
+            'manage_all_quotes',
+            'view_assigned_quotes',
+            'update_quote_status',
+            'request_quotes',
+            'view_own_quotes',
+            'place_orders',
+            // Analytics permissions (new)
+            'view_analytics',
+            // Profile permissions (existing)
+            'view_own_profile',
+            'update_own_profile',
         ];
 
         foreach ($permissions as $permission) {
@@ -44,7 +55,10 @@ class RoleAndPermissionSeeder extends Seeder
             'view_assigned_service_jobs',
             'update_service_job_status',
             'add_service_job_notes',
+            'view_assigned_quotes',
+            'update_quote_status',
             'view_own_profile',
+            'update_own_profile',
         ]);
 
         $customerRole = Role::firstOrCreate(['name' => 'customer']);
@@ -54,6 +68,9 @@ class RoleAndPermissionSeeder extends Seeder
             'cancel_own_orders',
             'update_own_profile',
             'upload_service_files',
+            'request_quotes',
+            'view_own_quotes',
+            'place_orders',
         ]);
 
         $ownerRole = Role::firstOrCreate(['name' => 'owner']);
@@ -62,7 +79,10 @@ class RoleAndPermissionSeeder extends Seeder
             'assign_service_jobs',
             'manage_pricing',
             'manage_users',
+            'manage_all_quotes',
+            'view_analytics',
             'view_own_profile',
+            'update_own_profile',
         ]);
     }
 }

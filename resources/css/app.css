@@ -64,3 +64,14 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* Force smaller sidebar icons */
+flux\\:sidebar-item svg {
+    width: 1rem !important;
+    height: 1rem !important;
+}
+
+/* Adjust sidebar text size */
+flux\\:sidebar-item {
+    font-size: 0.875rem !important;
+}
