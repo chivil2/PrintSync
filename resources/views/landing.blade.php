@@ -30,7 +30,7 @@
     <section class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto text-center">
             <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-white">
-                PrintSync, your <span class="text-7xl sm:text-8xl lg:text-9xl inline-block px-4 py-2 bg-gradient-to-r from-orange-500 via-white to-orange-500 bg-clip-text text-transparent font-black relative" style="text-shadow: 0 0 80px rgba(249, 115, 22, 0.8), 0 0 120px rgba(249, 115, 22, 0.6);">#1</span> printing company!
+                PrintSync, your <span class="text-7xl sm:text-8xl lg:text-9xl inline-block px-4 py-2 bg-gradient-to-r from-orange-500 via-white to-orange-500 bg-clip-text text-transparent font-black relative">#1</span> printing company!
             </h1>
             <p class="text-xl sm:text-2xl text-white/90 max-w-2xl mx-auto mb-10">
                 Create an account to start checking out our professional printing services. Business cards, banners, flyers, and more - all at competitive prices with fast turnaround.

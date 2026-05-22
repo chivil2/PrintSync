@@ -12,6 +12,16 @@
 
                 <div class="flex items-center gap-1">
                     <a 
+                        href="{{ route('customer.dashboard') }}" 
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('customer.dashboard') ? 'text-[#E8743B] bg-orange-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50' }}"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+
+                    <a 
                         href="{{ route('customer.store') }}" 
                         class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('customer.store') ? 'text-[#E8743B] bg-orange-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50' }}"
                     >
@@ -23,7 +33,7 @@
 
                     <a 
                         href="{{ route('customer.orders') }}" 
-                        class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('customer.orders') ? 'text-[#19A7CE] bg-blue-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50' }}"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors {{ request()->routeIs('customer.orders') ? 'text-[#E8743B] bg-orange-50' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50' }}"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
