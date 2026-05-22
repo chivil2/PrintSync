@@ -11,8 +11,8 @@
             </div>
             <div class="flex items-center gap-4">
                 @auth
-                    <a href="{{ route('customer.store') }}" class="text-sm font-medium text-white hover:text-orange-300 transition-colors">
-                        Dashboard
+                    <a href="{{ route('customer.store') }}" class="text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg transition-colors">
+                        Go to Store
                     </a>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium text-white hover:text-orange-300 transition-colors">

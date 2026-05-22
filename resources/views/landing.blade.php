@@ -29,10 +29,10 @@
     <!-- Hero Section -->
     <section class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto text-center">
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-white">
-                PrintSync, your <span class="text-6xl sm:text-7xl lg:text-8xl inline-block px-4 py-2 bg-gradient-to-r from-orange-500 via-white to-orange-500 bg-clip-text text-transparent font-black relative" style="text-shadow: 0 0 80px rgba(249, 115, 22, 0.8), 0 0 120px rgba(249, 115, 22, 0.6);">#1</span> printing company!
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-white">
+                PrintSync, your <span class="text-7xl sm:text-8xl lg:text-9xl inline-block px-4 py-2 bg-gradient-to-r from-orange-500 via-white to-orange-500 bg-clip-text text-transparent font-black relative" style="text-shadow: 0 0 80px rgba(249, 115, 22, 0.8), 0 0 120px rgba(249, 115, 22, 0.6);">#1</span> printing company!
             </h1>
-            <p class="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto mb-10">
+            <p class="text-xl sm:text-2xl text-white/90 max-w-2xl mx-auto mb-10">
                 Create an account to start checking out our professional printing services. Business cards, banners, flyers, and more - all at competitive prices with fast turnaround.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -47,8 +47,8 @@
                         Sign In
                     </a>
                 @else
-                    <a href="{{ route('customer.store') }}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-medium rounded-lg transition-colors">
-                        Dashboard
+                    <a href="{{ route('customer.store') }}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-bold rounded-lg transition-colors">
+                        Go to Store
                     </a>
                 @endguest
             </div>
