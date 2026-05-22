@@ -48,7 +48,7 @@
                     </a>
                 @else
                     <a href="{{ route('customer.store') }}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-medium rounded-lg transition-colors">
-                        Order Prints
+                        Dashboard
                     </a>
                 @endguest
             </div>
@@ -131,8 +131,9 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600/80 to-orange-600/80 backdrop-blur-xl">
-        <div class="max-w-4xl mx-auto text-center">
+    <section class="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div class="absolute inset-0 z-0" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(249, 115, 22, 0.9)), url('https://images.unsplash.com/photo-1504270997636-07ddfbd48945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;"></div>
+        <div class="relative z-10 max-w-4xl mx-auto text-center">
             <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to Check Out Our Services?</h2>
             <p class="text-lg text-blue-100 mb-8">Create an account to start exploring our professional printing services today.</p>
             @guest
