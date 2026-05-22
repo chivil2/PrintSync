@@ -3,7 +3,10 @@
     service: null,
     close() {
         this.show = false;
-        this.service = null;
+        // Clear service after animation completes
+        setTimeout(() => {
+            this.service = null;
+        }, 200);
     }
 }" 
 @open-modal.window="service = { ...$event.detail.service, type: $event.detail.type }; show = true"
