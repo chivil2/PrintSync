@@ -32,9 +32,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::prefix('customer')->name('customer.')->group(function () {
-        Route::get('dashboard', function () {
-            return view('customer.dashboard');
-        })->name('dashboard');
+        Route::get('dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
         Route::get('store', [CustomerController::class, 'store'])->name('store');
         Route::get('orders', [CustomerController::class, 'orders'])->name('orders');
         Route::get('profile', [CustomerController::class, 'profile'])->name('profile');

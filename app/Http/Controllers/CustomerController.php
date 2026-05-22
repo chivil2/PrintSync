@@ -14,6 +14,17 @@ class CustomerController extends Controller
 {
     use ProfileValidationRules;
 
+    public function dashboard()
+    {
+        $printingServices = PrintingService::where('is_active', true)->get();
+        $technicalServices = TechnicalService::where('is_active', true)->get();
+
+        return view('customer.dashboard', [
+            'printingServices' => $printingServices,
+            'technicalServices' => $technicalServices,
+        ]);
+    }
+
     public function store()
     {
         $printingServices = PrintingService::where('is_active', true)->get();
