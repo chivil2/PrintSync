@@ -14,7 +14,7 @@
                 </div>
                 <h3 class="text-lg font-semibold text-zinc-700 mb-2">No employees yet</h3>
                 <p class="text-zinc-500 mb-8 max-w-sm">Get started by adding your first team member.</p>
-                <a href="#" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                <a href="{{ route('owner.employees.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
@@ -22,6 +22,15 @@
                 </a>
             </div>
         @else
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-zinc-500">{{ count($employees) }} employee{{ count($employees) !== 1 ? 's' : '' }}</p>
+                <a href="{{ route('owner.employees.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Employee
+                </a>
+            </div>
             <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
                 <table class="w-full text-sm">
                     <thead>

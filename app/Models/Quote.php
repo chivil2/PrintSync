@@ -10,6 +10,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['quote_number', 'customer_id', 'date', 'status', 'currency', 'subtotal', 'tax', 'discount', 'total', 'terms', 'notes', 'employee_id'])]
 class Quote extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'date' => 'date',
+            'subtotal' => 'decimal:2',
+            'tax' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'total' => 'decimal:2',
+        ];
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');

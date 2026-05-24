@@ -31,6 +31,8 @@
             </main>
         </div>
 
+        @fluxScripts
+
         <script>
             // Mobile sidebar toggle
             document.querySelector('[onclick*="sidebar"]').addEventListener('click', function() {

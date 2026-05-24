@@ -68,13 +68,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', function () {
             return view('owner.dashboard');
         })->name('dashboard');
-        Route::get('quotes', function () {
-            return view('owner.quotes');
-        })->name('quotes');
+        Route::get('quotes', [OwnerController::class, 'quotes'])->name('quotes');
         Route::get('employees', [OwnerController::class, 'employees'])->name('employees');
-        Route::get('jobs', function () {
-            return view('owner.jobs');
-        })->name('jobs');
+        Route::get('employees/create', [OwnerController::class, 'createEmployee'])->name('employees.create');
+        Route::post('employees', [OwnerController::class, 'storeEmployee'])->name('employees.store');
+        Route::get('jobs', [OwnerController::class, 'jobs'])->name('jobs');
+        Route::patch('jobs/{job}/assign', [OwnerController::class, 'assignEmployee'])->name('jobs.assign');
     });
 });
 
