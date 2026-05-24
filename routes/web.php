@@ -4,7 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\OwnerController;
-use App\Http\Controllers\StaffController;
+use App\Models\ServiceJob;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,8 +22,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/owner/register', [AuthController::class, 'showOwnerRegistrationForm'])->name('owner.register');
     Route::post('/owner/register', [AuthController::class, 'registerOwner']);
 });
-
-Route::get('/staff/dashboard', [StaffController::class, 'dashboard'])->name('staff.dashboard');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
@@ -53,20 +52,36 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['employee'])->prefix('employee')->name('employee.')->group(function () {
-        Route::get('dashboard', function () {
-            return view('employee.dashboard');
-        })->name('dashboard');
-        Route::get('quotes', function () {
-            return view('employee.quotes');
-        })->name('quotes');
-        Route::get('jobs', function () {
-            return view('employee.jobs');
-        })->name('jobs');
+        Route::get('dashboard', [EmployeeController::class, 'dashboard'])->name('dashboard');
+        Route::get('quotes', [EmployeeController::class, 'quotes'])->name('quotes');
+        Route::get('jobs', [EmployeeController::class, 'jobs'])->name('jobs');
     });
 
     Route::middleware(['owner'])->prefix('owner')->name('owner.')->group(function () {
         Route::get('dashboard', function () {
-            return view('owner.dashboard');
+            $jobsCount = ServiceJob::count();
+            $recentJobs = ServiceJob::with(['customer', 'employee'])
+                ->latest()
+                ->take(10)
+                ->get();
+
+            $customersCount = User::role('customer')->count();
+            $recentCustomers = User::role('customer')
+                ->latest()
+                ->take(10)
+                ->get();
+
+            $jobsByStatus = ServiceJob::selectRaw('status, count(*) as count')
+                ->groupBy('status')
+                ->pluck('count', 'status');
+
+            return view('owner.dashboard', [
+                'jobsCount' => $jobsCount,
+                'recentJobs' => $recentJobs,
+                'customersCount' => $customersCount,
+                'recentCustomers' => $recentCustomers,
+                'jobsByStatus' => $jobsByStatus,
+            ]);
         })->name('dashboard');
         Route::get('quotes', [OwnerController::class, 'quotes'])->name('quotes');
         Route::get('employees', [OwnerController::class, 'employees'])->name('employees');

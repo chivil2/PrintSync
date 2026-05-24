@@ -110,9 +110,19 @@ class OwnerController extends Controller
             'employee_id' => ['nullable', 'exists:users,id'],
         ]);
 
-        $job->update([
-            'employee_id' => $validated['employee_id'],
-        ]);
+        if ($validated['employee_id']) {
+            $job->update([
+                'employee_id' => $validated['employee_id'],
+                'status' => 'in_progress',
+                'started_at' => now(),
+            ]);
+        } else {
+            $job->update([
+                'employee_id' => null,
+                'status' => 'pending',
+                'started_at' => null,
+            ]);
+        }
 
         $employee = $validated['employee_id'] ? User::find($validated['employee_id']) : null;
 

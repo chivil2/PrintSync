@@ -35,30 +35,41 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-zinc-200 bg-zinc-50 text-left">
-                            <th class="px-6 py-3 font-medium text-zinc-600">Name</th>
+                            <th class="px-6 py-3 font-medium text-zinc-600">Employee</th>
                             <th class="px-6 py-3 font-medium text-zinc-600">Email</th>
+                            <th class="px-6 py-3 font-medium text-zinc-600">Phone</th>
                             <th class="px-6 py-3 font-medium text-zinc-600">Specialization</th>
+                            <th class="px-6 py-3 font-medium text-zinc-600">Hourly Rate</th>
+                            <th class="px-6 py-3 font-medium text-zinc-600">Hire Date</th>
                             <th class="px-6 py-3 font-medium text-zinc-600">Status</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-100">
                         @foreach($employees as $employee)
                             <tr class="hover:bg-zinc-50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-orange-400 flex items-center justify-center text-white text-xs font-semibold shadow-sm">
-                                            {{ $employee->initials() }}
-                                        </div>
-                                        <span class="font-medium text-zinc-800">{{ $employee->first_name }} {{ $employee->last_name }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-zinc-600">{{ $employee->email }}</td>
-                                <td class="px-6 py-4 text-zinc-600">{{ $employee->specialization ?? '—' }}</td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $employee->employee_status === 'active' ? 'bg-green-100 text-green-700' : 'bg-zinc-100 text-zinc-600' }}">
-                                        {{ ucfirst($employee->employee_status ?? 'inactive') }}
-                                    </span>
-                                </td>
+                                 <td class="px-6 py-4">
+                                     <div class="flex items-center gap-3">
+                                         <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-orange-400 flex items-center justify-center text-white text-xs font-semibold shadow-sm">
+                                             {{ $employee->initials() }}
+                                         </div>
+                                         <div>
+                                             <span class="font-medium text-zinc-800">{{ $employee->first_name }} {{ $employee->last_name }}</span>
+                                             @if($employee->employee_id)
+                                                 <p class="text-xs text-zinc-400">{{ $employee->employee_id }}</p>
+                                             @endif
+                                         </div>
+                                     </div>
+                                 </td>
+                                 <td class="px-6 py-4 text-zinc-600">{{ $employee->email }}</td>
+                                 <td class="px-6 py-4 text-zinc-600">{{ $employee->phone ?? '—' }}</td>
+                                 <td class="px-6 py-4 text-zinc-600">{{ $employee->specializationLabel() }}</td>
+                                 <td class="px-6 py-4 text-zinc-600">{{ $employee->hourly_rate ? '$'.number_format($employee->hourly_rate, 2) : '—' }}</td>
+                                 <td class="px-6 py-4 text-zinc-600">{{ $employee->hire_date ? \Carbon\Carbon::parse($employee->hire_date)->format('M d, Y') : '—' }}</td>
+                                 <td class="px-6 py-4">
+                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $employee->employee_status === 'active' ? 'bg-green-100 text-green-700' : 'bg-zinc-100 text-zinc-600' }}">
+                                         {{ ucfirst($employee->employee_status ?? 'inactive') }}
+                                     </span>
+                                 </td>
                             </tr>
                         @endforeach
                     </tbody>

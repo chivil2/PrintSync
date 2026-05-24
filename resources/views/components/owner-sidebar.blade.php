@@ -48,17 +48,8 @@
             </a>
         </div>
 
-        <!-- User Section -->
+        <!-- Logout -->
         <div class="border-t border-blue-800/30 p-4 bg-blue-950/50">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 flex items-center justify-center text-white text-sm font-semibold shadow-lg">
-                    {{ auth()->user()->initials() }}
-                </div>
-                <div class="min-w-0 flex-1">
-                    <div class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</div>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-500/20 text-orange-300 border border-orange-500/30">Owner</span>
-                </div>
-            </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-blue-100 bg-blue-800/40 border border-blue-700/50 rounded-lg hover:bg-blue-700/50 hover:text-white transition-all duration-200 cursor-pointer">

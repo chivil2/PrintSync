@@ -62,4 +62,13 @@ class User extends Authenticatable
     {
         return Str::substr($this->first_name, 0, 1).Str::substr($this->last_name, 0, 1);
     }
+
+    public function specializationLabel(): string
+    {
+        return match ($this->specialization) {
+            'printing_staff' => 'Printing Staff',
+            'technical_staff' => 'Technical Staff',
+            default => $this->specialization ?? '—',
+        };
+    }
 }
