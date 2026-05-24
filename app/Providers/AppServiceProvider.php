@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -44,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
             'printing_service' => PrintingService::class,
             'technical_service' => TechnicalService::class,
         ]);
+
+        View::addNamespace('pages', resource_path('views/pages'));
 
         Password::defaults(fn (): ?Password => app()->isProduction()
             ? Password::min(12)
