@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+
 class OwnerController extends Controller
 {
     /**
@@ -9,6 +11,10 @@ class OwnerController extends Controller
      */
     public function employees()
     {
-        return view('owner.employees');
+        $employees = User::role('employee')->get();
+
+        return view('owner.employees', [
+            'employees' => $employees,
+        ]);
     }
 }
