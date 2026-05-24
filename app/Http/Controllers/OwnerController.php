@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-class AdminController extends Controller
+class OwnerController extends Controller
 {
     /**
      * Display the employees management page.
      */
     public function employees()
     {
-        return view('admin.employees');
+        return view('owner.employees');
     }
 }

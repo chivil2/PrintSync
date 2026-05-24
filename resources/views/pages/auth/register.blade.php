@@ -1,17 +1,17 @@
-<x-layouts::auth :title="$isAdmin ?? false ? __('Admin Register') : __('Register')">
+<x-layouts::auth :title="$isOwner ?? false ? __('Owner Register') : __('Register')">
     <div class="flex flex-col gap-6">
         <div class="flex w-full flex-col items-center gap-2 text-center">
-            <flux:badge color="{{ $isAdmin ?? false ? 'red' : 'zinc' }}" variant="outline" size="sm" class="mb-1">
-                {{ $isAdmin ?? false ? __('Admin Registration') : __('User Registration') }}
+            <flux:badge color="{{ $isOwner ?? false ? 'red' : 'zinc' }}" variant="outline" size="sm" class="mb-1">
+                {{ $isOwner ?? false ? __('Owner Registration') : __('User Registration') }}
             </flux:badge>
-            <flux:heading size="xl">{{ $isAdmin ?? false ? __('Create an admin account') : __('Create an account') }}</flux:heading>
+            <flux:heading size="xl">{{ $isOwner ?? false ? __('Create an owner account') : __('Create an account') }}</flux:heading>
             <flux:subheading>{{ __('Enter your details below to create your account') }}</flux:subheading>
         </div>
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ $isAdmin ?? false ? route('admin.register') : route('register') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ $isOwner ?? false ? route('owner.register') : route('register') }}" class="flex flex-col gap-6">
             @csrf
             <!-- First Name -->
             <flux:input

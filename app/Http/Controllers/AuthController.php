@@ -76,17 +76,17 @@ class AuthController extends Controller
     }
 
     /**
-     * Show the admin registration form.
+     * Show the owner registration form.
      */
-    public function showAdminRegistrationForm()
+    public function showOwnerRegistrationForm()
     {
-        return view('pages::auth.register', ['isAdmin' => true]);
+        return view('pages::auth.register', ['isOwner' => true]);
     }
 
     /**
-     * Handle an admin registration request.
+     * Handle an owner registration request.
      */
-    public function registerAdmin(Request $request)
+    public function registerOwner(Request $request)
     {
         $request->validate([
             ...$this->profileRules(),

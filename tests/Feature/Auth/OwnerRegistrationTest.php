@@ -6,7 +6,7 @@ use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class AdminRegistrationTest extends TestCase
+class OwnerRegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -17,21 +17,21 @@ class AdminRegistrationTest extends TestCase
         $this->seed(RoleAndPermissionSeeder::class);
     }
 
-    public function test_admin_registration_screen_can_be_rendered(): void
+    public function test_owner_registration_screen_can_be_rendered(): void
     {
-        $response = $this->get(route('admin.register'));
+        $response = $this->get(route('owner.register'));
 
         $response->assertOk()
-            ->assertSee('Admin Registration')
-            ->assertSee('Create an admin account');
+            ->assertSee('Owner Registration')
+            ->assertSee('Create an owner account');
     }
 
-    public function test_new_admin_can_register(): void
+    public function test_new_owner_can_register(): void
     {
-        $response = $this->post(route('admin.register'), [
+        $response = $this->post(route('owner.register'), [
             'first_name' => 'Jane',
             'last_name' => 'Owner',
-            'email' => 'admin@example.com',
+            'email' => 'owner@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
         ]);
@@ -46,12 +46,12 @@ class AdminRegistrationTest extends TestCase
         $this->assertFalse($user->hasRole('customer'));
     }
 
-    public function test_admin_registration_requires_password_confirmation(): void
+    public function test_owner_registration_requires_password_confirmation(): void
     {
-        $response = $this->post(route('admin.register'), [
+        $response = $this->post(route('owner.register'), [
             'first_name' => 'Jane',
             'last_name' => 'Owner',
-            'email' => 'admin@example.com',
+            'email' => 'owner@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'wrong-password',
         ]);

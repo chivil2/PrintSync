@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,8 +18,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
-    Route::get('/admin/register', [AuthController::class, 'showAdminRegistrationForm'])->name('admin.register');
-    Route::post('/admin/register', [AuthController::class, 'registerAdmin']);
+    Route::get('/owner/register', [AuthController::class, 'showOwnerRegistrationForm'])->name('owner.register');
+    Route::post('/owner/register', [AuthController::class, 'registerOwner']);
 });
 
 Route::get('/staff/dashboard', [StaffController::class, 'dashboard'])->name('staff.dashboard');
@@ -71,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('quotes', function () {
             return view('owner.quotes');
         })->name('quotes');
-        Route::get('employees', [AdminController::class, 'employees'])->name('employees');
+        Route::get('employees', [OwnerController::class, 'employees'])->name('employees');
         Route::get('jobs', function () {
             return view('owner.jobs');
         })->name('jobs');
