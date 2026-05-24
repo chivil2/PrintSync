@@ -4,16 +4,26 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        <div class="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-orange-500 z-50"></div>
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                <x-app-logo :sidebar="true" href="{{ route('owner.dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                <flux:sidebar.group :heading="__('Owner')" class="grid">
+                    <flux:sidebar.item icon="home" :href="route('owner.dashboard')" :current="request()->routeIs('owner.dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" :href="route('owner.quotes')" :current="request()->routeIs('owner.quotes')" wire:navigate>
+                        {{ __('All Quotes') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="users" :href="route('owner.employees')" :current="request()->routeIs('owner.employees')" wire:navigate>
+                        {{ __('Employees') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="wrench" :href="route('owner.jobs')" :current="request()->routeIs('owner.jobs')" wire:navigate>
+                        {{ __('Service Jobs') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
@@ -30,7 +40,30 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+            <div class="px-4 pb-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <flux:avatar
+                        :name="auth()->user()->name"
+                        :initials="auth()->user()->initials()"
+                    />
+                    <div class="flex-1">
+                        <div class="text-sm font-medium">{{ auth()->user()->name }}</div>
+                        <x-role-badge :role="auth()->user()->getRoleNames()->first()" />
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <flux:button
+                        as="button"
+                        type="submit"
+                        variant="outline"
+                        size="sm"
+                        class="w-full"
+                    >
+                        Log out
+                    </flux:button>
+                </form>
+            </div>
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
@@ -77,7 +110,6 @@
                         <flux:menu.item
                             as="button"
                             type="submit"
-                            icon="arrow-right-start-on-rectangle"
                             class="w-full cursor-pointer"
                             data-test="logout-button"
                         >

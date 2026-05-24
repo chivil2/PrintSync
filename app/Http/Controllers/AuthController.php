@@ -76,6 +76,38 @@ class AuthController extends Controller
     }
 
     /**
+     * Show the admin registration form.
+     */
+    public function showAdminRegistrationForm()
+    {
+        return view('pages::auth.register', ['isAdmin' => true]);
+    }
+
+    /**
+     * Handle an admin registration request.
+     */
+    public function registerAdmin(Request $request)
+    {
+        $request->validate([
+            ...$this->profileRules(),
+            'password' => $this->passwordRules(),
+        ]);
+
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $user->assignRole('owner');
+
+        Auth::login($user);
+
+        return redirect()->route('dashboard')->with('success', 'Registration successful! Welcome to PrintSync.');
+    }
+
+    /**
      * Log the user out.
      */
     public function logout(Request $request)

@@ -15,11 +15,11 @@ class EnsureOwnerRole
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login');
         }
 
-        if (!auth()->user()->hasRole('owner')) {
+        if (! auth()->user()->hasRole('owner')) {
             abort(403, 'Unauthorized access. Owner role required.');
         }
 

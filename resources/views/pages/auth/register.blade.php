@@ -1,11 +1,17 @@
-<x-layouts::auth :title="__('Register')">
+<x-layouts::auth :title="$isAdmin ?? false ? __('Admin Register') : __('Register')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+        <div class="flex w-full flex-col items-center gap-2 text-center">
+            <flux:badge color="{{ $isAdmin ?? false ? 'red' : 'zinc' }}" variant="outline" size="sm" class="mb-1">
+                {{ $isAdmin ?? false ? __('Admin Registration') : __('User Registration') }}
+            </flux:badge>
+            <flux:heading size="xl">{{ $isAdmin ?? false ? __('Create an admin account') : __('Create an account') }}</flux:heading>
+            <flux:subheading>{{ __('Enter your details below to create your account') }}</flux:subheading>
+        </div>
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ $isAdmin ?? false ? route('admin.register') : route('register') }}" class="flex flex-col gap-6">
             @csrf
             <!-- First Name -->
             <flux:input

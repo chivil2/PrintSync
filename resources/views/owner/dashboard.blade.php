@@ -1,28 +1,12 @@
-<x-layouts::app.owner-sidebar>
+<x-layouts::app.owner>
     <flux:main>
-        <flux:heading level="1">Owner Dashboard</flux:heading>
-        <flux:text>Welcome, {{ auth()->user()->name }}</flux:text>
+        <div class="bg-gradient-to-r from-blue-600 to-orange-500 -mx-6 -mt-6 px-6 pt-6 pb-8 mb-8">
+            <flux:heading level="1" class="text-white!">Owner Dashboard</flux:heading>
+            <flux:text class="text-white/80!">Welcome, {{ auth()->user()->name }}</flux:text>
+        </div>
 
-        <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-4">
-            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-                <h3 class="text-lg font-semibold mb-2">Total Quotes</h3>
-                <p class="text-4xl font-bold">0</p>
-            </div>
-
-            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-                <h3 class="text-lg font-semibold mb-2">Total Employees</h3>
-                <p class="text-4xl font-bold">0</p>
-            </div>
-
-            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-                <h3 class="text-lg font-semibold mb-2">Active Jobs</h3>
-                <p class="text-4xl font-bold">0</p>
-            </div>
-
-            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-6">
-                <h3 class="text-lg font-semibold mb-2">Revenue (PHP)</h3>
-                <p class="text-4xl font-bold">0.00</p>
-            </div>
+        <div class="p-12 flex flex-col items-center justify-center text-center text-zinc-500 dark:text-zinc-400">
+            <p>Dashboard content coming soon...</p>
         </div>
     </flux:main>
-</x-layouts::app.owner-sidebar>
+</x-layouts::app.owner>

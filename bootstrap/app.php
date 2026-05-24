@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureEmployeeRole;
+use App\Http\Middleware\EnsureOwnerRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,8 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'employee' => \App\Http\Middleware\EnsureEmployeeRole::class,
-            'owner' => \App\Http\Middleware\EnsureOwnerRole::class,
+            'employee' => EnsureEmployeeRole::class,
+            'owner' => EnsureOwnerRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

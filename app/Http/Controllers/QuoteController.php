@@ -40,7 +40,7 @@ class QuoteController extends Controller
      */
     public function store(Request $request)
     {
-        if (!auth()->user()->can('manage_all_quotes') && !auth()->user()->can('request_quotes')) {
+        if (! auth()->user()->can('manage_all_quotes') && ! auth()->user()->can('request_quotes')) {
             abort(403, 'Unauthorized access');
         }
 
@@ -136,6 +136,7 @@ class QuoteController extends Controller
             ]);
 
             $quote->update($validated);
+
             return response()->json($quote->load('lineItems'));
         } elseif (auth()->user()->can('update_quote_status') && $quote->employee_id === auth()->id()) {
             // Employee: Can only update status of assigned quotes
@@ -144,6 +145,7 @@ class QuoteController extends Controller
             ]);
 
             $quote->update(['status' => $validated['status']]);
+
             return response()->json($quote->load('lineItems'));
         } else {
             abort(403, 'Unauthorized access');
@@ -155,7 +157,7 @@ class QuoteController extends Controller
      */
     public function destroy(string $id)
     {
-        if (!auth()->user()->can('manage_all_quotes')) {
+        if (! auth()->user()->can('manage_all_quotes')) {
             abort(403, 'Unauthorized access');
         }
 

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Quote;
 use App\Models\QuoteLineItem;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -15,8 +16,11 @@ use Illuminate\Support\Facades\DB;
 class ImportQuotesFromCsv extends Command
 {
     protected $importedCount = 0;
+
     protected $skippedCount = 0;
+
     protected $updatedCount = 0;
+
     protected $errorCount = 0;
 
     public function handle()
@@ -24,28 +28,31 @@ class ImportQuotesFromCsv extends Command
         $filePath = $this->argument('file');
         $updateExisting = $this->option('update');
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             $this->error("File not found: {$filePath}");
+
             return 1;
         }
 
         $this->info("Starting import from: {$filePath}");
-        $this->info("Mode: " . ($updateExisting ? 'Update existing quotes' : 'Skip duplicates'));
+        $this->info('Mode: '.($updateExisting ? 'Update existing quotes' : 'Skip duplicates'));
 
         $csvFile = fopen($filePath, 'r');
         if ($csvFile === false) {
             $this->error("Could not open file: {$filePath}");
+
             return 1;
         }
 
         $header = fgetcsv($csvFile);
         if ($header === false) {
-            $this->error("Could not read CSV header");
+            $this->error('Could not read CSV header');
             fclose($csvFile);
+
             return 1;
         }
 
-        $this->info("CSV columns found: " . implode(', ', array_filter($header)));
+        $this->info('CSV columns found: '.implode(', ', array_filter($header)));
 
         DB::beginTransaction();
 
@@ -65,6 +72,7 @@ class ImportQuotesFromCsv extends Command
                     if (empty($quoteNumber)) {
                         $this->warn("Row {$rowNumber}: Missing quote number, skipping");
                         $this->errorCount++;
+
                         continue;
                     }
 
@@ -89,7 +97,7 @@ class ImportQuotesFromCsv extends Command
                     $this->importLineItem($currentQuote, $rowData);
 
                 } catch (\Exception $e) {
-                    $this->error("Row {$rowNumber}: " . $e->getMessage());
+                    $this->error("Row {$rowNumber}: ".$e->getMessage());
                     $this->errorCount++;
                 }
             }
@@ -98,7 +106,7 @@ class ImportQuotesFromCsv extends Command
             DB::commit();
 
             $this->newLine();
-            $this->info("Import completed:");
+            $this->info('Import completed:');
             $this->line("  Imported: {$this->importedCount}");
             $this->line("  Updated: {$this->updatedCount}");
             $this->line("  Skipped: {$this->skippedCount}");
@@ -109,7 +117,8 @@ class ImportQuotesFromCsv extends Command
         } catch (\Exception $e) {
             DB::rollBack();
             fclose($csvFile);
-            $this->error("Import failed: " . $e->getMessage());
+            $this->error('Import failed: '.$e->getMessage());
+
             return 1;
         }
     }
@@ -202,7 +211,7 @@ class ImportQuotesFromCsv extends Command
         $customerName = $this->getValue($rowData, 'customer_name') ?? 'Walk-in Customer';
 
         $customer = User::firstOrCreate(
-            ['email' => 'customer_' . uniqid() . '@temp.local'],
+            ['email' => 'customer_'.uniqid().'@temp.local'],
             [
                 'first_name' => explode(' ', $customerName)[0] ?? 'Customer',
                 'last_name' => explode(' ', $customerName)[1] ?? '',
@@ -220,7 +229,7 @@ class ImportQuotesFromCsv extends Command
         }
 
         try {
-            return \Carbon\Carbon::parse($date)->toDateString();
+            return Carbon::parse($date)->toDateString();
         } catch (\Exception $e) {
             return now()->toDateString();
         }
