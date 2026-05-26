@@ -4,7 +4,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-white">Dashboard</h1>
-                    <p class="text-white/80">Hello, {{ ucfirst(auth()->user()->first_name) }} {{ ucfirst(auth()->user()->last_name) }}</p>
+                    <p class="text-white/80">Hello there, {{ ucfirst(auth()->user()->first_name) }} {{ ucfirst(auth()->user()->last_name) }}</p>
                 </div>
                 <div class="text-right" x-data="{ time: '', date: '' }" x-init="time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }); setInterval(() => { time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }, 1000)">
                     <div class="text-white text-4xl font-mono font-bold" x-text="time"></div>
