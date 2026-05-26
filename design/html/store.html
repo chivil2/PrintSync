@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrintSync — Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #FAFBFC;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .page { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+    @media (min-width: 1024px) { .page { padding: 32px 32px; } }
+
+    /* ─── Hero ─── */
+    .hero {
+      position: relative;
+      margin-bottom: 40px;
+      overflow: hidden;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #F47C3C, #E8654A, #4A6CF7);
+      padding: 40px 40px;
+      color: #fff;
+    }
+    .hero-glow1 {
+      position: absolute; right: -80px; top: -80px;
+      width: 288px; height: 288px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); filter: blur(48px);
+    }
+    .hero-glow2 {
+      position: absolute; left: 33%; bottom: -96px;
+      width: 224px; height: 224px; border-radius: 50%;
+      background: rgba(74,108,247,0.3); filter: blur(48px);
+    }
+    .hero-inner { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 32px; }
+    @media (min-width: 768px) { .hero-inner { flex-direction: row; align-items: center; justify-content: space-between; } }
+
+    .hero-text { max-width: 560px; }
+    .hero-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      font-size: 12px; font-weight: 500;
+      margin-bottom: 16px; backdrop-filter: blur(4px);
+    }
+    .hero-chip svg { width: 12px; height: 12px; }
+    .hero-title {
+      font-size: 36px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em;
+    }
+    @media (min-width: 768px) { .hero-title { font-size: 48px; } }
+    .hero-sub {
+      margin-top: 16px; max-width: 480px;
+      font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.85);
+    }
+
+    .hero-search {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 28px; padding: 6px;
+      border-radius: 9999px; background: #fff;
+      max-width: 448px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .hero-search-icon { padding-left: 12px; color: #9CA3AF; }
+    .hero-search-icon svg { width: 16px; height: 16px; }
+    .hero-search input {
+      flex: 1; border: none; background: none;
+      font-size: 14px; font-family: inherit; outline: none; color: #374151;
+    }
+    .hero-search input::placeholder { color: #9CA3AF; }
+    .hero-search-btn {
+      padding: 8px 20px; border: none; border-radius: 9999px;
+      background: #F47C3C; color: #fff;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: filter 0.2s;
+    }
+    .hero-search-btn:hover { filter: brightness(1.1); }
+
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+    @media (min-width: 768px) { .hero-stats { display: flex; flex-direction: column; gap: 12px; } }
+    .hero-stat {
+      padding: 16px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+    }
+    .hero-stat-top { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.8); }
+    .hero-stat-top svg { width: 14px; height: 14px; }
+    .hero-stat-value { margin-top: 4px; font-size: 24px; font-weight: 700; }
+
+    /* ─── Trust Strip ─── */
+    .trust-strip {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+      margin-bottom: 40px; padding: 20px;
+      border-radius: 16px; border: 1px solid #E5E7EB; background: #fff;
+    }
+    @media (min-width: 768px) { .trust-strip { grid-template-columns: repeat(4, 1fr); } }
+    .trust-item { display: flex; align-items: center; gap: 12px; }
+    .trust-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 12px;
+      background: #FEF0E7; color: #F47C3C; flex-shrink: 0;
+    }
+    .trust-icon svg { width: 18px; height: 18px; }
+    .trust-label { font-size: 14px; font-weight: 600; color: #111827; }
+    .trust-sub { font-size: 12px; color: #6B7280; }
+
+    /* ─── Services Highlight ─── */
+    .services-highlight {
+      margin-bottom: 40px; overflow: hidden;
+      border-radius: 24px; border: 1px solid #E5E7EB; background: #fff;
+    }
+    .services-grid { display: grid; }
+    @media (min-width: 1024px) { .services-grid { grid-template-columns: 1.25fr 0.75fr; } }
+    .services-left { padding: 28px 32px; }
+    @media (min-width: 768px) { .services-left { padding: 32px; } }
+    .services-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 4px 12px; border-radius: 9999px;
+      background: #EEF1FE; color: #4A6CF7;
+      font-size: 12px; font-weight: 600;
+    }
+    .services-chip svg { width: 12px; height: 12px; }
+    .services-title { margin-top: 16px; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: #111827; }
+    .services-desc { margin-top: 12px; max-width: 560px; font-size: 14px; line-height: 1.6; color: #6B7280; }
+    .services-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .services-tag {
+      padding: 8px 14px; border-radius: 9999px;
+      border: 1px solid #E5E7EB; background: #F9FAFB;
+      font-size: 12px; font-weight: 500; color: #374151;
+    }
+    .services-right {
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 28px 32px; color: #fff;
+      background: linear-gradient(135deg, #4A6CF7, #3A5CE0);
+    }
+    @media (min-width: 768px) { .services-right { padding: 32px; } }
+    .services-right-label { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.85); }
+    .services-right-title { margin-top: 8px; font-size: 22px; font-weight: 700; }
+    .services-right-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 24px; padding: 12px 20px; border: none; border-radius: 9999px;
+      background: #fff; color: #4A6CF7;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.2s; width: fit-content;
+    }
+    .services-right-btn:hover { background: rgba(255,255,255,0.9); }
+    .services-right-btn svg { width: 15px; height: 15px; }
+
+    /* ─── Section Header ─── */
+    .section-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .section-header h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: #111827; }
+    .section-header p { margin-top: 4px; font-size: 14px; color: #6B7280; }
+    .sort-btn {
+      display: none; align-items: center; gap: 8px;
+      padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 9999px;
+      background: #fff; font-size: 14px; font-weight: 500; font-family: inherit;
+      color: #374151; cursor: pointer; transition: border-color 0.2s;
+    }
+    .sort-btn:hover { border-color: #D1D5DB; }
+    .sort-btn svg { width: 14px; height: 14px; color: #9CA3AF; }
+    @media (min-width: 768px) { .sort-btn { display: flex; } }
+
+    /* ─── Layout: Sidebar + Grid ─── */
+    .store-layout { display: flex; flex-direction: column; gap: 32px; }
+    @media (min-width: 1024px) { .store-layout { flex-direction: row; } }
+
+    /* ─── Sidebar ─── */
+    .sidebar { width: 100%; flex-shrink: 0; }
+    @media (min-width: 1024px) { .sidebar { width: 240px; } }
+    .sidebar-card {
+      padding: 20px; border-radius: 16px;
+      border: 1px solid #E5E7EB; background: #fff;
+    }
+    .sidebar-heading {
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: #9CA3AF; margin-bottom: 16px;
+    }
+    .sidebar-divider { height: 1px; background: #F3F4F6; margin: 20px 0; border: none; }
+
+    .cat-item {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 12px 16px; border: none; border-radius: 12px;
+      background: none; font-size: 14px; font-weight: 500; font-family: inherit;
+      color: #4B5563; cursor: pointer; text-align: left; transition: background 0.15s;
+    }
+    .cat-item:hover { background: #F9FAFB; color: #111827; }
+    .cat-item.active { background: #FEF0E7; color: #F47C3C; }
+    .cat-count {
+      display: flex; align-items: center; justify-content: center;
+      height: 20px; min-width: 20px; padding: 0 6px; border-radius: 9999px;
+      font-size: 10px; font-weight: 700;
+    }
+    .cat-item.active .cat-count { background: #F47C3C; color: #fff; }
+    .cat-item:not(.active) .cat-count { background: #F3F4F6; color: #6B7280; }
+
+    .filter-item {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 10px 16px; border: none; border-radius: 12px;
+      background: none; font-size: 14px; font-weight: 500; font-family: inherit;
+      color: #4B5563; cursor: pointer; text-align: left; transition: background 0.15s;
+    }
+    .filter-item:hover { background: #F9FAFB; color: #111827; }
+    .filter-item svg { width: 15px; height: 15px; }
+    .filter-item .orange { color: #F47C3C; }
+    .filter-item .blue { color: #4A6CF7; }
+
+    .sidebar-cta {
+      margin-top: 20px; padding: 20px; border-radius: 16px;
+      background: linear-gradient(135deg, #4A6CF7, #3A5CE0); color: #fff;
+    }
+    .sidebar-cta-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 12px;
+      background: rgba(255,255,255,0.2); backdrop-filter: blur(4px);
+      margin-bottom: 12px;
+    }
+    .sidebar-cta-icon svg { width: 18px; height: 18px; }
+    .sidebar-cta-title { font-size: 16px; font-weight: 700; }
+    .sidebar-cta-desc { margin-top: 4px; font-size: 12px; color: rgba(255,255,255,0.8); }
+    .sidebar-cta-btn {
+      margin-top: 16px; width: 100%; padding: 8px; border: none; border-radius: 9999px;
+      background: #fff; color: #4A6CF7; font-size: 12px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .sidebar-cta-btn:hover { background: rgba(255,255,255,0.9); }
+
+    /* ─── Product Grid ─── */
+    .product-grid {
+      display: grid; grid-template-columns: 1fr; gap: 24px 24px; flex: 1;
+    }
+    @media (min-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .product-card { display: flex; flex-direction: column; }
+    .product-img-wrap {
+      position: relative; aspect-ratio: 1 / 1; width: 100%;
+      margin-bottom: 16px; overflow: hidden; border-radius: 16px;
+      transition: background 0.3s;
+    }
+    .product-img-wrap.service { background: rgba(238,241,254,0.5); }
+    .product-img-wrap.product { background: #F3F4F6; }
+    .product-img-wrap.service:hover { background: #EEF1FE; }
+    .product-img-wrap.product:hover { background: rgba(227,227,227,0.7); }
+
+    .product-cat-tag {
+      position: absolute; left: 16px; top: 16px; z-index: 2;
+      padding: 4px 12px; border-radius: 9999px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      backdrop-filter: blur(4px); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .product-cat-tag.service-tag { background: rgba(74,108,247,0.9); color: #fff; }
+    .product-cat-tag.product-tag { background: rgba(255,255,255,0.95); color: #374151; }
+    .product-popular {
+      position: absolute; left: 16px; top: 44px; z-index: 2;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 9999px;
+      background: #F47C3C; color: #fff;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .product-popular svg { width: 10px; height: 10px; }
+
+    .product-like {
+      position: absolute; right: 16px; top: 16px; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.95); border: none; cursor: pointer;
+      color: #6B7280; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s, color 0.2s;
+    }
+    .product-like:hover { transform: scale(1.1); color: #F47C3C; }
+    .product-like svg { width: 14px; height: 14px; }
+    .product-like.liked { color: #F47C3C; }
+    .product-like.liked svg { fill: #F47C3C; }
+
+    .product-img {
+      width: 100%; height: 100%; object-fit: cover;
+      border-radius: 16px; transition: transform 0.5s;
+    }
+    .product-card:hover .product-img { transform: scale(1.05); }
+
+    .product-info { display: flex; flex-direction: column; flex: 1; padding: 0 4px; }
+    .product-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .product-name { font-size: 16px; font-weight: 700; line-height: 1.3; color: #111827; }
+    .product-price-wrap { text-align: right; flex-shrink: 0; }
+    .product-from { display: block; font-size: 10px; font-weight: 500; color: #9CA3AF; }
+    .product-price { font-size: 16px; font-weight: 700; color: #F47C3C; }
+    .product-price.service-price { color: #4A6CF7; }
+    .product-service-detail { margin-top: 8px; font-size: 12px; color: #6B7280; }
+    .product-rating {
+      display: flex; align-items: center; gap: 6px; margin-top: 8px; margin-bottom: 16px;
+    }
+    .product-rating svg { width: 13px; height: 13px; fill: #F47C3C; color: #F47C3C; }
+    .product-rating-val { font-size: 14px; font-weight: 600; color: #374151; }
+    .product-rating-count { font-size: 14px; color: #9CA3AF; }
+
+    .product-actions { display: flex; gap: 8px; margin-top: auto; }
+    .product-actions .btn-outline, .product-actions .btn-primary {
+      flex: 1; padding: 10px; border-radius: 9999px;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .product-actions .btn-outline {
+      border: 2px solid #E5E7EB; background: none; color: #374151;
+    }
+    .product-actions .btn-outline:hover {
+      border-color: #F47C3C; color: #F47C3C;
+    }
+    .product-actions .btn-outline.service-hover:hover {
+      border-color: #4A6CF7; color: #4A6CF7;
+    }
+    .product-actions .btn-primary {
+      border: none; background: #4A6CF7; color: #fff;
+    }
+    .product-actions .btn-primary:hover { filter: brightness(1.1); }
+
+    /* ─── Pagination ─── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 48px; padding-top: 24px; border-top: 1px solid #E5E7EB;
+    }
+    .pag-prev, .pag-next {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      border: none; background: none; cursor: pointer; transition: color 0.2s;
+    }
+    .pag-prev { color: #9CA3AF; }
+    .pag-prev:hover { color: #374151; }
+    .pag-next { color: #111827; }
+    .pag-next:hover { color: #F47C3C; }
+    .pag-prev svg, .pag-next svg { width: 16px; height: 16px; }
+    .pag-nums { display: flex; align-items: center; gap: 6px; }
+    .pag-num {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; font-family: inherit;
+      border: none; cursor: pointer; transition: background 0.15s;
+    }
+    .pag-num:hover { background: #F3F4F6; }
+    .pag-num.active { background: #F47C3C; color: #fff; font-weight: 700; }
+    .pag-ellipsis { padding: 0 4px; color: #9CA3AF; }
+
+    /* ─── Recommendations ─── */
+    .rec-section { margin-top: 80px; }
+    .rec-header {
+      display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px;
+    }
+    .rec-header h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: #111827; }
+    .rec-header p { margin-top: 4px; font-size: 14px; color: #6B7280; }
+    .rec-nav { display: flex; gap: 8px; }
+    .rec-nav-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid #E5E7EB; background: #fff; color: #6B7280;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    }
+    .rec-nav-btn:hover { border-color: #F47C3C; color: #F47C3C; }
+    .rec-nav-btn svg { width: 18px; height: 18px; }
+    .rec-grid {
+      display: grid; grid-template-columns: 1fr; gap: 24px;
+    }
+    @media (min-width: 640px) { .rec-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .rec-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    /* ─── CTA Banner ─── */
+    .cta-banner {
+      margin-top: 80px; overflow: hidden; border-radius: 24px;
+      background: linear-gradient(90deg, #4A6CF7, #3A5CE0);
+      padding: 48px 56px; color: #fff;
+    }
+    @media (min-width: 1024px) { .cta-banner { padding: 64px 56px; } }
+    .cta-row {
+      display: flex; flex-direction: column; gap: 32px;
+    }
+    @media (min-width: 1024px) { .cta-row { flex-direction: row; align-items: center; justify-content: space-between; } }
+    .cta-text { max-width: 560px; }
+    .cta-title { font-size: 30px; font-weight: 700; line-height: 1.2; }
+    @media (min-width: 768px) { .cta-title { font-size: 36px; } }
+    .cta-highlight { color: #FDE3C8; }
+    .cta-desc { margin-top: 12px; color: rgba(255,255,255,0.85); font-size: 15px; line-height: 1.6; }
+    .cta-btns { display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 640px) { .cta-btns { flex-direction: row; } }
+    .cta-btn-primary, .cta-btn-secondary {
+      padding: 12px 24px; border-radius: 9999px;
+      font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+      transition: filter 0.2s, background 0.2s;
+    }
+    .cta-btn-primary {
+      border: none; background: #F47C3C; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .cta-btn-primary:hover { filter: brightness(1.1); }
+    .cta-btn-secondary {
+      border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
+      color: #fff; backdrop-filter: blur(4px);
+    }
+    .cta-btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+    /* ─── Footer ─── */
+    .footer {
+      margin-top: 64px; padding-top: 40px; border-top: 1px solid #E5E7EB;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px;
+    }
+    @media (min-width: 768px) { .footer-grid { grid-template-columns: repeat(4, 1fr); } }
+    .footer-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .footer-brand-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; background: #F47C3C; color: #fff;
+    }
+    .footer-brand-icon svg { width: 16px; height: 16px; }
+    .footer-brand-name { font-size: 16px; font-weight: 700; color: #111827; }
+    .footer-brand-desc { font-size: 14px; color: #6B7280; }
+    .footer-col h4 { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 12px; }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 8px; }
+    .footer-col a { font-size: 14px; color: #6B7280; transition: color 0.2s; }
+    .footer-col a:hover { color: #F47C3C; }
+    .footer-bottom {
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      margin-top: 40px; padding-top: 24px; border-top: 1px solid #F3F4F6;
+      font-size: 12px; color: #9CA3AF;
+    }
+    @media (min-width: 640px) { .footer-bottom { flex-direction: row; justify-content: space-between; } }
+    .footer-bottom-links { display: flex; gap: 24px; }
+    .footer-bottom-links a { color: #9CA3AF; transition: color 0.2s; }
+    .footer-bottom-links a:hover { color: #F47C3C; }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- ═══ HERO ═══ -->
+    <div class="hero">
+      <div class="hero-glow1"></div>
+      <div class="hero-glow2"></div>
+      <div class="hero-inner">
+        <div class="hero-text">
+          <div class="hero-chip">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Welcome back, Alice
+          </div>
+          <h1 class="hero-title">Print, repair, and support<br />for your next project.</h1>
+          <p class="hero-sub">Browse our curated catalog of professional printing, technical services, and repair solutions — all in one customer dashboard.</p>
+          <div class="hero-search">
+            <span class="hero-search-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input type="text" placeholder="Search services, products..." />
+            <button class="hero-search-btn">Search</button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-top">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.5 9.4 7.55 4.24a1 1 0 0 0-1.1 0L2 6.5"/><path d="M4 6v.86"/><path d="M2 12v-.86"/><path d="M4 18v-.86"/><path d="M2 6v-.86"/><path d="M4 6l-2 1.5v9L4 18l2-1.5v-9Z"/><path d="M16.5 9.4V21a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V9.4"/><path d="M20 4v9"/><path d="M16 12v9"/><path d="M20 9.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5Z"/>
+              </svg>
+              <span>Active Orders</span>
+            </div>
+            <div class="hero-stat-value">1</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-top">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+              <span>Wishlist</span>
+            </div>
+            <div class="hero-stat-value">4</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-top">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span>Member</span>
+            </div>
+            <div class="hero-stat-value">Gold</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TRUST STRIP ═══ -->
+    <div class="trust-strip">
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="trust-label">Free Delivery</div>
+          <div class="trust-sub">Orders over &#x20B1;500</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="trust-label">Quality Guarantee</div>
+          <div class="trust-sub">100% satisfaction</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a1 1 0 0 0 0-1.4L19.4 2.6a1 1 0 0 0-1.4 0l-3.7 3.7z"/><path d="M4 13.5V19h5.5L18.2 10.3a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0L4 13.5z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="trust-label">Certified Repairs</div>
+          <div class="trust-sub">Devices & printers supported</div>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16.5 9.4 7.55 4.24a1 1 0 0 0-1.1 0L2 6.5"/><path d="M4 6v.86"/><path d="M2 12v-.86"/><path d="M4 18v-.86"/><path d="M2 6v-.86"/><path d="M4 6l-2 1.5v9L4 18l2-1.5v-9Z"/><path d="M16.5 9.4V21a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V9.4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="trust-label">Fast Turnaround</div>
+          <div class="trust-sub">2&#x2013;3 business days</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SERVICES HIGHLIGHT ═══ -->
+    <div class="services-highlight">
+      <div class="services-grid">
+        <div class="services-left">
+          <div class="services-chip">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a1 1 0 0 0 0-1.4L19.4 2.6a1 1 0 0 0-1.4 0l-3.7 3.7z"/><path d="M4 13.5V19h5.5L18.2 10.3a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0L4 13.5z"/>
+            </svg>
+            Technical Services Available
+          </div>
+          <h3 class="services-title">Need repairs too? We've got your tech covered.</h3>
+          <p class="services-desc">Alongside printing services, you can now book printer maintenance, laptop repairs, system tune-ups, and office device setup directly from the store.</p>
+          <div class="services-tags">
+            <span class="services-tag">Printer repair</span>
+            <span class="services-tag">Laptop repair</span>
+            <span class="services-tag">PC tune-up</span>
+            <span class="services-tag">Device setup</span>
+          </div>
+        </div>
+        <div class="services-right">
+          <div>
+            <p class="services-right-label">Repair & Diagnostics</p>
+            <h4 class="services-right-title">Book technical support for office devices and workstations.</h4>
+          </div>
+          <button class="services-right-btn">
+            Browse Repair Services
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SECTION HEADER ═══ -->
+    <div class="section-header">
+      <div>
+        <h2>Browse Products & Services</h2>
+        <p>Printing, repairs, and technical support for every business need</p>
+      </div>
+      <button class="sort-btn">
+        Sort: Featured
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ═══ SIDEBAR + PRODUCTS ═══ -->
+    <div class="store-layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <h3 class="sidebar-heading">Categories</h3>
+          <button class="cat-item active">
+            <span>All</span>
+            <span class="cat-count">34</span>
+          </button>
+          <button class="cat-item">
+            <span>Paper & Cards</span>
+            <span class="cat-count">8</span>
+          </button>
+          <button class="cat-item">
+            <span>Marketing</span>
+            <span class="cat-count">6</span>
+          </button>
+          <button class="cat-item">
+            <span>Signage & Banners</span>
+            <span class="cat-count">5</span>
+          </button>
+          <button class="cat-item">
+            <span>Merchandise</span>
+            <span class="cat-count">6</span>
+          </button>
+          <button class="cat-item">
+            <span>Technical Repairs</span>
+            <span class="cat-count">5</span>
+          </button>
+          <button class="cat-item">
+            <span>Device Setup</span>
+            <span class="cat-count">4</span>
+          </button>
+
+          <hr class="sidebar-divider" />
+
+          <h3 class="sidebar-heading">Quick Filters</h3>
+          <button class="filter-item">
+            <svg class="orange" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            New Arrivals
+          </button>
+          <button class="filter-item">
+            <svg class="orange" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Best Sellers
+          </button>
+          <button class="filter-item">
+            <svg class="blue" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a1 1 0 0 0 0-1.4L19.4 2.6a1 1 0 0 0-1.4 0l-3.7 3.7z"/><path d="M4 13.5V19h5.5L18.2 10.3a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0L4 13.5z"/>
+            </svg>
+            Repair Services
+          </button>
+        </div>
+
+        <div class="sidebar-cta">
+          <div class="sidebar-cta-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a1 1 0 0 0 0-1.4L19.4 2.6a1 1 0 0 0-1.4 0l-3.7 3.7z"/><path d="M4 13.5V19h5.5L18.2 10.3a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0L4 13.5z"/>
+            </svg>
+          </div>
+          <h4 class="sidebar-cta-title">Need a Quick Repair?</h4>
+          <p class="sidebar-cta-desc">Book diagnostics, device setup, or printer maintenance directly from your account.</p>
+          <button class="sidebar-cta-btn">Book a Repair</button>
+        </div>
+      </aside>
+
+      <!-- Product Grid -->
+      <div class="product-grid">
+
+        <!-- Card 1: Business Cards (product, popular) -->
+        <div class="product-card">
+          <div class="product-img-wrap product">
+            <span class="product-cat-tag product-tag">Paper</span>
+            <span class="product-popular">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Popular
+            </span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/20140155/pexels-photo-20140155.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="Premium Business Cards" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Premium Business Cards</h3>
+              <div class="product-price-wrap">
+                <span class="product-price">&#x20B1;499</span>
+              </div>
+            </div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">5.0</span>
+              <span class="product-rating-count">(1.2k reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline">Add to Cart</button>
+              <button class="btn-primary">Order Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Brochures (product) -->
+        <div class="product-card">
+          <div class="product-img-wrap product">
+            <span class="product-cat-tag product-tag">Marketing</span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/33952994/pexels-photo-33952994.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="Corporate Brochures" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Corporate Brochures</h3>
+              <div class="product-price-wrap">
+                <span class="product-price">&#x20B1;1,250</span>
+              </div>
+            </div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.8</span>
+              <span class="product-rating-count">(850 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline">Add to Cart</button>
+              <button class="btn-primary">Order Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Stickers (product, popular) -->
+        <div class="product-card">
+          <div class="product-img-wrap product">
+            <span class="product-cat-tag product-tag">Promo</span>
+            <span class="product-popular">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Popular
+            </span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/29765806/pexels-photo-29765806.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="Die-Cut Vinyl Stickers" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Die-Cut Vinyl Stickers</h3>
+              <div class="product-price-wrap">
+                <span class="product-price">&#x20B1;299</span>
+              </div>
+            </div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.9</span>
+              <span class="product-rating-count">(2.1k reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline">Add to Cart</button>
+              <button class="btn-primary">Order Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Mugs (product) -->
+        <div class="product-card">
+          <div class="product-img-wrap product">
+            <span class="product-cat-tag product-tag">Merch</span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/20633747/pexels-photo-20633747.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="Custom Graphic Mugs" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Custom Graphic Mugs</h3>
+              <div class="product-price-wrap">
+                <span class="product-price">&#x20B1;350</span>
+              </div>
+            </div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.7</span>
+              <span class="product-rating-count">(420 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline">Add to Cart</button>
+              <button class="btn-primary">Order Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Banners (product) -->
+        <div class="product-card">
+          <div class="product-img-wrap product">
+            <span class="product-cat-tag product-tag">Signage</span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.unsplash.com/photo-1596472260656-3b3dfa393dc5?auto=format&fit=crop&w=400&q=80" alt="Large Format Banners" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Large Format Banners</h3>
+              <div class="product-price-wrap">
+                <span class="product-price">&#x20B1;1,800</span>
+              </div>
+            </div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">5.0</span>
+              <span class="product-rating-count">(156 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline">Add to Cart</button>
+              <button class="btn-primary">Order Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6: Printer Repair (service, popular) -->
+        <div class="product-card">
+          <div class="product-img-wrap service">
+            <span class="product-cat-tag service-tag">Repair</span>
+            <span class="product-popular">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Popular
+            </span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/9951393/pexels-photo-9951393.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="Printer Repair & Maintenance" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Printer Repair & Maintenance</h3>
+              <div class="product-price-wrap">
+                <span class="product-from">from</span>
+                <span class="product-price service-price">&#x20B1;900</span>
+              </div>
+            </div>
+            <div class="product-service-detail">On-site &middot; 1&#x2013;2 hrs &middot; All brands</div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.9</span>
+              <span class="product-rating-count">(310 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline service-hover">Get Quote</button>
+              <button class="btn-primary">Book Now</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ PAGINATION ═══ -->
+    <div class="pagination">
+      <button class="pag-prev">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Previous
+      </button>
+      <div class="pag-nums">
+        <button class="pag-num active">1</button>
+        <button class="pag-num">2</button>
+        <button class="pag-num">3</button>
+        <span class="pag-ellipsis">...</span>
+        <button class="pag-num">6</button>
+      </div>
+      <button class="pag-next">
+        Next
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ═══ RECOMMENDATIONS ═══ -->
+    <div class="rec-section">
+      <div class="rec-header">
+        <div>
+          <h2>Recommended for you</h2>
+          <p>Based on your recent activity</p>
+        </div>
+        <div class="rec-nav">
+          <button class="rec-nav-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+          </button>
+          <button class="rec-nav-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="rec-grid">
+        <div class="product-card">
+          <div class="product-img-wrap product">
+            <span class="product-cat-tag product-tag">Setup</span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/14887613/pexels-photo-14887613.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="CCTV & Office Device Setup" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">CCTV & Office Device Setup</h3>
+              <div class="product-price-wrap">
+                <span class="product-from">from</span>
+                <span class="product-price service-price">&#x20B1;2,500</span>
+              </div>
+            </div>
+            <div class="product-service-detail">On-site &middot; 3&#x2013;5 hrs &middot; Includes wiring</div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.7</span>
+              <span class="product-rating-count">(96 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline service-hover">Get Quote</button>
+              <button class="btn-primary">Book Now</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-img-wrap product">
+            <span class="product-cat-tag product-tag">Merch</span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=400&q=80" alt="Branded T-Shirts" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Branded T-Shirts</h3>
+              <div class="product-price-wrap">
+                <span class="product-price">&#x20B1;450</span>
+              </div>
+            </div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.8</span>
+              <span class="product-rating-count">(920 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline">Add to Cart</button>
+              <button class="btn-primary">Order Now</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-img-wrap service">
+            <span class="product-cat-tag service-tag">Tech</span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/343457/pexels-photo-343457.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="PC Tune-Up" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">PC Tune-Up & Virus Cleanup</h3>
+              <div class="product-price-wrap">
+                <span class="product-from">from</span>
+                <span class="product-price service-price">&#x20B1;750</span>
+              </div>
+            </div>
+            <div class="product-service-detail">Remote or on-site &middot; Same day</div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.9</span>
+              <span class="product-rating-count">(188 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline service-hover">Get Quote</button>
+              <button class="btn-primary">Book Now</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-img-wrap service">
+            <span class="product-cat-tag service-tag">Repair</span>
+            <button class="product-like">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
+            <img class="product-img" src="https://images.pexels.com/photos/12200696/pexels-photo-12200696.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=400" alt="Laptop Repair" />
+          </div>
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">Laptop Screen & Keyboard Repair</h3>
+              <div class="product-price-wrap">
+                <span class="product-from">from</span>
+                <span class="product-price service-price">&#x20B1;1,450</span>
+              </div>
+            </div>
+            <div class="product-service-detail">Drop-off &middot; 1&#x2013;3 days &middot; Parts included</div>
+            <div class="product-rating">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span class="product-rating-val">4.8</span>
+              <span class="product-rating-count">(274 reviews)</span>
+            </div>
+            <div class="product-actions">
+              <button class="btn-outline service-hover">Get Quote</button>
+              <button class="btn-primary">Book Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CTA BANNER ═══ -->
+    <div class="cta-banner">
+      <div class="cta-row">
+        <div class="cta-text">
+          <h2 class="cta-title">
+            Need something custom?<br />
+            <span class="cta-highlight">Let's bring it to life.</span>
+          </h2>
+          <p class="cta-desc">Our design team is ready to help with bespoke printing projects of any size.</p>
+        </div>
+        <div class="cta-btns">
+          <button class="cta-btn-primary">Request a Quote</button>
+          <button class="cta-btn-secondary">Talk to a Designer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <div class="footer-brand-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <line x1="10" y1="9" x2="8" y2="9"/>
+              </svg>
+            </div>
+            <span class="footer-brand-name">PrintSync</span>
+          </div>
+          <p class="footer-brand-desc">Professional printing for modern businesses.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="#">Business Cards</a></li>
+            <li><a href="#">Brochures</a></li>
+            <li><a href="#">Banners</a></li>
+            <li><a href="#">Merchandise</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Account</h4>
+          <ul>
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">My Orders</a></li>
+            <li><a href="#">Wishlist</a></li>
+            <li><a href="#">Profile</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Shipping</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 PrintSync. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Terms of Service</a>
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.product-like').forEach(btn => {
+      btn.addEventListener('click', () => btn.classList.toggle('liked'));
+    });
+    document.querySelectorAll('.cat-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+    document.querySelectorAll('.pag-num').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.pag-num').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

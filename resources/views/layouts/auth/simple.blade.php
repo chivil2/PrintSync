@@ -14,13 +14,7 @@
         <div class="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10" style="background: linear-gradient(rgba(30, 58, 138, 0.7), rgba(30, 58, 138, 0.7)), url('https://images.unsplash.com/photo-1562564055-71e051d33c19?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-attachment: fixed;">
             <div class="flex w-full max-w-sm flex-col gap-2 text-black">
                 <a href="{{ route('home') }}" class="flex flex-col items-center gap-3 font-medium mb-4 text-black" wire:navigate>
-                    <span class="flex items-center justify-center">
-                        <svg class="size-12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="#E8743B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 7H15M9 11H15M9 15H12" stroke="#19A7CE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </span>
-                    <span class="text-2xl font-bold text-black">PrintSync</span>
+                    <x-printsync-icon size="size-12" textSize="text-2xl" variant="minimal" />
                 </a>
                 <div class="flex flex-col gap-6 bg-white/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 text-black" style="color: black !important;">
                     <style>

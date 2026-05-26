@@ -16,7 +16,7 @@
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </head>
     <body class="min-h-screen bg-white">
-        @include('partials.employee-navbar')
+        @include('partials.customer-navbar')
 
         <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             @yield('content')

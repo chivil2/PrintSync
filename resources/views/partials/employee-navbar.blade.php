@@ -3,11 +3,7 @@
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center gap-8">
                 <a href="{{ route('employee.dashboard') }}" class="flex items-center gap-2">
-                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="#E8743B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M9 7H15M9 11H15M9 15H12" stroke="#19A7CE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span class="text-xl font-bold text-zinc-900">PrintSync</span>
+                    <x-printsync-icon size="w-8 h-8" textSize="text-xl" variant="minimal" />
                 </a>
                 <div class="hidden md:flex items-center gap-6">
                     <a href="{{ route('employee.dashboard') }}" class="text-sm font-medium {{ request()->routeIs('employee.dashboard') ? 'text-blue-600' : 'text-zinc-600 hover:text-zinc-900' }}">

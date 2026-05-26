@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrintSync — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #FAFBFC;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ─── Layout ─── */
+    .page { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+    @media (min-width: 1024px) { .page { padding: 32px 32px; } }
+
+    /* ─── Welcome Banner ─── */
+    .welcome-banner {
+      position: relative;
+      margin-bottom: 32px;
+      overflow: hidden;
+      border-radius: 20px;
+    }
+    .welcome-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #F47C3C, #E8654A, #4A6CF7);
+    }
+    .welcome-dots {
+      position: absolute;
+      inset: 0;
+      opacity: 0.15;
+      background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+    .welcome-glow1 {
+      position: absolute;
+      right: -80px;
+      top: -80px;
+      width: 256px;
+      height: 256px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      filter: blur(48px);
+    }
+    .welcome-glow2 {
+      position: absolute;
+      left: -40px;
+      bottom: -40px;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.1);
+      filter: blur(32px);
+    }
+    .welcome-content {
+      position: relative;
+      padding: 36px 32px;
+    }
+    @media (min-width: 1024px) { .welcome-content { padding: 40px; } }
+    .welcome-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .welcome-title {
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+    @media (min-width: 1024px) { .welcome-title { font-size: 32px; } }
+    .welcome-sub {
+      margin-top: 8px;
+      max-width: 520px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.85);
+    }
+    .welcome-status {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px);
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34D399;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: #fff;
+    }
+    @media (min-width: 1024px) { .welcome-status { display: flex; } }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ─── Stats Grid ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .stat-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid #F3F4F6;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      transform: translateY(-1px);
+    }
+    .stat-inner {
+      padding: 20px;
+      border-radius: 15px;
+      background: #fff;
+    }
+    .stat-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .stat-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .stat-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
+      transition: transform 0.25s;
+    }
+    .stat-card:hover .stat-icon { transform: scale(1.05); }
+    .stat-icon.orange { background: #FEF0E7; color: #F47C3C; }
+    .stat-icon.green { background: #ECFDF5; color: #22C55E; }
+    .stat-icon.blue { background: #EEF1FE; color: #4A6CF7; }
+    .stat-icon svg { width: 20px; height: 20px; }
+    .stat-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #6B7280;
+    }
+    .stat-value {
+      margin-top: 4px;
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #111827;
+    }
+    .stat-trend {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #6B7280;
+    }
+
+    /* ─── Quick Actions ─── */
+    .quick-section {
+      margin-bottom: 32px;
+      border-radius: 16px;
+      border: 1px solid #F3F4F6;
+      background: #fff;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    @media (min-width: 1024px) { .quick-section { padding: 28px; } }
+    .quick-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .quick-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #111827;
+    }
+    .quick-accent {
+      width: 32px;
+      height: 4px;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #F47C3C, #4A6CF7);
+      opacity: 0.6;
+    }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 640px) { .quick-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .quick-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .quick-btn {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid #F3F4F6;
+      background: linear-gradient(180deg, #fff, rgba(249,250,251,0.5));
+      padding: 1px;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: box-shadow 0.25s, transform 0.25s;
+    }
+    .quick-btn:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .quick-btn-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 11px;
+      background: #fff;
+    }
+    .quick-btn-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, var(--icon-bg), var(--icon-bg));
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
+      transition: transform 0.25s;
+    }
+    .quick-btn:hover .quick-btn-icon {
+      transform: scale(1.1) rotate(-3deg);
+    }
+    .quick-btn-icon svg { width: 20px; height: 20px; }
+    .quick-btn-label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: #111827;
+    }
+    .quick-btn-desc {
+      margin-top: 2px;
+      font-size: 12.5px;
+      color: #6B7280;
+    }
+    .quick-arrow {
+      margin-left: auto;
+      color: #D1D5DB;
+      transition: transform 0.2s, color 0.2s;
+    }
+    .quick-arrow svg { width: 16px; height: 16px; }
+    .quick-btn:hover .quick-arrow {
+      transform: translateX(2px);
+      color: #9CA3AF;
+    }
+
+    /* ─── Recent Orders ─── */
+    .orders-section {
+      border-radius: 16px;
+      border: 1px solid #F3F4F6;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .orders-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    @media (min-width: 1024px) { .orders-header { padding: 16px 28px; } }
+    .orders-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #111827;
+    }
+    .orders-view-all {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #F47C3C;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.2s;
+    }
+    .orders-view-all:hover { color: #E06A2A; }
+    .orders-body { padding: 12px 16px; }
+    @media (min-width: 1024px) { .orders-body { padding: 16px; } }
+
+    .order-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid #F3F4F6;
+      background: linear-gradient(90deg, rgba(249,250,251,0.7), #fff);
+      padding: 1px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .order-card:hover {
+      border-color: #E5E7EB;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .order-card-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-radius: 11px;
+      background: #fff;
+    }
+    .order-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .order-icon-wrap {
+      position: relative;
+    }
+    .order-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #EEF1FE;
+      box-shadow: 0 0 0 1px rgba(74,108,247,0.1);
+    }
+    .order-icon svg { width: 20px; height: 20px; color: #4A6CF7; }
+    .order-dot {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #F59E0B;
+      border: 2px solid #fff;
+    }
+    .order-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .order-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .status-badge.pending { background: #FEF3C7; color: #B45309; }
+    .status-badge.processing { background: #DBEAFE; color: #1D4ED8; }
+    .status-badge.completed { background: #D1FAE5; color: #047857; }
+
+    .order-meta {
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #6B7280;
+    }
+    .order-meta .sep { color: #D1D5DB; }
+    .order-meta svg { width: 12px; height: 12px; }
+    .order-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .order-amount {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .order-payment {
+      margin-top: 2px;
+      font-size: 12px;
+      color: #6B7280;
+      text-align: right;
+    }
+    .order-details-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      color: #374151;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .order-details-btn:hover { background: #F9FAFB; border-color: #D1D5DB; }
+    .order-details-btn svg { width: 14px; height: 14px; }
+    @media (min-width: 640px) { .order-details-btn { display: flex; } }
+
+    .order-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 0;
+      margin-top: 16px;
+    }
+    .order-divider-line {
+      height: 1px;
+      width: 48px;
+    }
+    .order-divider-line.l { background: linear-gradient(90deg, transparent, #E5E7EB); }
+    .order-divider-line.r { background: linear-gradient(270deg, transparent, #E5E7EB); }
+    .order-divider-text {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+
+    /* ─── Promo Banner ─── */
+    .promo {
+      margin-top: 32px;
+      overflow: hidden;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #4A6CF7, #3A5CE0);
+      padding: 24px;
+      color: #fff;
+    }
+    .promo-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .promo-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .promo-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+      flex-shrink: 0;
+    }
+    .promo-icon svg { width: 20px; height: 20px; }
+    .promo-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .promo-desc {
+      margin-top: 4px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.85);
+    }
+    .promo-code {
+      font-family: monospace;
+      font-weight: 700;
+    }
+    .promo-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 9999px;
+      background: #fff;
+      color: #4A6CF7;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .promo-btn:hover { background: rgba(255,255,255,0.9); }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- ═══ Welcome Banner ═══ -->
+    <div class="welcome-banner">
+      <div class="welcome-bg"></div>
+      <div class="welcome-dots"></div>
+      <div class="welcome-glow1"></div>
+      <div class="welcome-glow2"></div>
+      <div class="welcome-content">
+        <div class="welcome-row">
+          <div>
+            <h1 class="welcome-title">Welcome back, Alice!</h1>
+            <p class="welcome-sub">Manage your printing and technical services from your personal dashboard.</p>
+          </div>
+          <div class="welcome-status">
+            <div class="status-dot"></div>
+            <span class="status-text">All systems operational</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Stats ═══ -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-top">
+            <div class="stat-left">
+              <div class="stat-icon orange">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                  <path d="M3 6h18"/>
+                  <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+              </div>
+              <div>
+                <p class="stat-label">Total Orders</p>
+                <p class="stat-value">1</p>
+              </div>
+            </div>
+          </div>
+          <div class="stat-trend">+1 this week</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-top">
+            <div class="stat-left">
+              <div class="stat-icon green">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div>
+                <p class="stat-label">Completed</p>
+                <p class="stat-value">0</p>
+              </div>
+            </div>
+          </div>
+          <div class="stat-trend">In progress</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-top">
+            <div class="stat-left">
+              <div class="stat-icon blue">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"/>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div>
+                <p class="stat-label">Total Spent</p>
+                <p class="stat-value">&#x20B1;0.00</p>
+              </div>
+            </div>
+          </div>
+          <div class="stat-trend">No charges yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Quick Actions ═══ -->
+    <div class="quick-section">
+      <div class="quick-header">
+        <h2 class="quick-title">Quick Actions</h2>
+        <div class="quick-accent"></div>
+      </div>
+      <div class="quick-grid">
+        <button class="quick-btn">
+          <div class="quick-btn-inner">
+            <div class="quick-btn-icon" style="--icon-bg: #FEF0E7; color: #F47C3C;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                <path d="M3 6h18"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+            </div>
+            <div>
+              <div class="quick-btn-label">Browse Store</div>
+              <div class="quick-btn-desc">View services</div>
+            </div>
+            <div class="quick-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </div>
+        </button>
+
+        <button class="quick-btn">
+          <div class="quick-btn-inner">
+            <div class="quick-btn-icon" style="--icon-bg: #E0F2FE; color: #0EA5E9;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16.5 9.4 7.55 4.24a1 1 0 0 0-1.1 0L2 6.5M4 6v.86M2 12v-.86M4 18v-.86M2 6v-.86"/>
+                <path d="M4 6l-2 1.5v9L4 18l2-1.5v-9Z"/>
+                <path d="M16.5 9.4V21a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V9.4"/>
+                <path d="M20 4v9"/>
+                <path d="M16 12v9"/>
+                <path d="M20 9.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5Z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="quick-btn-label">My Orders</div>
+              <div class="quick-btn-desc">Track orders</div>
+            </div>
+            <div class="quick-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </div>
+        </button>
+
+        <button class="quick-btn">
+          <div class="quick-btn-inner">
+            <div class="quick-btn-icon" style="--icon-bg: #F3F0FF; color: #8B5CF6;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="quick-btn-label">Wishlist</div>
+              <div class="quick-btn-desc">Saved items</div>
+            </div>
+            <div class="quick-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </div>
+        </button>
+
+        <button class="quick-btn">
+          <div class="quick-btn-inner">
+            <div class="quick-btn-icon" style="--icon-bg: #ECFDF5; color: #22C55E;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="quick-btn-label">Support</div>
+              <div class="quick-btn-desc">Get help</div>
+            </div>
+            <div class="quick-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ Recent Orders ═══ -->
+    <div class="orders-section">
+      <div class="orders-header">
+        <h2 class="orders-title">Recent Orders</h2>
+        <button class="orders-view-all">View All</button>
+      </div>
+      <div class="orders-body">
+        <div class="order-card">
+          <div class="order-card-inner">
+            <div class="order-left">
+              <div class="order-icon-wrap">
+                <div class="order-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <line x1="10" y1="9" x2="8" y2="9"/>
+                  </svg>
+                </div>
+                <div class="order-dot"></div>
+              </div>
+              <div>
+                <div class="order-name-row">
+                  <h3 class="order-name">Signage</h3>
+                  <span class="status-badge pending">Pending</span>
+                </div>
+                <div class="order-meta">
+                  <span>Order #5</span>
+                  <span class="sep">&#8226;</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>1 hour ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="order-right">
+              <div>
+                <div class="order-amount">&#x20B1;0.00</div>
+                <div class="order-payment">Pending payment</div>
+              </div>
+              <button class="order-details-btn">
+                Details
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-divider">
+          <div class="order-divider-line l"></div>
+          <span class="order-divider-text">You have 1 active order</span>
+          <div class="order-divider-line r"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Promo Banner ═══ -->
+    <div class="promo">
+      <div class="promo-row">
+        <div class="promo-left">
+          <div class="promo-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="promo-title">First Order Bonus</h3>
+            <p class="promo-desc">
+              Get 15% off your first printing order this month. Use code <span class="promo-code">WELCOME15</span>
+            </p>
+          </div>
+        </div>
+        <button class="promo-btn">Claim Offer</button>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrintSync — Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #FAFBFC;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .page { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+    @media (min-width: 1024px) { .page { padding: 32px 32px; } }
+
+    /* ─── Header ─── */
+    .page-header {
+      display: flex; flex-direction: column; gap: 16px;
+      margin-bottom: 32px;
+    }
+    @media (min-width: 640px) {
+      .page-header { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 500; font-family: inherit;
+      color: #6B7280; background: none; border: none; cursor: pointer;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: #F47C3C; }
+    .back-btn svg { width: 18px; height: 18px; }
+    .page-title { font-size: 24px; font-weight: 700; color: #111827; }
+
+    .search-wrap {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; max-width: 320px;
+      padding: 10px 16px; border-radius: 9999px;
+      background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      outline: 1px solid #E5E7EB;
+    }
+    .search-wrap:focus-within { outline-color: #F47C3C; }
+    .search-wrap svg { width: 16px; height: 16px; color: #9CA3AF; flex-shrink: 0; }
+    .search-wrap input {
+      width: 100%; border: none; background: none;
+      font-size: 14px; font-family: inherit; outline: none; color: #374151;
+    }
+    .search-wrap input::placeholder { color: #9CA3AF; }
+
+    /* ─── Filter Tabs ─── */
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .filter-tab {
+      padding: 8px 16px; border: none; border-radius: 9999px;
+      font-size: 14px; font-weight: 500; font-family: inherit;
+      cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .filter-tab.default { background: #fff; color: #4B5563; }
+    .filter-tab.default:hover { background: #F3F4F6; }
+    .filter-tab.all { background: #111827; color: #fff; }
+    .filter-tab.active { background: #F47C3C; color: #fff; }
+    .filter-tab.completed { background: #22C55E; color: #fff; }
+
+    /* ─── Order Card ─── */
+    .order-card {
+      margin-bottom: 16px; overflow: hidden;
+      border-radius: 16px; border: 1px solid #E5E7EB;
+      background: #fff; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .order-card:hover {
+      border-color: rgba(244,124,60,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .order-header {
+      display: flex; flex-direction: column; gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid #F3F4F6;
+      background: rgba(249,250,251,0.5);
+    }
+    @media (min-width: 640px) {
+      .order-header { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+
+    .order-id-wrap { display: flex; align-items: center; gap: 16px; }
+    .order-id-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 12px;
+      background: #FEF0E7; color: #F47C3C;
+    }
+    .order-id-icon svg { width: 18px; height: 18px; }
+    .order-id { font-size: 14px; font-weight: 700; color: #111827; }
+    .order-date { font-size: 12px; color: #6B7280; margin-top: 1px; }
+
+    .order-header-right { display: flex; align-items: center; gap: 16px; }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 9999px;
+      font-size: 12px; font-weight: 600;
+    }
+    .status-badge svg { width: 12px; height: 12px; }
+    .status-badge.pending { background: #FEF3C7; color: #B45309; }
+    .status-badge.processing { background: #DBEAFE; color: #1D4ED8; }
+    .status-badge.shipped { background: #F3F0FF; color: #6D28D9; }
+    .status-badge.delivered { background: #D1FAE5; color: #047857; }
+    .status-badge.cancelled { background: #FEE2E2; color: #B91C1C; }
+
+    .track-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 14px; font-weight: 500; font-family: inherit;
+      color: #6B7280; background: none; border: none; cursor: pointer;
+      transition: color 0.2s;
+    }
+    .track-link:hover { color: #F47C3C; }
+    .track-link svg { width: 14px; height: 14px; }
+
+    /* ─── Order Body ─── */
+    .order-body { padding: 24px; }
+
+    .order-main {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    @media (min-width: 640px) {
+      .order-main { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+
+    .order-products { display: flex; align-items: center; gap: 16px; }
+    .product-stack { display: flex; }
+    .product-stack > * + * { margin-left: -8px; }
+    .product-thumb {
+      width: 56px; height: 56px; flex-shrink: 0;
+      overflow: hidden; border-radius: 8px;
+      border: 2px solid #fff; background: #F3F4F6;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .order-items { margin-top: 2px; }
+    .order-items-name {
+      font-size: 14px; font-weight: 500; color: #111827;
+    }
+    .order-items-list {
+      font-size: 12px; color: #6B7280; margin-top: 1px;
+    }
+
+    .order-total-wrap { display: flex; align-items: center; gap: 24px; }
+    .order-total-label { font-size: 12px; color: #6B7280; }
+    .order-total-value {
+      font-size: 18px; font-weight: 700; color: #111827;
+    }
+    .order-total-value.pending { color: #F47C3C; }
+
+    .order-actions { display: flex; align-items: center; gap: 8px; }
+    .btn-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 9999px;
+      font-size: 14px; font-weight: 500; font-family: inherit;
+      cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-pill svg { width: 14px; height: 14px; }
+    .btn-outline {
+      border: 1px solid #E5E7EB; background: #fff; color: #374151;
+    }
+    .btn-outline:hover { border-color: #F47C3C; color: #F47C3C; }
+    .btn-solid {
+      border: none; background: #F47C3C; color: #fff; font-weight: 600;
+    }
+    .btn-solid:hover { filter: brightness(1.1); }
+
+    /* ─── Delivery Info ─── */
+    .delivery-info {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-top: 16px; padding: 12px 16px;
+      border-radius: 12px; background: #F9FAFB;
+    }
+    .delivery-info svg { width: 16px; height: 16px; color: #9CA3AF; flex-shrink: 0; }
+    .delivery-info-text { font-size: 14px; color: #4B5563; }
+    .delivery-info-text strong { color: #111827; font-weight: 600; }
+    .delivery-sep { color: #D1D5DB; }
+
+    /* ─── Empty State ─── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 80px 0;
+      border: 1px solid #E5E7EB; border-radius: 16px; background: #fff;
+    }
+    .empty-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 80px; height: 80px; border-radius: 50%;
+      background: #F3F4F6; color: #9CA3AF; margin-bottom: 24px;
+    }
+    .empty-icon svg { width: 32px; height: 32px; }
+    .empty-title { font-size: 20px; font-weight: 700; color: #111827; }
+    .empty-desc { margin-top: 8px; font-size: 14px; color: #6B7280; }
+
+    /* ─── Help Section ─── */
+    .help-section {
+      margin-top: 40px; overflow: hidden; border-radius: 16px;
+      background: linear-gradient(90deg, #4A6CF7, #3A5CE0);
+      padding: 24px; color: #fff;
+    }
+    .help-row {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    @media (min-width: 640px) {
+      .help-row { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+    .help-title { font-size: 18px; font-weight: 700; }
+    .help-desc { margin-top: 4px; font-size: 14px; color: rgba(255,255,255,0.85); }
+    .help-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 24px; border: none; border-radius: 9999px;
+      background: #fff; color: #4A6CF7;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; white-space: nowrap; transition: background 0.2s;
+    }
+    .help-btn:hover { background: rgba(255,255,255,0.9); }
+    .help-btn svg { width: 16px; height: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="page-header">
+      <div class="header-left">
+        <button class="back-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Back
+        </button>
+        <h1 class="page-title">My Orders</h1>
+      </div>
+      <div class="search-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" placeholder="Search by order ID or product..." />
+      </div>
+    </div>
+
+    <!-- ═══ FILTER TABS ═══ -->
+    <div class="filter-tabs">
+      <button class="filter-tab all">All Orders</button>
+      <button class="filter-tab active">Active</button>
+      <button class="filter-tab completed">Completed</button>
+    </div>
+
+    <!-- ═══ ORDERS LIST ═══ -->
+    <div>
+
+      <!-- Order 1: Pending -->
+      <div class="order-card">
+        <div class="order-header">
+          <div class="order-id-wrap">
+            <div class="order-id-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <line x1="10" y1="9" x2="8" y2="9"/>
+              </svg>
+            </div>
+            <div>
+              <div class="order-id">ORD-005</div>
+              <div class="order-date">Placed 1 hour ago</div>
+            </div>
+          </div>
+          <div class="order-header-right">
+            <span class="status-badge pending">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Pending Payment
+            </span>
+            <button class="track-link">
+              Track Order
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="order-body">
+          <div class="order-main">
+            <div class="order-products">
+              <div class="product-stack">
+                <div class="product-thumb">
+                  <img src="https://images.unsplash.com/photo-1596472260656-3b3dfa393dc5?auto=format&fit=crop&w=100&q=80" alt="Signage" />
+                </div>
+              </div>
+              <div class="order-items">
+                <div class="order-items-name">1 item</div>
+                <div class="order-items-list">Signage</div>
+              </div>
+            </div>
+            <div class="order-total-wrap">
+              <div>
+                <div class="order-total-label">Total</div>
+                <div class="order-total-value pending">Pending</div>
+              </div>
+              <div class="order-actions">
+                <button class="btn-pill btn-solid">Pay Now</button>
+              </div>
+            </div>
+          </div>
+          <div class="delivery-info">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <span class="delivery-info-text"><strong>Estimated:</strong> 3&#x2013;5 business days</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order 2: Delivered -->
+      <div class="order-card">
+        <div class="order-header">
+          <div class="order-id-wrap">
+            <div class="order-id-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <line x1="10" y1="9" x2="8" y2="9"/>
+              </svg>
+            </div>
+            <div>
+              <div class="order-id">ORD-004</div>
+              <div class="order-date">Placed 2 days ago</div>
+            </div>
+          </div>
+          <div class="order-header-right">
+            <span class="status-badge delivered">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Delivered
+            </span>
+            <button class="track-link">
+              Track Order
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="order-body">
+          <div class="order-main">
+            <div class="order-products">
+              <div class="product-stack">
+                <div class="product-thumb">
+                  <img src="https://images.pexels.com/photos/20140155/pexels-photo-20140155.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=100&w=100" alt="Business Cards" />
+                </div>
+                <div class="product-thumb">
+                  <img src="https://images.pexels.com/photos/33952994/pexels-photo-33952994.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=100&w=100" alt="Flyers" />
+                </div>
+              </div>
+              <div class="order-items">
+                <div class="order-items-name">3 items</div>
+                <div class="order-items-list">Business Cards, Flyers</div>
+              </div>
+            </div>
+            <div class="order-total-wrap">
+              <div>
+                <div class="order-total-label">Total</div>
+                <div class="order-total-value">&#x20B1;1,547</div>
+              </div>
+              <div class="order-actions">
+                <button class="btn-pill btn-outline">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                  Rate
+                </button>
+                <button class="btn-pill btn-outline">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  Reorder
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="delivery-info">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <span class="delivery-info-text"><strong>Estimated:</strong> Delivered on Jan 15</span>
+            <span class="delivery-sep">&#8226;</span>
+            <span class="delivery-info-text"><strong>Tracking:</strong> PH1234567890</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order 3: Delivered -->
+      <div class="order-card">
+        <div class="order-header">
+          <div class="order-id-wrap">
+            <div class="order-id-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <line x1="10" y1="9" x2="8" y2="9"/>
+              </svg>
+            </div>
+            <div>
+              <div class="order-id">ORD-003</div>
+              <div class="order-date">Placed 1 week ago</div>
+            </div>
+          </div>
+          <div class="order-header-right">
+            <span class="status-badge delivered">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Delivered
+            </span>
+            <button class="track-link">
+              Track Order
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="order-body">
+          <div class="order-main">
+            <div class="order-products">
+              <div class="product-stack">
+                <div class="product-thumb">
+                  <img src="https://images.pexels.com/photos/29765806/pexels-photo-29765806.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=100&w=100" alt="Custom Stickers" />
+                </div>
+              </div>
+              <div class="order-items">
+                <div class="order-items-name">2 items</div>
+                <div class="order-items-list">Custom Stickers</div>
+              </div>
+            </div>
+            <div class="order-total-wrap">
+              <div>
+                <div class="order-total-label">Total</div>
+                <div class="order-total-value">&#x20B1;899</div>
+              </div>
+              <div class="order-actions">
+                <button class="btn-pill btn-outline">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                  Rate
+                </button>
+                <button class="btn-pill btn-outline">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  Reorder
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="delivery-info">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <span class="delivery-info-text"><strong>Estimated:</strong> Delivered on Jan 10</span>
+            <span class="delivery-sep">&#8226;</span>
+            <span class="delivery-info-text"><strong>Tracking:</strong> PH0987654321</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ HELP SECTION ═══ -->
+    <div class="help-section">
+      <div class="help-row">
+        <div>
+          <h3 class="help-title">Need help with your order?</h3>
+          <p class="help-desc">Our support team is here to assist you.</p>
+        </div>
+        <button class="help-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Contact Support
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.filter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.textContent.trim().toLowerCase();
+        document.querySelectorAll('.filter-tab').forEach(b => {
+          b.className = 'filter-tab default';
+        });
+        if (type === 'all orders') btn.className = 'filter-tab all';
+        else if (type === 'active') btn.className = 'filter-tab active';
+        else if (type === 'completed') btn.className = 'filter-tab completed';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -32,6 +32,7 @@
         <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-r from-blue-500/5 to-orange-500/5 blur-3xl rounded-full pointer-events-none"></div>
 
         <div class="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
+    
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 text-sm text-zinc-400 mb-8 cursor-default">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"></span>
                 Professional Printing Services
@@ -63,6 +64,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                         </svg>
                     </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center justify-center px-8 py-3.5 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-medium rounded-xl transition-all duration-200 cursor-pointer">
+                            Logout
+                        </button>
+                    </form>
                 @endguest
             </div>
 
@@ -186,12 +193,7 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
                 <div class="scroll-fade lg:col-span-2" style="transition-delay: 0ms;">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-orange-500 rounded-lg flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                        </div>
-                        <span class="text-lg font-bold text-white">PrintSync</span>
+                        <x-printsync-icon size="w-8 h-8" textSize="text-lg" variant="gradient" />
                     </div>
                     <p class="text-sm text-zinc-400 max-w-md leading-relaxed">
                         Your premium printing partner for business cards, banners, flyers, and more. Quality printing with fast turnaround.

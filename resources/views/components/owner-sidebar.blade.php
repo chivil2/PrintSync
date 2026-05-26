@@ -3,12 +3,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between p-4 border-b border-blue-800/30">
             <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-2.5 cursor-pointer" wire:navigate>
-                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-orange-500 rounded-lg flex items-center justify-center shadow-sm">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                </div>
-                <span class="text-lg font-bold text-white">PrintSync</span>
+                <x-printsync-icon size="w-8 h-8" textSize="text-lg" variant="gradient" />
             </a>
             <button type="button" class="lg:hidden p-2 text-blue-200 hover:text-white" onclick="document.getElementById('sidebar').classList.add('-translate-x-full')">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
