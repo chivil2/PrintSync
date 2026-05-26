@@ -35,10 +35,23 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function store()
+    public function store(Request $request)
     {
-        $printingServices = PrintingService::where('is_active', true)->paginate(3, ['*'], 'printing_page');
-        $technicalServices = TechnicalService::where('is_active', true)->paginate(3, ['*'], 'technical_page');
+        $search = $request->get('search');
+
+        $printingServices = PrintingService::where('is_active', true)
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->get();
+
+        $technicalServices = TechnicalService::where('is_active', true)
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->get();
 
         return view('customer.store', [
             'printingServices' => $printingServices,
