@@ -66,6 +66,7 @@ class RoleAndPermissionSeeder extends Seeder
             'create_service_requests',
             'view_own_orders',
             'cancel_own_orders',
+            'view_own_profile',
             'update_own_profile',
             'upload_service_files',
             'request_quotes',

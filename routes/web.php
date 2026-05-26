@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DatabaseController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\OwnerController;
 use App\Models\ServiceJob;
 use App\Models\User;
@@ -55,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', [EmployeeController::class, 'dashboard'])->name('dashboard');
         Route::get('quotes', [EmployeeController::class, 'quotes'])->name('quotes');
         Route::get('jobs', [EmployeeController::class, 'jobs'])->name('jobs');
+        Route::patch('jobs/{job}', [EmployeeController::class, 'updateJobStatus'])->name('jobs.update');
     });
 
     Route::middleware(['owner'])->prefix('owner')->name('owner.')->group(function () {

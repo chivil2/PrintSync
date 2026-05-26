@@ -3,23 +3,31 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Staff Navbar Configuration
+    | Employee Navbar Configuration
     |--------------------------------------------------------------------------
-    | Navigation items for staff/employee/owner navbar
+    | Navigation items for employee/owner navbar
     |
     */
 
     'logo' => [
-        'route' => 'staff.dashboard',
+        'route' => 'employee.dashboard',
+        'role_based_route' => [
+            'owner' => 'owner.dashboard',
+            'employee' => 'employee.dashboard',
+        ],
         'icon' => 'fa-solid fa-file-lines',
     ],
 
     'links' => [
         [
             'label' => 'Dashboard',
-            'route' => 'staff.dashboard',
+            'route' => 'owner.dashboard',
             'icon' => 'fa-solid fa-house',
             'permission' => 'view_assigned_service_jobs',
+            'role_based_route' => [
+                'owner' => 'owner.dashboard',
+                'employee' => 'employee.dashboard',
+            ],
         ],
         [
             'label' => 'Quotes',

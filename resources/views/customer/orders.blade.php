@@ -42,7 +42,7 @@
                                         ];
                                     @endphp
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$order->status] ?? 'bg-zinc-100 text-zinc-800' }}">
-                                        {{ ucfirst($order->status) }}
+                                        {{ str_replace('_', ' ', ucfirst($order->status)) }}
                                     </span>
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $priorityColors[$order->priority] ?? 'bg-zinc-100 text-zinc-800' }}">
                                         {{ ucfirst($order->priority) }}

@@ -1,8 +1,10 @@
 @php
     $navbarConfig = auth()->check() && auth()->user()->can('view_assigned_service_jobs')
-        ? config('navbar.staff')
+        ? config('navbar.employee')
         : config('navbar.customer');
-    $logoRoute = $navbarConfig['logo']['route'];
+    $logoRoute = isset($navbarConfig['logo']['role_based_route']) && auth()->check()
+        ? $navbarConfig['logo']['role_based_route'][auth()->user()->roles->first()->name] ?? $navbarConfig['logo']['route']
+        : $navbarConfig['logo']['route'];
     $colors = config('colors');
 @endphp
 
@@ -22,7 +24,7 @@
                             $route = isset($link['role_based_route']) && auth()->check()
                                 ? $link['role_based_route'][auth()->user()->roles->first()->name] ?? $link['route']
                                 : $link['route'];
-                            $isActive = request()->routeIs($route) || request()->routeIs('*.quotes') || request()->routeIs('*.jobs');
+                            $isActive = request()->routeIs($route) || str_starts_with(request()->route()?->getName() ?? '', $route . '.');
                         @endphp
 
                         <a
