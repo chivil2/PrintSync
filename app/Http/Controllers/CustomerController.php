@@ -37,8 +37,8 @@ class CustomerController extends Controller
 
     public function store()
     {
-        $printingServices = PrintingService::where('is_active', true)->get();
-        $technicalServices = TechnicalService::where('is_active', true)->get();
+        $printingServices = PrintingService::where('is_active', true)->paginate(3);
+        $technicalServices = TechnicalService::where('is_active', true)->paginate(3);
 
         return view('customer.store', [
             'printingServices' => $printingServices,
