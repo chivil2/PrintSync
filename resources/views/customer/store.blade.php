@@ -83,7 +83,7 @@
             </div>
 
             <!-- Services Section with Tabs -->
-            <div x-data="{ activeTab: 'printing' }" x-init="$watch('activeTab', () => { $dispatch('modal-close') })">
+            <div x-data="{ activeTab: new URLSearchParams(window.location.search).get('tab') || 'printing' }" x-init="$watch('activeTab', (val) => { $dispatch('modal-close'); const url = new URL(window.location.href); url.searchParams.set('tab', val); window.history.replaceState({}, '', url) })">
                 <!-- Tab Navigation -->
                 <div class="flex gap-4 border-b border-gray-200 mb-8">
                     <button
@@ -158,22 +158,12 @@
 
                 <!-- Pagination -->
                 <div x-show="activeTab === 'printing'" class="pagination">
-                    {{ $printingServices->links() }}
+                    {{ $printingServices->appends(['tab' => 'printing'])->links('vendor.pagination.store') }}
                 </div>
                 <div x-show="activeTab === 'technical'" class="pagination">
-                    {{ $technicalServices->links() }}
+                    {{ $technicalServices->appends(['tab' => 'technical'])->links('vendor.pagination.store') }}
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- CTA Banner -->
-    <div class="cta-banner">
-        <h2 class="cta-banner-title">Need something <span>custom</span>?</h2>
-        <p class="cta-banner-desc">Let's bring your ideas to life with our custom printing and design services.</p>
-        <div class="cta-banner-actions">
-            <button class="cta-btn-primary">Request a Quote</button>
-            <button class="cta-btn-secondary">Talk to a Designer</button>
         </div>
     </div>
 </div>
