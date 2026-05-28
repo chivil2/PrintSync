@@ -60,7 +60,7 @@ class User extends Authenticatable
      */
     public function getNameAttribute(): string
     {
-        return trim($this->first_name . ' ' . $this->last_name);
+        return trim($this->first_name.' '.$this->last_name);
     }
 
     /**
@@ -78,5 +78,10 @@ class User extends Authenticatable
             'technical_staff' => 'Technical Staff',
             default => $this->specialization ?? '—',
         };
+    }
+
+    public function serviceJobs()
+    {
+        return $this->hasMany(ServiceJob::class, 'employee_id');
     }
 }

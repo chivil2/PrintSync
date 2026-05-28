@@ -39,12 +39,12 @@
                         @foreach($jobs as $job)
                             <tr class="hover:bg-zinc-50 transition-colors {{ $loop->even ? 'bg-zinc-50' : '' }}">
                                 <td class="px-6 py-4">
-                                    <div>
-                                        <p class="font-medium text-zinc-800">{{ $job->name }}</p>
+                                    <a href="{{ route('owner.jobs.show', $job) }}" class="block">
+                                        <p class="font-medium text-zinc-800 hover:text-blue-600">{{ $job->name }}</p>
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-600 mt-1">
                                             {{ ucfirst(str_replace('_', ' ', $job->service_type)) }}
                                         </span>
-                                    </div>
+                                    </a>
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($job->customer)

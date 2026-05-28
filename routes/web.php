@@ -5,6 +5,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\QuoteController;
+use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -46,16 +48,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('store', [CustomerController::class, 'store'])->name('store');
         Route::post('request-service', [CustomerController::class, 'requestService'])->name('request-service');
         Route::get('orders', [CustomerController::class, 'orders'])->name('orders');
+        Route::get('orders/{order}', [CustomerController::class, 'showOrder'])->name('orders.show');
         Route::delete('orders/{order}', [CustomerController::class, 'destroyOrder'])->name('orders.destroy');
         Route::get('profile', [CustomerController::class, 'profile'])->name('profile');
         Route::post('profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
         Route::post('profile/resend-verification', [CustomerController::class, 'resendVerification'])->name('profile.resend');
+        Route::get('quotes', [QuoteController::class, 'customerIndex'])->name('quotes');
+        Route::get('quotes/{quote}', [QuoteController::class, 'customerShow'])->name('quotes.show');
+        Route::post('quotes/{quote}/approve', [QuoteController::class, 'approve'])->name('quotes.approve');
+        Route::post('quotes/{quote}/reject', [QuoteController::class, 'reject'])->name('quotes.reject');
     });
 
     Route::middleware(['employee'])->prefix('employee')->name('employee.')->group(function () {
         Route::get('dashboard', [EmployeeController::class, 'dashboard'])->name('dashboard');
         Route::get('quotes', [EmployeeController::class, 'quotes'])->name('quotes');
         Route::get('jobs', [EmployeeController::class, 'jobs'])->name('jobs');
+        Route::get('jobs/{job}', [EmployeeController::class, 'showJob'])->name('jobs.show');
         Route::patch('jobs/{job}', [EmployeeController::class, 'updateJobStatus'])->name('jobs.update');
     });
 
@@ -77,19 +85,60 @@ Route::middleware(['auth'])->group(function () {
                 ->groupBy('status')
                 ->pluck('count', 'status');
 
+            $quotesCount = Quote::count();
+            $pendingQuotes = Quote::where('status', 'draft')->count();
+            $sentQuotes = Quote::where('status', 'sent')->count();
+            $acceptedQuotes = Quote::where('status', 'accepted')->count();
+            $totalRevenue = Quote::where('status', 'accepted')->sum('total');
+
+            $completedJobs = ServiceJob::where('status', 'completed')->count();
+            $completedJobRevenue = Quote::whereHas('serviceJob', function ($query) {
+                $query->where('status', 'completed');
+            })->where('status', 'accepted')->sum('total');
+            $averageOrderValue = $completedJobs > 0 ? $completedJobRevenue / $completedJobs : 0;
+            $highestOrderValue = Quote::whereHas('serviceJob', function ($query) {
+                $query->where('status', 'completed');
+            })->where('status', 'accepted')->max('total') ?? 0;
+
+            $serviceTypes = ServiceJob::selectRaw('type, count(*) as count')
+                ->groupBy('type')
+                ->pluck('count', 'type');
+
+            $employees = User::role('employee')
+                ->where('employee_status', 'active')
+                ->withCount(['serviceJobs as assigned_jobs_count' => function ($query) {
+                    $query->where('status', 'in_progress');
+                }])
+                ->get();
+
             return view('owner.dashboard', [
                 'jobsCount' => $jobsCount,
                 'recentJobs' => $recentJobs,
                 'customersCount' => $customersCount,
                 'recentCustomers' => $recentCustomers,
                 'jobsByStatus' => $jobsByStatus,
+                'quotesCount' => $quotesCount,
+                'pendingQuotes' => $pendingQuotes,
+                'sentQuotes' => $sentQuotes,
+                'acceptedQuotes' => $acceptedQuotes,
+                'totalRevenue' => $totalRevenue,
+                'completedJobs' => $completedJobs,
+                'completedJobRevenue' => $completedJobRevenue,
+                'averageOrderValue' => $averageOrderValue,
+                'highestOrderValue' => $highestOrderValue,
+                'serviceTypes' => $serviceTypes,
+                'employees' => $employees,
             ]);
         })->name('dashboard');
-        Route::get('quotes', [OwnerController::class, 'quotes'])->name('quotes');
+        Route::get('quotes', [QuoteController::class, 'ownerIndex'])->name('quotes');
+        Route::get('quotes/{quote}/edit', [QuoteController::class, 'ownerEdit'])->name('quotes.edit');
+        Route::put('quotes/{quote}', [QuoteController::class, 'ownerUpdate'])->name('quotes.update');
+        Route::post('quotes/{quote}/send', [QuoteController::class, 'send'])->name('quotes.send');
         Route::get('employees', [OwnerController::class, 'employees'])->name('employees');
         Route::get('employees/create', [OwnerController::class, 'createEmployee'])->name('employees.create');
         Route::post('employees', [OwnerController::class, 'storeEmployee'])->name('employees.store');
         Route::get('jobs', [OwnerController::class, 'jobs'])->name('jobs');
+        Route::get('jobs/{job}', [OwnerController::class, 'showJob'])->name('jobs.show');
         Route::patch('jobs/{job}/assign', [OwnerController::class, 'assignEmployee'])->name('jobs.assign');
     });
 });

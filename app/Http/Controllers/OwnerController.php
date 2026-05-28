@@ -102,6 +102,20 @@ class OwnerController extends Controller
     }
 
     /**
+     * Display the job detail page.
+     */
+    public function showJob(ServiceJob $job)
+    {
+        $job->load(['customer', 'employee', 'service', 'quote', 'quote.lineItems']);
+
+        $employees = User::role('employee')
+            ->where('employee_status', 'active')
+            ->get();
+
+        return view('owner.job-detail', compact('job', 'employees'));
+    }
+
+    /**
      * Assign an employee to a job.
      */
     public function assignEmployee(Request $request, ServiceJob $job)

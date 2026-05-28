@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Concerns\ProfileValidationRules;
 use App\Models\PrintingService;
+use App\Models\Quote;
+use App\Models\QuoteLineItem;
 use App\Models\ServiceJob;
 use App\Models\TechnicalService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -64,6 +66,7 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'service_id' => 'required|integer',
             'service_type' => 'required|in:printing,technical',
+            'deadline' => 'required|date|after_or_equal:today',
             'notes' => 'nullable|string|max:1000',
         ]);
 
@@ -80,22 +83,58 @@ class CustomerController extends Controller
             'service_type' => $validated['service_type'] === 'printing' ? 'printing_service' : 'technical_service',
             'status' => null,
             'priority' => null,
+            'deadline' => $validated['deadline'],
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        return redirect()->route('customer.orders')->with('success', 'Service request submitted successfully!');
+        // Auto-generate quote
+        $quoteNumber = 'QT-'.date('Ymd').'-'.str_pad((Quote::count() + 1), 4, '0', STR_PAD_LEFT);
+        $quote = Quote::create([
+            'quote_number' => $quoteNumber,
+            'customer_id' => auth()->id(),
+            'service_job_id' => $serviceJob->id,
+            'date' => now(),
+            'status' => 'draft',
+            'currency' => 'PHP',
+            'subtotal' => $service->price,
+            'tax' => 0,
+            'discount' => 0,
+            'total' => $service->price,
+        ]);
+
+        QuoteLineItem::create([
+            'quote_id' => $quote->id,
+            'item_name' => $service->name,
+            'description' => $service->description,
+            'quantity' => 1,
+            'unit_price' => $service->price,
+            'line_total' => $service->price,
+        ]);
+
+        return redirect()->route('customer.quotes.show', $quote)->with('success', 'Service request submitted successfully! Your quote has been generated.');
     }
 
     public function orders()
     {
         $orders = ServiceJob::where('customer_id', auth()->id())
-            ->with(['service', 'employee'])
+            ->with(['service', 'employee', 'quote'])
             ->orderBy('created_at', 'desc')
             ->get();
 
         return view('customer.orders', [
             'orders' => $orders,
         ]);
+    }
+
+    public function showOrder(ServiceJob $order)
+    {
+        if ($order->customer_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $order->load(['service', 'employee', 'quote']);
+
+        return view('customer.order-detail', compact('order'));
     }
 
     public function destroyOrder(ServiceJob $order)

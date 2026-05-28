@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 #[Fillable(['name', 'description', 'type', 'customer_id', 'employee_id', 'service_id', 'service_type', 'status', 'priority', 'started_at', 'completed_at', 'deadline', 'notes'])]
@@ -37,5 +38,10 @@ class ServiceJob extends Model
     public function service(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function quote(): HasOne
+    {
+        return $this->hasOne(Quote::class);
     }
 }

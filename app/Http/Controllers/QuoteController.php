@@ -166,4 +166,176 @@ class QuoteController extends Controller
 
         return response()->json(null, 204);
     }
+
+    /**
+     * Display customer's quotes.
+     */
+    public function customerIndex()
+    {
+        $quotes = Quote::where('customer_id', auth()->id())
+            ->whereIn('status', ['sent', 'accepted', 'rejected'])
+            ->with(['serviceJob', 'lineItems'])
+            ->latest()
+            ->get();
+
+        return view('customer.quotes', compact('quotes'));
+    }
+
+    /**
+     * Display the specified quote for customer.
+     */
+    public function customerShow(Quote $quote)
+    {
+        if ($quote->customer_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $quote->load(['serviceJob', 'lineItems']);
+
+        return view('customer.quote-detail', compact('quote'));
+    }
+
+    /**
+     * Approve the specified quote.
+     */
+    public function approve(Request $request, Quote $quote)
+    {
+        if ($quote->customer_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if ($quote->status !== 'sent') {
+            return redirect()->back()->with('error', 'Quote cannot be approved in current status');
+        }
+
+        $quote->update([
+            'status' => 'accepted',
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->route('customer.quotes.show', $quote)
+            ->with('success', 'Quote approved successfully');
+    }
+
+    /**
+     * Reject the specified quote.
+     */
+    public function reject(Request $request, Quote $quote)
+    {
+        if ($quote->customer_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if ($quote->status !== 'sent') {
+            return redirect()->back()->with('error', 'Quote cannot be rejected in current status');
+        }
+
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ]);
+
+        $quote->update([
+            'status' => 'rejected',
+            'rejected_at' => now(),
+            'rejection_reason' => $validated['rejection_reason'],
+        ]);
+
+        return redirect()->route('customer.quotes')
+            ->with('success', 'Quote rejected. Owner will be notified.');
+    }
+
+    /**
+     * Display owner's quotes.
+     */
+    public function ownerIndex()
+    {
+        $quotes = Quote::with(['customer', 'serviceJob', 'lineItems'])
+            ->latest()
+            ->get();
+
+        return view('owner.quotes', compact('quotes'));
+    }
+
+    /**
+     * Show the form for editing the specified quote.
+     */
+    public function ownerEdit(Quote $quote)
+    {
+        $quote->load(['customer', 'serviceJob', 'lineItems']);
+
+        return view('owner.quote-edit', compact('quote'));
+    }
+
+    /**
+     * Update the specified quote.
+     */
+    public function ownerUpdate(Request $request, Quote $quote)
+    {
+        $validated = $request->validate([
+            'subtotal' => 'required|numeric',
+            'tax' => 'required|numeric',
+            'discount' => 'required|numeric',
+            'total' => 'required|numeric',
+            'terms' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'line_items' => 'required|array',
+            'line_items.*.id' => 'nullable|exists:quote_line_items,id',
+            'line_items.*.item_name' => 'required|string',
+            'line_items.*.description' => 'nullable|string',
+            'line_items.*.quantity' => 'required|numeric',
+            'line_items.*.unit_price' => 'required|numeric',
+            'line_items.*.line_total' => 'required|numeric',
+        ]);
+
+        $quote->update([
+            'subtotal' => $validated['subtotal'],
+            'tax' => $validated['tax'],
+            'discount' => $validated['discount'],
+            'total' => $validated['total'],
+            'terms' => $validated['terms'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        foreach ($validated['line_items'] as $item) {
+            if (isset($item['id'])) {
+                QuoteLineItem::where('id', $item['id'])->update([
+                    'item_name' => $item['item_name'],
+                    'description' => $item['description'] ?? null,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'line_total' => $item['line_total'],
+                ]);
+            } else {
+                QuoteLineItem::create([
+                    'quote_id' => $quote->id,
+                    'item_name' => $item['item_name'],
+                    'description' => $item['description'] ?? null,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'line_total' => $item['line_total'],
+                ]);
+            }
+        }
+
+        return redirect()->route('owner.quotes.edit', $quote)
+            ->with('success', 'Quote updated successfully');
+    }
+
+    /**
+     * Send the quote to customer.
+     */
+    public function send(Quote $quote)
+    {
+        if ($quote->status !== 'draft') {
+            return redirect()->back()->with('error', 'Quote can only be sent from draft status');
+        }
+
+        $quote->update([
+            'status' => 'sent',
+            'sent_at' => now(),
+        ]);
+
+        return redirect()->route('owner.quotes')
+            ->with('success', 'Quote sent to customer successfully');
+    }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'description', 'price', 'image', 'is_active'])]
+#[Fillable(['name', 'description', 'price', 'image', 'is_active', 'production_time'])]
 class TechnicalService extends Model
 {
     /** @use HasFactory<TechnicalServiceFactory> */
@@ -18,6 +18,7 @@ class TechnicalService extends Model
         return [
             'price' => 'decimal:2',
             'is_active' => 'boolean',
+            'production_time' => 'integer',
         ];
     }
 }

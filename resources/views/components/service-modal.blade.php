@@ -1,17 +1,35 @@
-<div x-data="{ 
+<div x-data="{
     show: false,
     service: null,
+    deadline: '',
+    quantity: 1,
+    get estimatedCompletion() {
+        if (!this.service || !this.service.production_time) return '';
+        const productionDays = this.service.production_time;
+        const today = new Date();
+        let completionDate = new Date(today);
+        let daysAdded = 0;
+        while (daysAdded < productionDays) {
+            completionDate.setDate(completionDate.getDate() + 1);
+            const day = completionDate.getDay();
+            if (day !== 0 && day !== 6) {
+                daysAdded++;
+            }
+        }
+        return completionDate.toISOString().split('T')[0];
+    },
     close() {
         this.show = false;
-        // Clear service after animation completes
+        this.deadline = '';
+        this.quantity = 1;
         setTimeout(() => {
             this.service = null;
         }, 200);
     }
-}" 
+}"
 @open-modal.window="service = { ...$event.detail.service, type: $event.detail.type }; show = true"
-@modal-close.window="close()" 
-x-show="show" 
+@modal-close.window="close()"
+x-show="show"
 x-transition:enter="transition ease-out duration-300"
 x-transition:enter-start="opacity-0"
 x-transition:enter-end="opacity-100"
@@ -90,6 +108,49 @@ style="display: none;">
                             </div>
                         </div>
 
+                        <!-- Delivery Options -->
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold text-zinc-900 mb-2">When do you need this?</h4>
+                            <p class="text-zinc-600 text-sm mb-3">
+                                Select the date you need this service completed. Delivery depends on our schedule and availability in your area.
+                            </p>
+                            <div class="relative">
+                                <input
+                                    type="date"
+                                    name="deadline"
+                                    x-model="deadline"
+                                    class="w-full px-4 py-3 pl-12 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8743B] focus:border-transparent text-gray-900 text-sm bg-white"
+                                    :min="new Date().toISOString().split('T')[0]"
+                                    required
+                                >
+                                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <p class="text-xs text-zinc-500 mt-2">
+                                Note: We deliver when near your area and based on staff availability.
+                            </p>
+                        </div>
+
+                        <!-- Estimated Completion -->
+                        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                    <h5 class="font-medium text-blue-900 mb-1">Estimated Completion</h5>
+                                    <p class="text-sm text-blue-700">
+                                        Based on this service's production time (<span x-text="service?.production_time || 'N/A'"></span> business days), your order should be ready by:
+                                    </p>
+                                    <p class="text-lg font-semibold text-blue-900 mt-1" x-text="estimatedCompletion || 'Select a service to see estimate'"></p>
+                                    <p class="text-xs text-blue-600 mt-2">
+                                        This is an estimate. Actual completion may vary based on workload and delivery schedule.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Notes -->
                         <div class="mb-6">
                             <h4 class="text-lg font-semibold text-zinc-900 mb-2">Additional Notes</h4>
@@ -100,6 +161,7 @@ style="display: none;">
                                 @csrf
                                 <input type="hidden" name="service_id" :value="service?.id">
                                 <input type="hidden" name="service_type" :value="service?.type">
+                                <input type="hidden" name="deadline" :value="deadline">
                                 <textarea
                                     name="notes"
                                     rows="3"

@@ -18,7 +18,7 @@
     @else
         <div class="space-y-4">
             @foreach($jobs as $job)
-                <div class="bg-white rounded-lg border border-zinc-200 hover:shadow-md transition-shadow">
+                <a href="{{ route('employee.jobs.show', $job) }}" class="block bg-white rounded-lg border border-zinc-200 hover:shadow-md transition-shadow">
                     <div class="p-6">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
@@ -31,19 +31,13 @@
                                             'completed' => 'bg-green-100 text-green-800',
                                             'cancelled' => 'bg-red-100 text-red-800',
                                         ];
-                                        $priorityColors = [
-                                            'low' => 'bg-zinc-100 text-zinc-800',
-                                            'medium' => 'bg-blue-100 text-blue-800',
-                                            'high' => 'bg-orange-100 text-orange-800',
-                                            'urgent' => 'bg-red-100 text-red-800',
-                                        ];
                                     @endphp
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$job->status] ?? 'bg-zinc-100 text-zinc-800' }}">
                                         {{ str_replace('_', ' ', ucfirst($job->status)) }}
                                     </span>
-                                    @if($job->priority)
-                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $priorityColors[$job->priority] ?? 'bg-zinc-100 text-zinc-800' }}">
-                                            {{ ucfirst($job->priority) }}
+                                    @if($job->quote)
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            Quote
                                         </span>
                                     @endif
                                 </div>
@@ -92,27 +86,10 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 @endif
-
-                                @php
-                                    $selectColors = [
-                                        'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                                        'in_progress' => 'bg-blue-100 text-blue-800 border-blue-300',
-                                        'completed' => 'bg-green-100 text-green-800 border-green-300',
-                                    ];
-                                @endphp
-                                <form method="POST" action="{{ route('employee.jobs.update', $job) }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    <select name="status" onchange="this.form.submit()" class="block w-full text-sm font-medium rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 {{ $selectColors[$job->status] ?? 'bg-white text-zinc-800 border-zinc-300' }}">
-                                        <option value="pending" {{ $job->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="in_progress" {{ $job->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                        <option value="completed" {{ $job->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                                    </select>
-                                </form>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             @endforeach
         </div>
     @endif

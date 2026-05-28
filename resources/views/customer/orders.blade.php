@@ -21,7 +21,7 @@
     @else
         <div class="space-y-4">
             @foreach($orders as $order)
-                <div class="bg-white rounded-lg border border-zinc-200 hover:shadow-md transition-shadow">
+                <a href="{{ route('customer.orders.show', $order) }}" class="block bg-white rounded-lg border border-zinc-200 hover:shadow-md transition-shadow">
                     <div class="p-6">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
@@ -34,18 +34,9 @@
                                             'completed' => 'bg-green-100 text-green-800',
                                             'cancelled' => 'bg-red-100 text-red-800',
                                         ];
-                                        $priorityColors = [
-                                            'low' => 'bg-zinc-100 text-zinc-800',
-                                            'medium' => 'bg-blue-100 text-blue-800',
-                                            'high' => 'bg-orange-100 text-orange-800',
-                                            'urgent' => 'bg-red-100 text-red-800',
-                                        ];
                                     @endphp
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$order->status] ?? 'bg-zinc-100 text-zinc-800' }}">
                                         {{ str_replace('_', ' ', ucfirst($order->status)) }}
-                                    </span>
-                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $priorityColors[$order->priority] ?? 'bg-zinc-100 text-zinc-800' }}">
-                                        {{ ucfirst($order->priority) }}
                                     </span>
                                 </div>
 
@@ -96,19 +87,18 @@
                                     </svg>
                                 @endif
 
-                                <form method="POST" action="{{ route('customer.orders.destroy', $order) }}" onsubmit="return confirm('Are you sure you want to delete this order?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Delete order">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                @if($order->quote && in_array($order->quote->status, ['sent', 'accepted', 'rejected']))
+                                    <span class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                    </button>
-                                </form>
+                                        {{ $order->quote->status === 'accepted' ? 'Receipt' : 'Quote' }}
+                                    </span>
+                                @endif
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             @endforeach
         </div>
     @endif

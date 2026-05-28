@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Quote;
 use App\Models\ServiceJob;
 use Illuminate\Http\Request;
 
@@ -32,19 +33,39 @@ class EmployeeController extends Controller
 
     public function quotes()
     {
-        return view('employee.quotes');
+        $quotes = Quote::whereHas('serviceJob', function ($query) {
+            $query->where('employee_id', auth()->id());
+        })
+            ->with(['serviceJob', 'serviceJob.customer', 'lineItems'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('employee.quotes', [
+            'quotes' => $quotes,
+        ]);
     }
 
     public function jobs()
     {
         $jobs = ServiceJob::where('employee_id', auth()->id())
-            ->with(['customer', 'service'])
+            ->with(['customer', 'service', 'quote'])
             ->orderBy('created_at', 'desc')
             ->get();
 
         return view('employee.jobs', [
             'jobs' => $jobs,
         ]);
+    }
+
+    public function showJob(ServiceJob $job)
+    {
+        if ($job->employee_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        $job->load(['customer', 'service', 'quote', 'quote.lineItems']);
+
+        return view('employee.job-detail', compact('job'));
     }
 
     public function updateJobStatus(Request $request, ServiceJob $job)
