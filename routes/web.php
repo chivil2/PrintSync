@@ -137,6 +137,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('employees', [OwnerController::class, 'employees'])->name('employees');
         Route::get('employees/create', [OwnerController::class, 'createEmployee'])->name('employees.create');
         Route::post('employees', [OwnerController::class, 'storeEmployee'])->name('employees.store');
+        Route::get('employees/{employee}/edit', [OwnerController::class, 'editEmployee'])->name('employees.edit');
+        Route::put('employees/{employee}', [OwnerController::class, 'updateEmployee'])->name('employees.update');
+        Route::patch('employees/{employee}/toggle-status', [OwnerController::class, 'toggleEmployeeStatus'])->name('employees.toggle-status');
+        Route::delete('employees/{employee}', [OwnerController::class, 'destroyEmployee'])->name('employees.destroy');
         Route::get('jobs', [OwnerController::class, 'jobs'])->name('jobs');
         Route::get('jobs/{job}', [OwnerController::class, 'showJob'])->name('jobs.show');
         Route::patch('jobs/{job}/assign', [OwnerController::class, 'assignEmployee'])->name('jobs.assign');

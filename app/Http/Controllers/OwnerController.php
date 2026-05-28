@@ -14,9 +14,24 @@ class OwnerController extends Controller
     /**
      * Display the employees management page.
      */
-    public function employees()
+    public function employees(Request $request)
     {
-        $employees = User::role('employee')->get();
+        $query = User::role('employee');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('employee_status', $request->status);
+        }
+
+        $employees = $query->latest()->paginate(12);
 
         return view('owner.employees', [
             'employees' => $employees,
@@ -66,6 +81,70 @@ class OwnerController extends Controller
 
         return redirect()->route('owner.employees')
             ->with('success', 'Employee added successfully.');
+    }
+
+    /**
+     * Show the form for editing the specified employee.
+     */
+    public function editEmployee(User $employee)
+    {
+        return view('owner.employees-edit', compact('employee'));
+    }
+
+    /**
+     * Update the specified employee.
+     */
+    public function updateEmployee(Request $request, User $employee)
+    {
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$employee->id],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'employee_id' => ['nullable', 'string', 'max:50'],
+            'hire_date' => ['nullable', 'date'],
+            'specialization' => ['nullable', 'string', 'max:255'],
+            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
+            'employee_status' => ['nullable', 'string', 'in:active,inactive'],
+        ]);
+
+        $employee->update([
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'employee_id' => $validated['employee_id'] ?? null,
+            'hire_date' => $validated['hire_date'] ?? null,
+            'specialization' => $validated['specialization'] ?? null,
+            'hourly_rate' => $validated['hourly_rate'] ?? null,
+            'employee_status' => $validated['employee_status'] ?? 'active',
+        ]);
+
+        return redirect()->route('owner.employees')
+            ->with('success', 'Employee updated successfully.');
+    }
+
+    /**
+     * Toggle the status of the specified employee.
+     */
+    public function toggleEmployeeStatus(User $employee)
+    {
+        $newStatus = $employee->employee_status === 'active' ? 'inactive' : 'active';
+        $employee->update(['employee_status' => $newStatus]);
+
+        return redirect()->route('owner.employees')
+            ->with('success', "Employee status changed to {$newStatus}.");
+    }
+
+    /**
+     * Remove the specified employee.
+     */
+    public function destroyEmployee(User $employee)
+    {
+        $employee->delete();
+
+        return redirect()->route('owner.employees')
+            ->with('success', 'Employee deleted successfully.');
     }
 
     /**

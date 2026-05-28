@@ -193,7 +193,7 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
                 <div class="scroll-fade lg:col-span-2" style="transition-delay: 0ms;">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <x-printsync-icon size="w-8 h-8" textSize="text-lg" variant="gradient" />
+                        <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12">
                     </div>
                     <p class="text-sm text-zinc-400 max-w-md leading-relaxed">
                         Your premium printing partner for business cards, banners, flyers, and more. Quality printing with fast turnaround.
