@@ -46,6 +46,19 @@
                                 <p class="text-slate-900 font-bold mt-1">{{ ucfirst($job->type) }}</p>
                             </div>
                             <div>
+                                <span class="text-slate-400 text-xs font-medium">Priority</span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium mt-1
+                                    {{ match($job->priority) {
+                                        'low' => 'bg-slate-100 text-slate-700',
+                                        'medium' => 'bg-blue-100 text-blue-700',
+                                        'high' => 'bg-orange-100 text-orange-700',
+                                        'urgent' => 'bg-red-100 text-red-700',
+                                        default => 'bg-slate-100 text-slate-600',
+                                    } }}">
+                                    {{ ucfirst($job->priority ?? 'medium') }}
+                                </span>
+                            </div>
+                            <div>
                                 <span class="text-slate-400 text-xs font-medium">Requested</span>
                                 <p class="text-slate-900 font-bold mt-1">{{ $job->created_at->format('M d, Y') }}</p>
                             </div>
@@ -93,6 +106,56 @@
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                    <div class="mt-6">
+                        <h2 class="text-lg font-bold text-slate-900 mb-4">Job Timeline</h2>
+                        <div class="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-check text-emerald-600 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-900">Job Created</p>
+                                        <p class="text-xs text-slate-500">{{ $job->created_at->format('M d, Y H:i') }}</p>
+                                    </div>
+                                </div>
+                                @if ($job->started_at)
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-play text-blue-600 text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">Work Started</p>
+                                            <p class="text-xs text-slate-500">{{ $job->started_at->format('M d, Y H:i') }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($job->completed_at)
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-flag-checkered text-emerald-600 text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">Job Completed</p>
+                                            <p class="text-xs text-slate-500">{{ $job->completed_at->format('M d, Y H:i') }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                                @if ($job->deadline)
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fa-solid fa-clock text-amber-600 text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">Deadline</p>
+                                            <p class="text-xs text-slate-500">{{ $job->deadline->format('M d, Y H:i') }}</p>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
 
                     @if ($job->quote)

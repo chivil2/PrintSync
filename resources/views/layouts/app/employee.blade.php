@@ -35,15 +35,22 @@
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('employee.jobs') }}" class="flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-2xl text-sm font-semibold hover:bg-orange-600 transition-colors shadow-sm cursor-pointer">
-                            <i class="fa-solid fa-plus text-xs"></i>
-                            New Job
-                        </a>
-
-                        <button class="relative p-3 bg-white rounded-2xl border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer">
-                            <i class="fa-regular fa-bell text-slate-600"></i>
-                            <span class="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                        </button>
+                        @if(isset($otherEmployees) && $otherEmployees->count() > 0)
+                            @foreach($otherEmployees as $employee)
+                                @php
+                                    $empInitials = strtoupper(substr($employee->first_name, 0, 1) . substr($employee->last_name, 0, 1));
+                                @endphp
+                                <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold text-slate-900">{{ $employee->first_name }} {{ $employee->last_name }}</p>
+                                        <p class="text-xs text-slate-500">Employee</p>
+                                    </div>
+                                    <div class="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm ring-2 ring-white shadow-sm">
+                                        {{ $empInitials }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
 
                         <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
                             <div class="text-right">

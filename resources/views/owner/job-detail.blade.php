@@ -149,6 +149,68 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- Job Timeline -->
+                <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
+                    <div class="p-6 border-b border-zinc-200">
+                        <h2 class="text-lg font-semibold text-zinc-900">Job Timeline</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-zinc-900">Job Created</p>
+                                    <p class="text-xs text-zinc-500">{{ $job->created_at->format('M d, Y H:i') }}</p>
+                                </div>
+                            </div>
+                            @if($job->started_at)
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-zinc-900">Work Started</p>
+                                        <p class="text-xs text-zinc-500">{{ $job->started_at->format('M d, Y H:i') }}</p>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($job->completed_at)
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-zinc-900">Job Completed</p>
+                                        <p class="text-xs text-zinc-500">{{ $job->completed_at->format('M d, Y H:i') }}</p>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($job->deadline)
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-zinc-900">Deadline</p>
+                                        <p class="text-xs text-zinc-500">{{ $job->deadline->format('M d, Y H:i') }}</p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="space-y-6">

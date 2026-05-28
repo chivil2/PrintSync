@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Quote;
 use App\Models\ServiceJob;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
@@ -22,12 +23,34 @@ class EmployeeController extends Controller
 
         $recentJobs = $assignedJobs->take(5);
 
+        // Get jobs with deadlines for the current month
+        $jobsWithDeadlines = ServiceJob::where('employee_id', auth()->id())
+            ->whereNotNull('deadline')
+            ->whereYear('deadline', now()->year)
+            ->whereMonth('deadline', now()->month)
+            ->with(['customer', 'service'])
+            ->get()
+            ->groupBy(function ($job) {
+                return $job->deadline->format('Y-m-d');
+            });
+
+        // Get other active employees for team view
+        $otherEmployees = User::where('id', '!=', auth()->id())
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'employee');
+            })
+            ->where('is_active', true)
+            ->take(2)
+            ->get();
+
         return view('employee.dashboard', [
             'totalJobs' => $totalJobs,
             'completedJobs' => $completedJobs,
             'inProgressJobs' => $inProgressJobs,
             'pendingJobs' => $pendingJobs,
             'recentJobs' => $recentJobs,
+            'jobsWithDeadlines' => $jobsWithDeadlines,
+            'otherEmployees' => $otherEmployees,
         ]);
     }
 
@@ -85,5 +108,32 @@ class EmployeeController extends Controller
         ]);
 
         return redirect()->route('employee.jobs')->with('success', 'Job status updated successfully.');
+    }
+
+    public function getJobsByMonth(Request $request)
+    {
+        $year = $request->query('year', now()->year);
+        $month = $request->query('month', now()->month);
+
+        $jobs = ServiceJob::where('employee_id', auth()->id())
+            ->whereNotNull('deadline')
+            ->whereYear('deadline', $year)
+            ->whereMonth('deadline', $month)
+            ->with(['customer', 'service'])
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'id' => $job->id,
+                    'name' => $job->name,
+                    'priority' => $job->priority,
+                    'deadline' => $job->deadline->format('Y-m-d'),
+                    'deadline_formatted' => $job->deadline->format('M d'),
+                ];
+            })
+            ->groupBy('deadline');
+
+        return response()->json([
+            'jobs_by_date' => $jobs,
+        ]);
     }
 }

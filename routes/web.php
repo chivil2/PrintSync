@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('jobs', [EmployeeController::class, 'jobs'])->name('jobs');
         Route::get('jobs/{job}', [EmployeeController::class, 'showJob'])->name('jobs.show');
         Route::patch('jobs/{job}', [EmployeeController::class, 'updateJobStatus'])->name('jobs.update');
+        Route::get('jobs-by-month', [EmployeeController::class, 'getJobsByMonth'])->name('jobs.by-month');
     });
 
     Route::middleware(['owner'])->prefix('owner')->name('owner.')->group(function () {
