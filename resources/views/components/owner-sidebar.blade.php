@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between p-4 border-b border-blue-800/30">
             <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-2.5 cursor-pointer" wire:navigate>
-                <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12">
+                <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12 object-cover">
             </a>
             <button type="button" class="lg:hidden p-2 text-blue-200 hover:text-white" onclick="document.getElementById('sidebar').classList.add('-translate-x-full')">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>

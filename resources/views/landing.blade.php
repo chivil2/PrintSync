@@ -58,12 +58,21 @@
                         Sign In
                     </a>
                 @else
-                    <a href="{{ route('customer.store') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer">
-                        Go to Store
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                        </svg>
-                    </a>
+                    @if(auth()->user()->hasRole('employee'))
+                        <a href="{{ route('employee.dashboard') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer">
+                            Go to Dashboard
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
+                        </a>
+                    @else
+                        <a href="{{ route('customer.store') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer">
+                            Go to Store
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
+                        </a>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="inline-flex items-center justify-center px-8 py-3.5 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-medium rounded-xl transition-all duration-200 cursor-pointer">
@@ -177,12 +186,21 @@
                     </svg>
                 </a>
             @else
-                <a href="{{ route('customer.store') }}" class="scroll-fade inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-xl hover:bg-zinc-50 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer" style="transition-delay: 200ms;">
-                    Explore Services
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                    </svg>
-                </a>
+                @if(auth()->user()->hasRole('employee'))
+                    <a href="{{ route('employee.dashboard') }}" class="scroll-fade inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-xl hover:bg-zinc-50 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer" style="transition-delay: 200ms;">
+                        Go to Dashboard
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                @else
+                    <a href="{{ route('customer.store') }}" class="scroll-fade inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-xl hover:bg-zinc-50 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer" style="transition-delay: 200ms;">
+                        Explore Services
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                        </svg>
+                    </a>
+                @endif
             @endguest
         </div>
     </section>
@@ -193,7 +211,7 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
                 <div class="scroll-fade lg:col-span-2" style="transition-delay: 0ms;">
                     <div class="flex items-center gap-2.5 mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12">
+                        <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12 object-cover">
                     </div>
                     <p class="text-sm text-zinc-400 max-w-md leading-relaxed">
                         Your premium printing partner for business cards, banners, flyers, and more. Quality printing with fast turnaround.

@@ -22,7 +22,7 @@
 <aside class="w-64 p-4 flex-shrink-0 hidden lg:block">
     <div class="bg-white rounded-3xl h-full p-5 flex flex-col shadow-sm border border-slate-200/60">
         <div class="flex items-center gap-3 px-3 py-2 mb-8">
-            <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12">
+            <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12 object-cover">
         </div>
 
         <div class="px-3 mb-2">

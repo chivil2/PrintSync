@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-14">
             <a href="{{ url('/') }}" class="flex items-center gap-2.5 cursor-pointer">
-                <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12">
+                <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12 object-cover">
             </a>
             <div class="flex items-center gap-3">
                 @auth

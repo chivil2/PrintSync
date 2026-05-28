@@ -14,7 +14,7 @@
         <div class="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10" style="background: linear-gradient(rgba(30, 58, 138, 0.7), rgba(30, 58, 138, 0.7)), url('https://images.unsplash.com/photo-1562564055-71e051d33c19?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-attachment: fixed;">
             <div class="flex w-full max-w-sm flex-col gap-2 text-black">
                 <a href="{{ route('home') }}" class="flex flex-col items-center gap-3 font-medium mb-4 text-black" wire:navigate>
-                    <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="size-16">
+                    <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="size-16 object-cover">
                 </a>
                 <div class="flex flex-col gap-6 bg-white/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 text-black" style="color: black !important;">
                     <style>

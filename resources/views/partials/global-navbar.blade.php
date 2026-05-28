@@ -11,7 +11,7 @@
 <header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#E5E7EB] bg-white px-6 py-3">
     <div class="flex items-center gap-8">
                 <a href="{{ route($logoRoute) }}" class="flex items-center gap-2">
-                    <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="h-12 w-12">
+                    <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="h-12 w-12 object-cover">
                 </a>
 
                 <div class="flex items-center gap-1">
