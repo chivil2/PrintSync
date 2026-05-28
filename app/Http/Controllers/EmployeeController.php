@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
+use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
@@ -106,6 +107,12 @@ class EmployeeController extends Controller
             'started_at' => $validated['status'] === 'in_progress' ? now() : $job->started_at,
             'completed_at' => $validated['status'] === 'completed' ? now() : $job->completed_at,
         ]);
+
+        // Generate invoice if job is completed and customer requested it
+        if ($validated['status'] === 'completed' && $job->request_invoice) {
+            $invoiceService = new InvoiceService;
+            $invoiceService->generateInvoice($job);
+        }
 
         return redirect()->route('employee.jobs')->with('success', 'Job status updated successfully.');
     }

@@ -8,6 +8,7 @@ use App\Models\Quote;
 use App\Models\QuoteLineItem;
 use App\Models\ServiceJob;
 use App\Models\TechnicalService;
+use App\Services\InvoiceService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -68,6 +69,7 @@ class CustomerController extends Controller
             'service_type' => 'required|in:printing,technical',
             'deadline' => 'required|date|after_or_equal:today',
             'notes' => 'nullable|string|max:1000',
+            'request_invoice' => 'nullable|boolean',
         ]);
 
         $service = $validated['service_type'] === 'printing'
@@ -85,6 +87,7 @@ class CustomerController extends Controller
             'priority' => null,
             'deadline' => $validated['deadline'],
             'notes' => $validated['notes'] ?? null,
+            'request_invoice' => isset($validated['request_invoice']),
         ]);
 
         // Auto-generate quote
@@ -146,6 +149,17 @@ class CustomerController extends Controller
         $order->delete();
 
         return redirect()->route('customer.orders')->with('success', 'Order deleted successfully.');
+    }
+
+    public function downloadInvoice(ServiceJob $order)
+    {
+        if ($order->customer_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $invoiceService = new InvoiceService;
+
+        return $invoiceService->downloadInvoice($order);
     }
 
     public function profile()

@@ -168,6 +168,34 @@ style="display: none;">
                                     class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8743B] focus:border-transparent text-gray-900"
                                     placeholder="Describe your specific requirements, quantity, timeline, or any other details..."
                                 ></textarea>
+
+                                <!-- Invoice Request Checkbox -->
+                                <div class="mt-4 p-4 bg-zinc-50 rounded-lg border border-zinc-200">
+                                    <label class="flex items-start gap-3 cursor-pointer">
+                                        <div class="relative flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                name="request_invoice"
+                                                value="1"
+                                                class="peer sr-only"
+                                            >
+                                            <div class="w-5 h-5 border-2 border-zinc-300 rounded peer-checked:bg-[#E8743B] peer-checked:border-[#E8743B] transition-colors flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                                <span class="text-sm font-medium text-zinc-900">Send me an invoice</span>
+                                            </div>
+                                            <p class="text-xs text-zinc-500 mt-1">Receive a PDF invoice via email when your order is completed</p>
+                                        </div>
+                                    </label>
+                                </div>
                             </form>
                         </div>
                     </div>

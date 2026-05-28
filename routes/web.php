@@ -50,6 +50,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('orders', [CustomerController::class, 'orders'])->name('orders');
         Route::get('orders/{order}', [CustomerController::class, 'showOrder'])->name('orders.show');
         Route::delete('orders/{order}', [CustomerController::class, 'destroyOrder'])->name('orders.destroy');
+        Route::get('orders/{order}/invoice', [CustomerController::class, 'downloadInvoice'])->name('orders.invoice');
         Route::get('profile', [CustomerController::class, 'profile'])->name('profile');
         Route::post('profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
         Route::post('profile/resend-verification', [CustomerController::class, 'resendVerification'])->name('profile.resend');
