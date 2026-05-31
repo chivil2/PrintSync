@@ -9,6 +9,7 @@
     <div class="bg-white rounded-[3rem] shadow-xl shadow-slate-200/70 border border-slate-100 flex-1 flex flex-col overflow-hidden">
         <div class="px-8 pt-8 pb-4 flex-1 overflow-y-auto">
             <div class="bg-gradient-to-r from-orange-500 to-blue-600 rounded-3xl p-8 text-white relative overflow-hidden mb-8">
+                <div class="welcome-dots"></div>
                 <div class="relative z-10 max-w-md">
                     <h1 class="text-4xl font-bold mb-2">Good {{ now()->format('A') === 'AM' ? 'Morning' : 'Afternoon' }}, {{ auth()->user()->first_name }}!</h1>
                     <p class="text-orange-100 mb-6">{{ $inProgressJobs }} jobs in progress. Let's keep it moving.</p>
@@ -23,28 +24,28 @@
             </div>
 
             <div class="grid grid-cols-4 gap-4 mb-8">
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl hover:shadow-md transition-all cursor-pointer group">
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
                     <div class="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-blue-600">
                         <i class="fa-solid fa-briefcase text-xl"></i>
                     </div>
                     <div class="text-3xl font-bold text-slate-900">{{ $totalJobs }}</div>
                     <div class="text-xs text-slate-500 mt-0.5">Total Jobs</div>
                 </div>
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl hover:shadow-md transition-all cursor-pointer group">
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
                     <div class="bg-orange-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-orange-600">
-                        <i class="fa-solid fa-spinner text-xl"></i>
+                        <i class="fa-solid fa-spinner text-xl animate-spin"></i>
                     </div>
                     <div class="text-3xl font-bold text-slate-900">{{ $inProgressJobs }}</div>
                     <div class="text-xs text-slate-500 mt-0.5">In Progress</div>
                 </div>
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl hover:shadow-md transition-all cursor-pointer group">
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
                     <div class="bg-amber-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-amber-600">
                         <i class="fa-solid fa-clock text-xl"></i>
                     </div>
                     <div class="text-3xl font-bold text-slate-900">{{ $pendingJobs }}</div>
                     <div class="text-xs text-slate-500 mt-0.5">Pending</div>
                 </div>
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl hover:shadow-md transition-all cursor-pointer group">
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
                     <div class="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-emerald-600">
                         <i class="fa-solid fa-check-circle text-xl"></i>
                     </div>

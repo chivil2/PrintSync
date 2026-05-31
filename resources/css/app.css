@@ -161,6 +161,14 @@ flux\\:sidebar-item {
     z-index: 1;
 }
 
+.card-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.1);
+}
+
+.card-shadow:hover {
+    box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 0.15);
+}
+
 /* Girl illustration — sits outside the clipped banner, anchored via the wrapper */
 .welcome-illustration {
     position: absolute;

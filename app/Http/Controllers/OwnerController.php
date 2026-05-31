@@ -15,6 +15,26 @@ use Illuminate\Validation\Rules\Password;
 class OwnerController extends Controller
 {
     /**
+     * Display the owner dashboard.
+     */
+    public function dashboard(Request $request)
+    {
+        $data['user'] = auth()->user();
+        $data['recentJobs'] = ServiceJob::with(['customer', 'service'])->latest()->take(5)->get();
+        $data['employees'] = User::role('employee')->where('employee_status', 'active')->latest()->take(5)->get();
+        $data['jobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->paginate(5);
+
+        // Stat card data - compute from completed service jobs
+        $completedJobIds = ServiceJob::where('status', 'completed')->pluck('id');
+        $data['totalRevenue'] = Quote::whereIn('service_job_id', $completedJobIds)->sum('total') ?? 0;
+        $data['totalOrders'] = Quote::whereIn('service_job_id', $completedJobIds)->count();
+        $data['activeCustomers'] = Quote::whereIn('service_job_id', $completedJobIds)->distinct('customer_id')->count('customer_id');
+        $data['completedJobs'] = ServiceJob::where('status', 'completed')->count();
+
+        return view('owner.dashboard', $data);
+    }
+
+    /**
      * Display the employees management page.
      */
     public function employees(Request $request)
