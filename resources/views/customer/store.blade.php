@@ -3,25 +3,29 @@
 @section('content')
 <div class="max-w-[1280px] mx-auto px-6 py-8 lg:px-8 lg:py-8 space-y-8">
     <!-- Store Hero Banner -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 p-8 sm:p-10 text-white mb-8">
-        <div class="absolute top-0 right-0 w-80 h-80 bg-[#E8743B]/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-        <div class="absolute bottom-0 left-0 w-60 h-60 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
-        <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-                <span class="inline-block px-3 py-1 bg-[#E8743B]/20 text-white text-xs font-medium rounded-full mb-3 border border-[#E8743B]/30">
-                    Special Offer
-                </span>
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Print, repair, and support<br class="hidden sm:block" /> for your next project.</h1>
-                <p class="text-gray-300 text-sm max-w-md">Browse our printing and technical services. Quality guaranteed.</p>
-            </div>
-            <div class="flex gap-4">
-                <div class="text-center">
-                    <p class="text-2xl font-bold">{{ $activeOrders ?? 0 }}</p>
-                    <p class="text-xs text-gray-400">Active Orders</p>
-                </div>
-            </div>
+    <div class="relative p-8 sm:p-10 mb-8 rounded-2xl overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('images/store-background-banner.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-orange-400 opacity-70"></div>
+        <div class="absolute inset-0 animate-pulse-slow" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 24px 24px; opacity: 0.4;"></div>
+        <div class="relative z-10">
+            <h1 class="text-4xl sm:text-5xl font-bold mb-2 text-white">Print, repair, and support<br class="hidden sm:block" /> for your next project.</h1>
+            <p class="text-lg max-w-md text-white">Browse our printing and technical services. Quality guaranteed.</p>
         </div>
     </div>
+
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+    </style>
 
     <!-- Products Section -->
     <div class="flex flex-col lg:flex-row gap-8" x-data="{ 
@@ -44,7 +48,7 @@
 
             if (this.search) {
                 const searchLower = this.search.toLowerCase();
-                services = services.filter(s => 
+                services = services.filter(s =>
                     s.name.toLowerCase().includes(searchLower) || s.description.toLowerCase().includes(searchLower)
                 );
             }

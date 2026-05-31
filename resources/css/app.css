@@ -285,7 +285,7 @@ flux\\:sidebar-item {
 
 /* Featured Total Orders card */
 .stat-card--featured {
-    background: linear-gradient(to bottom right, #FDBA74 0%, #EA580C 100%);
+    background: #FB923C;
 }
 
 .stat-icon--featured {
@@ -308,7 +308,7 @@ flux\\:sidebar-item {
 
 /* Green gradient card */
 .stat-card--green {
-    background: linear-gradient(to bottom right, #34D399 0%, #059669 100%);
+    background: #10B981;
 }
 
 .stat-label--green {
@@ -331,7 +331,7 @@ flux\\:sidebar-item {
 
 /* Blue gradient card */
 .stat-card--blue {
-    background: linear-gradient(to bottom right, #60A5FA 0%, #2563EB 100%);
+    background: #3B82F6;
 }
 
 .stat-label--blue {
@@ -378,8 +378,8 @@ flux\\:sidebar-item {
 }
 
 .stat-label {
-    font-size: 13.5px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 700;
     color: rgba(255, 255, 255, 0.6);
     margin-top: 0;
     letter-spacing: -0.01em;
@@ -394,7 +394,8 @@ flux\\:sidebar-item {
 }
 
 .stat-trend {
-    font-size: 12.5px;
+    font-size: 14px;
+    font-weight: 700;
     color: rgba(255, 255, 255, 0.4);
     margin-top: 4px;
 }

@@ -68,7 +68,6 @@
                 </div>
                 <p class="stat-label stat-label--featured">Total Orders</p>
                 <p class="stat-value stat-value--featured">{{ $totalOrders }}</p>
-                <p class="stat-trend stat-trend--featured">All time</p>
             </div>
         </div>
 

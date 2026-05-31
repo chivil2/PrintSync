@@ -6,6 +6,7 @@
     calendarOpen: false,
     calendarMonth: new Date().getMonth(),
     calendarYear: new Date().getFullYear(),
+    requestInvoice: false,
     get estimatedCompletion() {
         if (!this.service || !this.service.production_time) return '';
         const productionDays = this.service.production_time;
@@ -112,7 +113,7 @@ style="display: none;">
          x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
 
         <!-- Close button -->
-        <button @click="close()" class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 hover:bg-white text-zinc-400 hover:text-zinc-600 transition-colors shadow-sm">
+        <button @click="close()" class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -145,13 +146,13 @@ style="display: none;">
                 </div>
 
                 <div>
-                    <h3 class="text-xl font-bold text-zinc-900 font-[Poppins]" x-text="service?.name || 'Service Details'"></h3>
-                    <p class="text-sm text-zinc-500 mt-1 leading-relaxed font-[Open_Sans]" x-text="service?.description || 'No description available.'"></p>
+                    <h3 class="text-2xl font-bold text-zinc-900" x-text="service?.name || 'Service Details'"></h3>
+                    <p class="text-base text-zinc-500 mt-1 leading-relaxed" x-text="service?.description || 'No description available.'"></p>
                 </div>
 
                 <div>
                     <p class="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">Price</p>
-                    <p class="text-2xl font-bold font-[Poppins]"
+                    <p class="text-2xl font-bold"
                        :class="service?.type === 'printing' ? 'text-[#E8743B]' : 'text-[#19A7CE]'">
                         ₱<span x-text="service?.price ? parseFloat(service.price).toFixed(2) : '0.00'"></span>
                     </p>
@@ -298,13 +299,15 @@ style="display: none;">
                     </div>
 
                     <!-- Invoice Checkbox -->
-                    <label class="flex items-start gap-2.5 p-3 bg-zinc-50 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors">
-                        <input
-                            type="checkbox"
-                            name="request_invoice"
-                            value="1"
-                            class="mt-0.5 w-4 h-4 rounded border-zinc-300 text-[#E8743B] focus:ring-[#E8743B]/30 accent-[#E8743B]"
-                        >
+                    <label class="flex items-center gap-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors">
+                        <input type="checkbox" name="request_invoice" value="1" x-model="requestInvoice" class="sr-only">
+                        <div @click="requestInvoice = !requestInvoice"
+                             class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors"
+                             :class="requestInvoice ? 'bg-blue-600 border-blue-600' : 'bg-white border-zinc-300'">
+                            <svg x-show="requestInvoice" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
                         <div>
                             <span class="text-sm font-medium text-zinc-800">Send me an invoice</span>
                             <p class="text-xs text-zinc-400 mt-0.5">Receive a PDF invoice via email when completed</p>

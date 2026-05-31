@@ -55,10 +55,7 @@ class CustomerController extends Controller
             })
             ->get();
 
-        return view('customer.store', [
-            'printingServices' => $printingServices,
-            'technicalServices' => $technicalServices,
-        ]);
+        return view('customer.store', compact('printingServices', 'technicalServices'));
     }
 
     public function requestService(Request $request)
