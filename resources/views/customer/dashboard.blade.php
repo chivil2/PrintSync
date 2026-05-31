@@ -1,7 +1,7 @@
 @extends('layouts.app.customer')
 
 @section('content')
-<div class="max-w-[1280px] mx-auto px-5 py-6 lg:px-8 lg:py-7 space-y-6" x-data="clock()" x-init="startClock()">
+<div class="max-w-[1280px] mx-auto px-5 py-6 lg:px-8 lg:py-7 space-y-6">
     <!-- Welcome Banner -->
     <div class="welcome-banner-wrap">
         {{-- Clipped background layer (keeps border-radius + overflow:hidden) --}}
@@ -14,9 +14,6 @@
                 <div>
                     <h1>Welcome back, {{ auth()->user()->first_name }}!</h1>
                     <p>Manage your printing and technical services from your personal dashboard.</p>
-                </div>
-                <div class="text-right">
-                    <div class="text-white/80 text-sm" x-text="currentDate"></div>
                 </div>
             </div>
         </div>

@@ -6,9 +6,15 @@
             </a>
             <div class="flex items-center gap-3">
                 @auth
-                    <a href="{{ route('customer.store') }}" class="text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md">
-                        Go to Store
-                    </a>
+                    @if(auth()->user()->hasRole('employee'))
+                        <a href="{{ route('employee.dashboard') }}" class="text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md">
+                            Go to Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('customer.store') }}" class="text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md">
+                            Go to Store
+                        </a>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}" class="inline">
                         @csrf
                         <button type="submit" class="text-sm font-medium text-blue-200 hover:text-white transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white/10 cursor-pointer">

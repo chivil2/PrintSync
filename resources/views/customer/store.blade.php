@@ -4,8 +4,8 @@
 <div class="max-w-[1280px] mx-auto px-6 py-8 lg:px-8 lg:py-8 space-y-8">
     <!-- Store Hero Banner -->
     <div class="relative p-8 sm:p-10 mb-8 rounded-2xl overflow-hidden">
-        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('images/store-background-banner.jpg') }}');"></div>
-        <div class="absolute inset-0 bg-orange-400 opacity-70"></div>
+        <div class="absolute inset-0 bg-cover bg-center blur-[3px]" style="background-image: url('{{ asset('images/store-background-banner.jpg') }}');"></div>
+        <div class="absolute inset-0 animate-gradient opacity-70"></div>
         <div class="absolute inset-0 animate-pulse-slow" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 24px 24px; opacity: 0.4;"></div>
         <div class="relative z-10">
             <h1 class="text-4xl sm:text-5xl font-bold mb-2 text-white">Print, repair, and support<br class="hidden sm:block" /> for your next project.</h1>
@@ -24,6 +24,23 @@
         }
         .animate-pulse-slow {
             animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        .animate-gradient {
+            background: linear-gradient(270deg, #f97316, #3b82f6, #f97316);
+            background-size: 200% 200%;
+            animation: gradient-animation 6s ease infinite;
         }
     </style>
 
@@ -182,17 +199,22 @@
                             @click="$dispatch('open-modal', { service: service, type: service.type })"
                         >
                             <!-- Image Area -->
-                            <div class="relative h-52 flex items-center justify-center" :class="service.type === 'printing' ? 'bg-gradient-to-br from-orange-50 to-amber-50' : 'bg-gradient-to-br from-blue-50 to-indigo-50'">
+                            <div class="relative h-52 flex items-center justify-center bg-gray-100">
                                 <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-gray-900 text-white" x-text="service.type === 'printing' ? 'Printing' : 'Technical'">
                                 </span>
 
-                                <div class="transition-transform duration-300 group-hover:scale-110">
-                                    <svg class="w-14 h-14" :class="service.type === 'printing' ? 'text-orange-300' : 'text-blue-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path x-show="service.type === 'printing'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                        <path x-show="service.type === 'technical'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                        <path x-show="service.type === 'technical'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </div>
+                                <template x-if="service.image">
+                                    <img :src="'/storage/' + service.image" :alt="service.name" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
+                                </template>
+                                <template x-if="!service.image">
+                                    <div class="flex items-center justify-center w-full h-full" :class="service.type === 'printing' ? 'bg-gradient-to-br from-orange-50 to-amber-50' : 'bg-gradient-to-br from-blue-50 to-indigo-50'">
+                                        <svg class="w-14 h-14" :class="service.type === 'printing' ? 'text-orange-300' : 'text-blue-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path x-show="service.type === 'printing'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                            <path x-show="service.type === 'technical'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path x-show="service.type === 'technical'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                </template>
                             </div>
 
                             <!-- Content -->

@@ -30,8 +30,8 @@
 
 <div x-data="calendar()" x-init="initCalendar({{ now()->year }}, {{ now()->month }})">
 
-<aside class="w-96 p-4 flex-shrink-0 hidden xl:block sticky top-4 self-start">
-    <div class="bg-white rounded-lg h-full p-6 shadow-sm border border-slate-200 flex flex-col overflow-y-auto">
+<aside class="w-[380px] p-4 flex-shrink-0 hidden xl:block sticky top-4 self-start">
+    <div class="bg-white rounded-lg h-[calc(100vh-2rem)] p-6 shadow-sm border border-slate-200 flex flex-col overflow-hidden">
 
         <div class="flex items-center gap-3 mb-8">
             @if($user->profile_photo_path)
@@ -109,17 +109,49 @@
             </template>
         </div>
 
+        <!-- Jobs Section -->
         <div class="mt-8 pt-6 border-t border-slate-100">
-            <div class="text-sm font-medium text-slate-400 px-1 mb-3">THIS WEEK</div>
-            <div class="flex gap-4">
-                <div class="flex-1 bg-emerald-50 p-3 rounded-2xl">
-                    <div class="text-emerald-600 font-bold text-2xl">{{ $completedJobs ?? 0 }}</div>
-                    <div class="text-sm text-emerald-600 font-medium">Jobs Done</div>
+            <div class="flex items-center justify-between mb-4 px-1">
+                <div class="font-bold text-slate-900 text-lg flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Jobs
                 </div>
-                <div class="flex-1 bg-blue-50 p-3 rounded-2xl">
-                    <div class="text-blue-600 font-bold text-2xl">{{ $totalJobs ?? 0 }}</div>
-                    <div class="text-sm text-blue-600 font-medium">Total Jobs</div>
-                </div>
+            </div>
+
+            <div class="space-y-3">
+                @if(isset($jobs) && $jobs->count() > 0)
+                    @foreach($jobs as $job)
+                        @php
+                            $statusColors = [
+                                'pending' => ['bg' => 'bg-yellow-50', 'border' => 'border-yellow-100', 'icon' => 'bg-yellow-500'],
+                                'in_progress' => ['bg' => 'bg-sky-50', 'border' => 'border-sky-100', 'icon' => 'bg-sky-400'],
+                                'completed' => ['bg' => 'bg-emerald-50', 'border' => 'border-emerald-100', 'icon' => 'bg-emerald-500'],
+                            ];
+                            $statusColor = $statusColors[$job->status] ?? $statusColors['pending'];
+                            $deadlineText = $job->deadline ? $job->deadline->diffForHumans() : 'No deadline';
+                        @endphp
+                        <a href="{{ route('employee.jobs.show', $job) }}" class="block p-3 rounded-xl {{ $statusColor['bg'] }} border {{ $statusColor['border'] }} cursor-pointer hover:opacity-80 transition-colors">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 {{ $statusColor['icon'] }} rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-slate-900">{{ $job->service->name ?? 'Service' }}</p>
+                                    <p class="text-xs text-slate-500 mt-1">{{ $job->customer->name ?? 'Unknown' }}</p>
+                                    <p class="text-xs text-slate-400 mt-1">Due: {{ $deadlineText }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                @else
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                        <p class="text-sm text-slate-500 text-center">No jobs assigned</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

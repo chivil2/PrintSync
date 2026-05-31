@@ -37,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('owner.dashboard');
         }
         if (auth()->user()->hasRole('customer')) {
-            return redirect()->route('customer.dashboard');
+            return redirect()->route('customer.store');
         }
 
         return view('dashboard');

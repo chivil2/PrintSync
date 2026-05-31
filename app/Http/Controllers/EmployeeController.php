@@ -44,6 +44,13 @@ class EmployeeController extends Controller
             ->take(2)
             ->get();
 
+        // Get jobs for right panel
+        $jobs = ServiceJob::where('employee_id', auth()->id())
+            ->with(['customer', 'service'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
         return view('employee.dashboard', [
             'totalJobs' => $totalJobs,
             'completedJobs' => $completedJobs,
@@ -52,6 +59,7 @@ class EmployeeController extends Controller
             'recentJobs' => $recentJobs,
             'jobsWithDeadlines' => $jobsWithDeadlines,
             'otherEmployees' => $otherEmployees,
+            'jobs' => $jobs,
         ]);
     }
 
