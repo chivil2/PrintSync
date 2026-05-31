@@ -8,7 +8,6 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
-use App\Services\DashboardDataService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -70,12 +69,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['owner'])->prefix('owner')->name('owner.')->group(function () {
-        Route::get('dashboard', function () {
-            $dashboardService = new DashboardDataService;
-            $data = $dashboardService->getDashboardData();
-
-            return view('owner.dashboard', $data);
-        })->name('dashboard');
+        Route::get('dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
         Route::get('dashboard/earnings', [OwnerController::class, 'earningsByPeriod'])->name('dashboard.earnings');
         Route::get('quotes', [QuoteController::class, 'ownerIndex'])->name('quotes');
         Route::get('quotes/{quote}/edit', [QuoteController::class, 'ownerEdit'])->name('quotes.edit');

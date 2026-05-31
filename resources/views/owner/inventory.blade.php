@@ -6,10 +6,10 @@
 
         <!-- Inventory Alert -->
         @if($criticalCount > 0 || $lowCount > 0)
-            <div class="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-[24px] p-5 mb-6">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-5 mb-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center text-white">
+                        <div class="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center text-white">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
@@ -24,10 +24,10 @@
         @endif
 
         <!-- Inventory Management -->
-        <div class="bg-white/95 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-xl shadow-blue-950/10 border border-white/70 mb-6">
+        <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
             <div class="flex flex-col gap-4 mb-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h3 class="text-[17px] font-bold text-slate-900">Inventory Management</h3>
+                    <h3 class="text-lg font-bold text-slate-900">Inventory Management</h3>
                     <p class="text-sm text-slate-500">Showing {{ $inventory->count() }} of {{ $inventory->total() }} items</p>
                 </div>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -63,7 +63,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="text-left text-[13px] text-slate-500 border-b border-slate-100">
+                        <tr class="text-left text-xs text-slate-500 border-b border-slate-200">
                             <th class="pb-3 font-medium">SKU</th>
                             <th class="pb-3 font-medium">Name</th>
                             <th class="pb-3 font-medium">Quantity</th>

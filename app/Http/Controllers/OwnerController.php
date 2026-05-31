@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 class OwnerController extends Controller
@@ -85,7 +86,13 @@ class OwnerController extends Controller
             'specialization' => ['nullable', 'string', 'max:255'],
             'hourly_rate' => ['nullable', 'numeric', 'min:0'],
             'employee_status' => ['nullable', 'string', 'in:active,inactive'],
+            'profile_photo_path' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        $profilePhotoPath = null;
+        if ($request->hasFile('profile_photo_path')) {
+            $profilePhotoPath = $request->file('profile_photo_path')->store('profile-photos', 'public');
+        }
 
         $user = User::create([
             'first_name' => $validated['first_name'],
@@ -98,6 +105,7 @@ class OwnerController extends Controller
             'specialization' => $validated['specialization'] ?? null,
             'hourly_rate' => $validated['hourly_rate'] ?? null,
             'employee_status' => $validated['employee_status'] ?? 'active',
+            'profile_photo_path' => $profilePhotoPath,
         ]);
 
         $user->assignRole('employee');
@@ -129,7 +137,16 @@ class OwnerController extends Controller
             'specialization' => ['nullable', 'string', 'max:255'],
             'hourly_rate' => ['nullable', 'numeric', 'min:0'],
             'employee_status' => ['nullable', 'string', 'in:active,inactive'],
+            'profile_photo_path' => ['nullable', 'image', 'max:2048'],
         ]);
+
+        $profilePhotoPath = $employee->profile_photo_path;
+        if ($request->hasFile('profile_photo_path')) {
+            if ($employee->profile_photo_path) {
+                Storage::disk('public')->delete($employee->profile_photo_path);
+            }
+            $profilePhotoPath = $request->file('profile_photo_path')->store('profile-photos', 'public');
+        }
 
         $employee->update([
             'first_name' => $validated['first_name'],
@@ -141,6 +158,7 @@ class OwnerController extends Controller
             'specialization' => $validated['specialization'] ?? null,
             'hourly_rate' => $validated['hourly_rate'] ?? null,
             'employee_status' => $validated['employee_status'] ?? 'active',
+            'profile_photo_path' => $profilePhotoPath,
         ]);
 
         return redirect()->route('owner.employees')
@@ -179,27 +197,8 @@ class OwnerController extends Controller
             ->latest()
             ->paginate(20);
 
-        // Calculate report data
-        $totalRevenue = Quote::where('status', 'accepted')->sum('total') ?? 0;
-        $totalOrders = Quote::where('status', 'accepted')->count();
-        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
-
-        // Calculate top products
-        $topProducts = QuoteLineItem::select('item_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(line_total) as total_revenue'))
-            ->whereHas('quote', function ($q) {
-                $q->where('status', 'accepted');
-            })
-            ->groupBy('item_name')
-            ->orderBy('total_qty', 'desc')
-            ->take(10)
-            ->get();
-
         return view('owner.quotes', [
             'quotes' => $quotes,
-            'totalRevenue' => $totalRevenue,
-            'totalOrders' => $totalOrders,
-            'averageOrderValue' => $averageOrderValue,
-            'topProducts' => $topProducts,
         ]);
     }
 

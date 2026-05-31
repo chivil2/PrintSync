@@ -1,7 +1,7 @@
 @extends('layouts.app.customer')
 
 @section('content')
-<div class="max-w-[1280px] mx-auto px-5 py-6 lg:px-8 lg:py-7 space-y-6">
+<div class="max-w-[1280px] mx-auto px-5 py-6 lg:px-8 lg:py-7 space-y-6" x-data="clock()" x-init="startClock()">
     <!-- Welcome Banner -->
     <div class="welcome-banner-wrap">
         {{-- Clipped background layer (keeps border-radius + overflow:hidden) --}}
@@ -10,9 +10,15 @@
             <div class="welcome-dots"></div>
             <div class="welcome-glow1"></div>
             <div class="welcome-glow2"></div>
-            <div class="welcome-content">
-                <h1>Welcome back, {{ auth()->user()->first_name }}!</h1>
-                <p>Manage your printing and technical services from your personal dashboard.</p>
+            <div class="welcome-content flex items-center justify-between">
+                <div>
+                    <h1>Welcome back, {{ auth()->user()->first_name }}!</h1>
+                    <p>Manage your printing and technical services from your personal dashboard.</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-white" x-text="currentTime"></div>
+                    <div class="text-white/80 text-sm" x-text="currentDate"></div>
+                </div>
             </div>
         </div>
         {{-- Illustration sits outside the clipped banner, above it in z-index --}}
@@ -58,46 +64,46 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card stat-card--featured">
-            <div class="stat-card-inner">
-                <div class="stat-icon stat-icon--featured">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                </div>
-                <p class="stat-label stat-label--featured">Total Orders</p>
-                <p class="stat-value stat-value--featured">{{ $totalOrders }}</p>
+    <div class="grid grid-cols-4 gap-4">
+        <a href="{{ route('customer.orders') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
+            <div class="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
             </div>
-        </div>
+            <div class="text-3xl font-bold text-slate-900">-</div>
+            <div class="text-xs text-slate-500 mt-0.5">Total Orders</div>
+        </a>
 
-        <div class="stat-card stat-card--green">
-            <div class="stat-card-inner">
-                <div class="stat-icon green">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <p class="stat-label stat-label--green">Completed</p>
-                <p class="stat-value stat-value--green">{{ $completedOrders }}</p>
-                <p class="stat-trend stat-trend--green">Successfully delivered</p>
+        <a href="{{ route('customer.orders') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
+            <div class="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-emerald-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
-        </div>
+            <div class="text-3xl font-bold text-slate-900">-</div>
+            <div class="text-xs text-slate-500 mt-0.5">Completed</div>
+        </a>
 
-        <div class="stat-card stat-card--blue">
-            <div class="stat-card-inner">
-                <div class="stat-icon blue">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <p class="stat-label stat-label--blue">Total Spent</p>
-                <p class="stat-value stat-value--blue">₱{{ number_format($totalSpent, 2) }}</p>
-                <p class="stat-trend stat-trend--blue">Lifetime purchases</p>
+        <a href="{{ route('customer.orders') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
+            <div class="bg-orange-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-orange-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
-        </div>
+            <div class="text-3xl font-bold text-slate-900">-</div>
+            <div class="text-xs text-slate-500 mt-0.5">Total Spent</div>
+        </a>
 
-
+        <a href="{{ route('customer.orders') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
+            <div class="bg-purple-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-purple-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="text-3xl font-bold text-slate-900">-</div>
+            <div class="text-xs text-slate-500 mt-0.5">Pending Orders</div>
+        </a>
     </div>
 
     <!-- Recent Orders -->
@@ -178,4 +184,33 @@
         </div>
     </div>
 </div>
+
+<script>
+function clock() {
+    return {
+        currentTime: '',
+        currentDate: '',
+
+        startClock() {
+            this.updateTime();
+            setInterval(() => this.updateTime(), 1000);
+        },
+
+        updateTime() {
+            const now = new Date();
+            this.currentTime = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            this.currentDate = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    }
+}
+</script>
 @endsection

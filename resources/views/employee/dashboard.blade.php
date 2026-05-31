@@ -5,53 +5,63 @@
 @endsection
 
 @section('content')
-<div class="p-4 flex-1 flex flex-col">
+<div class="p-4 flex-1 flex flex-col" x-data="clock()" x-init="startClock()">
     <div class="bg-white rounded-[3rem] shadow-xl shadow-slate-200/70 border border-slate-100 flex-1 flex flex-col overflow-hidden">
         <div class="px-8 pt-8 pb-4 flex-1 overflow-y-auto">
             <div class="bg-gradient-to-r from-orange-500 to-blue-600 rounded-3xl p-8 text-white relative overflow-hidden mb-8">
                 <div class="welcome-dots"></div>
-                <div class="relative z-10 max-w-md">
-                    <h1 class="text-4xl font-bold mb-2">Good {{ now()->format('A') === 'AM' ? 'Morning' : 'Afternoon' }}, {{ auth()->user()->first_name }}!</h1>
-                    <p class="text-orange-100 mb-6">{{ $inProgressJobs }} jobs in progress. Let's keep it moving.</p>
-                    <a href="{{ route('employee.jobs') }}" class="inline-block px-6 py-2.5 bg-white text-orange-600 rounded-2xl text-sm font-bold hover:bg-orange-50 transition-colors cursor-pointer">
-                        Review Jobs
-                    </a>
+                <div class="relative z-10 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-4xl font-bold mb-2">Good {{ now()->format('A') === 'AM' ? 'Morning' : 'Afternoon' }}, {{ auth()->user()->first_name }}!</h1>
+                        <p class="text-orange-100">Manage your tasks from your dashboard.</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold" x-text="currentTime"></div>
+                        <div class="text-orange-100 text-sm" x-text="currentDate"></div>
+                    </div>
                 </div>
-                <div class="absolute right-8 bottom-0 text-[120px] opacity-20 leading-none">
-                    <i class="fa-solid fa-print"></i>
-                </div>
-                <div class="absolute -right-4 -top-4 w-40 h-40 bg-white/10 rounded-full"></div>
             </div>
 
             <div class="grid grid-cols-4 gap-4 mb-8">
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
+                <a href="{{ route('employee.jobs') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
                     <div class="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-blue-600">
-                        <i class="fa-solid fa-briefcase text-xl"></i>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
                     </div>
-                    <div class="text-3xl font-bold text-slate-900">{{ $totalJobs }}</div>
+                    <div class="text-3xl font-bold text-slate-900">-</div>
                     <div class="text-xs text-slate-500 mt-0.5">Total Jobs</div>
-                </div>
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
+                </a>
+
+                <a href="{{ route('employee.jobs') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
                     <div class="bg-orange-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-orange-600">
-                        <i class="fa-solid fa-spinner text-xl animate-spin"></i>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <div class="text-3xl font-bold text-slate-900">{{ $inProgressJobs }}</div>
+                    <div class="text-3xl font-bold text-slate-900">-</div>
                     <div class="text-xs text-slate-500 mt-0.5">In Progress</div>
-                </div>
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
+                </a>
+
+                <a href="{{ route('employee.jobs') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
                     <div class="bg-amber-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-amber-600">
-                        <i class="fa-solid fa-clock text-xl"></i>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <div class="text-3xl font-bold text-slate-900">{{ $pendingJobs }}</div>
+                    <div class="text-3xl font-bold text-slate-900">-</div>
                     <div class="text-xs text-slate-500 mt-0.5">Pending</div>
-                </div>
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer group">
+                </a>
+
+                <a href="{{ route('employee.jobs') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
                     <div class="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-emerald-600">
-                        <i class="fa-solid fa-check-circle text-xl"></i>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <div class="text-3xl font-bold text-slate-900">{{ $completedJobs }}</div>
+                    <div class="text-3xl font-bold text-slate-900">-</div>
                     <div class="text-xs text-slate-500 mt-0.5">Completed</div>
-                </div>
+                </a>
             </div>
 
             <h2 class="font-bold text-xl text-slate-900 mb-4 px-1">Recent Jobs</h2>
@@ -107,4 +117,33 @@
         </div>
     </div>
 </div>
+
+<script>
+function clock() {
+    return {
+        currentTime: '',
+        currentDate: '',
+
+        startClock() {
+            this.updateTime();
+            setInterval(() => this.updateTime(), 1000);
+        },
+
+        updateTime() {
+            const now = new Date();
+            this.currentTime = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            this.currentDate = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    }
+}
+</script>
 @endsection

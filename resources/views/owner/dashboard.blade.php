@@ -74,9 +74,13 @@
                 <div class="mt-4 space-y-2">
                     @forelse($employees as $employee)
                         <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-sm">
-                                {{ strtoupper(substr($employee->first_name, 0, 1)) }}{{ strtoupper(substr($employee->last_name, 0, 1)) }}
-                            </div>
+                            @if($employee->profile_photo_path)
+                                <img src="{{ asset('storage/' . $employee->profile_photo_path) }}" alt="{{ $employee->first_name }} {{ $employee->last_name }}" class="w-8 h-8 rounded-full object-cover">
+                            @else
+                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold text-sm">
+                                    {{ strtoupper(substr($employee->first_name, 0, 1)) }}{{ strtoupper(substr($employee->last_name, 0, 1)) }}
+                                </div>
+                            @endif
                             <div class="flex-1 min-w-0">
                                 <div class="text-sm font-medium text-slate-900 truncate">{{ $employee->first_name }} {{ $employee->last_name }}</div>
                                 <div class="text-xs text-slate-500 truncate">{{ $employee->specialization ?? 'Employee' }}</div>

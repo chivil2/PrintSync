@@ -5,10 +5,10 @@
         @endif
 
         <!-- Products Management -->
-        <div class="bg-white/95 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-xl shadow-blue-950/10 border border-white/70 mb-6">
+        <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
             <div class="flex flex-col gap-4 mb-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <h3 class="text-[17px] font-bold text-slate-900">Products Management</h3>
+                    <h3 class="text-lg font-bold text-slate-900">Products Management</h3>
                     <p class="text-sm text-slate-500">Showing {{ $products->count() }} of {{ $products->total() }} products</p>
                 </div>
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -41,7 +41,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="text-left text-[13px] text-slate-500 border-b border-slate-100">
+                        <tr class="text-left text-xs text-slate-500 border-b border-slate-200">
                             <th class="pb-3 font-medium">SKU</th>
                             <th class="pb-3 font-medium">Name</th>
                             <th class="pb-3 font-medium">Category</th>

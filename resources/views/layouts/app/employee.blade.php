@@ -47,7 +47,7 @@
                                         <p class="text-sm font-semibold text-slate-900">{{ $employee->first_name }} {{ $employee->last_name }}</p>
                                         <p class="text-xs text-slate-500">Employee</p>
                                     </div>
-                                    <div class="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm ring-2 ring-white shadow-sm">
+                                    <div class="w-9 h-9 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-sm ring-2 ring-white shadow-sm">
                                         {{ $empInitials }}
                                     </div>
                                 </div>
@@ -59,7 +59,7 @@
                                 <p class="text-sm font-semibold text-slate-900">{{ $user->first_name }} {{ $user->last_name }}</p>
                                 <p class="text-xs text-slate-500">Employee</p>
                             </div>
-                            <div class="w-9 h-9 bg-gradient-to-br from-orange-500 to-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-sm ring-2 ring-white shadow-sm">
+                            <div class="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm ring-2 ring-white shadow-sm">
                                 {{ $initials }}
                             </div>
                         </div>

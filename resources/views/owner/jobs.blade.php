@@ -5,8 +5,8 @@
         @endif
 
         <!-- Order Status Overview -->
-        <div class="bg-white/95 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-xl shadow-blue-950/10 border border-white/70 mb-6">
-            <h3 class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Order Status Overview</h3>
+        <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
+            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Order Status Overview</h3>
             <div class="flex flex-col items-center gap-6 lg:flex-row lg:items-start">
                 @php
                     $totalJobs = array_sum($jobsCountByStatus);
@@ -43,28 +43,28 @@
                     </div>
                 </div>
                 <div class="grid w-full grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:flex-1">
-                    <div class="flex items-center justify-between p-4 bg-[#f5ede3] rounded-2xl">
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                         <div class="flex items-center gap-3">
                             <span class="w-3.5 h-3.5 rounded-full bg-green-500"></span>
                             <span class="text-slate-700">Completed</span>
                         </div>
                         <span class="font-bold text-xl text-slate-900">{{ $completed }}</span>
                     </div>
-                    <div class="flex items-center justify-between p-4 bg-[#f5ede3] rounded-2xl">
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                         <div class="flex items-center gap-3">
                             <span class="w-3.5 h-3.5 rounded-full bg-blue-500"></span>
                             <span class="text-slate-700">In Progress</span>
                         </div>
                         <span class="font-bold text-xl text-slate-900">{{ $inProgress }}</span>
                     </div>
-                    <div class="flex items-center justify-between p-4 bg-[#f5ede3] rounded-2xl">
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                         <div class="flex items-center gap-3">
                             <span class="w-3.5 h-3.5 rounded-full bg-orange-500"></span>
                             <span class="text-slate-700">Pending</span>
                         </div>
                         <span class="font-bold text-xl text-slate-900">{{ $pending }}</span>
                     </div>
-                    <div class="flex items-center justify-between p-4 bg-[#f5ede3] rounded-2xl">
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                         <div class="flex items-center gap-3">
                             <span class="w-3.5 h-3.5 rounded-full bg-red-500"></span>
                             <span class="text-slate-700">Overdue</span>
@@ -76,17 +76,17 @@
         </div>
 
         <!-- Order Assignment Queue -->
-        <div class="bg-white/95 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-xl shadow-blue-950/10 border border-white/70 mb-6">
+        <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <div>
-                    <h3 class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Order Assignment Queue</h3>
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Order Assignment Queue</h3>
                     <p class="text-sm text-slate-500">Assign or reassign employees to active orders</p>
                 </div>
-                <span class="rounded-full bg-[#f5ede3] px-3 py-1 text-xs font-medium text-slate-700">{{ $unassignedJobsCount ?? 0 }} unassigned active orders</span>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{{ $unassignedJobsCount ?? 0 }} unassigned active orders</span>
             </div>
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 @foreach($unassignedJobs as $job)
-                    <div class="rounded-2xl border border-slate-100 bg-[#f5ede3] p-4">
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <p class="font-semibold text-slate-900 truncate">{{ $job->customer->first_name ?? 'N/A' }} {{ $job->customer->last_name ?? '' }}</p>
@@ -114,25 +114,25 @@
 
         <div class="grid lg:grid-cols-2 gap-6">
             <!-- Jobs Overview -->
-            <div class="bg-white/95 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-xl shadow-blue-950/10 border border-white/70 flex flex-col">
+            <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col">
                 <div class="flex flex-col gap-3 mb-4">
                     <div>
-                        <h3 class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Jobs Overview</h3>
+                        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Jobs Overview</h3>
                         <div class="flex items-baseline gap-2">
                             <div class="text-3xl font-bold text-blue-500">{{ $jobs->total() }}</div>
                             <div class="text-slate-500 text-sm">Total Jobs</div>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <button @click="jobStatusFilter = 'all'" :class="jobStatusFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-[#f5ede3] text-slate-600 hover:bg-slate-100'" class="rounded-full px-3 py-1 text-xs font-medium transition">All</button>
-                        <button @click="jobStatusFilter = 'in_progress'" :class="jobStatusFilter === 'in_progress' ? 'bg-slate-900 text-white' : 'bg-[#f5ede3] text-slate-600 hover:bg-slate-100'" class="rounded-full px-3 py-1 text-xs font-medium transition">In Progress</button>
-                        <button @click="jobStatusFilter = 'pending'" :class="jobStatusFilter === 'pending' ? 'bg-slate-900 text-white' : 'bg-[#f5ede3] text-slate-600 hover:bg-slate-100'" class="rounded-full px-3 py-1 text-xs font-medium transition">Pending</button>
-                        <button @click="jobStatusFilter = 'completed'" :class="jobStatusFilter === 'completed' ? 'bg-slate-900 text-white' : 'bg-[#f5ede3] text-slate-600 hover:bg-slate-100'" class="rounded-full px-3 py-1 text-xs font-medium transition">Completed</button>
+                        <button @click="jobStatusFilter = 'all'" :class="jobStatusFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="rounded-full px-3 py-1 text-xs font-medium transition">All</button>
+                        <button @click="jobStatusFilter = 'in_progress'" :class="jobStatusFilter === 'in_progress' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="rounded-full px-3 py-1 text-xs font-medium transition">In Progress</button>
+                        <button @click="jobStatusFilter = 'pending'" :class="jobStatusFilter === 'pending' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="rounded-full px-3 py-1 text-xs font-medium transition">Pending</button>
+                        <button @click="jobStatusFilter = 'completed'" :class="jobStatusFilter === 'completed' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="rounded-full px-3 py-1 text-xs font-medium transition">Completed</button>
                     </div>
                 </div>
                 <div class="space-y-3 overflow-y-auto max-h-[380px] pr-2 -mr-2">
                     @foreach($jobs->items() as $job)
-                        <div x-show="jobStatusFilter === 'all' || '{{ $job->status }}' === jobStatusFilter" class="flex justify-between items-center p-3 bg-[#f5ede3] rounded-xl">
+                        <div x-show="jobStatusFilter === 'all' || '{{ $job->status }}' === jobStatusFilter" class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
                             <div class="min-w-0 flex-1">
                                 <div class="font-semibold text-slate-900">{{ $job->name }}</div>
                                 <div class="text-xs text-slate-500 truncate">{{ $job->customer->first_name ?? 'N/A' }} {{ $job->customer->last_name ?? '' }}<span class="ml-2 text-blue-600">• {{ $job->employee ? $job->employee->first_name . ' ' . $job->employee->last_name : 'Unassigned' }}</span></div>
@@ -149,8 +149,8 @@
             </div>
 
             <!-- Employee Schedule -->
-            <div class="bg-white/95 rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 shadow-xl shadow-blue-950/10 border border-white/70 flex flex-col">
-                <h3 class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Employee Schedule</h3>
+            <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col">
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Employee Schedule</h3>
                 <div class="space-y-4 overflow-y-auto max-h-[400px] pr-2 -mr-2">
                     @foreach($employees as $employee)
                         <?php
@@ -158,9 +158,9 @@
                                 return $job->employee_id === $employee->id;
                             });
                         ?>
-                        <div class="border border-slate-100 rounded-2xl p-4">
+                        <div class="border border-slate-200 rounded-lg p-4">
                             <div class="flex items-center gap-3 mb-3">
-                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm">{{ $employee->initials() }}</div>
+                                <div class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-sm">{{ $employee->initials() }}</div>
                                 <div>
                                     <div class="font-semibold text-slate-900">{{ $employee->first_name }} {{ $employee->last_name }}</div>
                                     <div class="text-xs text-slate-500">{{ $employee->specialization ?? 'Employee' }}</div>

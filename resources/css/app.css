@@ -2,6 +2,30 @@
 @import '@fortawesome/fontawesome-free/css/all.css';
 @import '../../vendor/livewire/flux/dist/flux.css';
 
+/* Prevent logo from reloading on page navigation */
+img[src*="logo.png"] {
+    content-visibility: auto;
+    contain: layout style paint;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Force browser caching for logo images */
+@supports (content-visibility: auto) {
+    img[src*="logo.png"] {
+        content-visibility: auto;
+    }
+}
+
+/* Specific targeting for owner sidebar logo */
+.owner-logo {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
