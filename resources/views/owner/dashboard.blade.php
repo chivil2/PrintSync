@@ -163,6 +163,14 @@
                             </div>
                         </div>
                         <div class="mt-3 flex justify-end gap-2">
+                            <button @click="approveQuote(quote.id)" class="flex items-center gap-1 rounded-lg bg-green-100 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-200">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                Approve
+                            </button>
+                            <button @click="rejectQuote(quote.id)" class="flex items-center gap-1 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Reject
+                            </button>
                             <a :href="`/owner/quotes/${quote.id}/edit`" class="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 Review
@@ -184,6 +192,45 @@
                 <button @click="nextQuotePage()" :disabled="quotePage === totalQuotePages - 1" class="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </button>
+            </div>
+        </div>
+
+        <!-- Latest Transactions -->
+        <div class="bg-white/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/70 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-900 text-[17px]">Latest Transactions</h3>
+                <a href="{{ route('owner.quotes') }}" class="text-xs font-medium text-blue-600 hover:text-blue-800">View All</a>
+            </div>
+            <div class="space-y-3">
+                @php
+                    $recentTransactions = \App\Models\Quote::with(['customer'])
+                        ->where('status', 'accepted')
+                        ->whereNotNull('payment_status')
+                        ->latest()
+                        ->take(5)
+                        ->get();
+                @endphp
+                @if($recentTransactions->isEmpty())
+                    <div class="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">No recent transactions.</div>
+                @else
+                    @foreach($recentTransactions as $transaction)
+                        <div class="flex items-center justify-between p-3 bg-[#f5ede3] rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                                    {{ $transaction->customer ? $transaction->customer->first_name[0] . $transaction->customer->last_name[0] : 'NA' }}
+                                </div>
+                                <div>
+                                    <div class="font-medium text-slate-900 text-sm">{{ $transaction->customer ? $transaction->customer->first_name . ' ' . $transaction->customer->last_name : 'N/A' }}</div>
+                                    <div class="text-xs text-slate-500">{{ ucfirst(str_replace('_', ' ', $transaction->payment_status ?? 'unpaid')) }}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-slate-900">₱{{ number_format($transaction->total ?? 0, 2) }}</div>
+                                <div class="text-xs text-slate-500">{{ $transaction->created_at ? $transaction->created_at->diffForHumans() : 'N/A' }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
         </div>
 
@@ -547,6 +594,54 @@
                         console.error('Error:', error);
                         alert('Failed to assign employee');
                     });
+                },
+
+                approveQuote(quoteId) {
+                    if (confirm('Are you sure you want to approve this quote?')) {
+                        fetch(`/owner/quotes/${quoteId}/approve`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Failed to approve quote');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to approve quote');
+                        });
+                    }
+                },
+
+                rejectQuote(quoteId) {
+                    if (confirm('Are you sure you want to reject this quote?')) {
+                        fetch(`/owner/quotes/${quoteId}/reject`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Failed to reject quote');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to reject quote');
+                        });
+                    }
                 }
             };
         }

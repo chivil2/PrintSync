@@ -245,6 +245,49 @@ class QuoteController extends Controller
     }
 
     /**
+     * Owner approve the specified quote.
+     */
+    public function ownerApprove(Request $request, Quote $quote)
+    {
+        if (! auth()->user()->can('manage_all_quotes')) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if ($quote->status !== 'pending') {
+            return response()->json(['success' => false, 'message' => 'Quote cannot be approved in current status']);
+        }
+
+        $quote->update([
+            'status' => 'accepted',
+            'approved_at' => now(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Quote approved successfully']);
+    }
+
+    /**
+     * Owner reject the specified quote.
+     */
+    public function ownerReject(Request $request, Quote $quote)
+    {
+        if (! auth()->user()->can('manage_all_quotes')) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if ($quote->status !== 'pending') {
+            return response()->json(['success' => false, 'message' => 'Quote cannot be rejected in current status']);
+        }
+
+        $quote->update([
+            'status' => 'rejected',
+            'rejected_at' => now(),
+            'rejection_reason' => 'Rejected by owner',
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Quote rejected successfully']);
+    }
+
+    /**
      * Display owner's quotes.
      */
     public function ownerIndex()

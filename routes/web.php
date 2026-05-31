@@ -83,6 +83,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('quotes/{quote}/edit', [QuoteController::class, 'ownerEdit'])->name('quotes.edit');
         Route::put('quotes/{quote}', [QuoteController::class, 'ownerUpdate'])->name('quotes.update');
         Route::post('quotes/{quote}/send', [QuoteController::class, 'send'])->name('quotes.send');
+        Route::post('quotes/{quote}/approve', [QuoteController::class, 'ownerApprove'])->name('quotes.approve');
+        Route::post('quotes/{quote}/reject', [QuoteController::class, 'ownerReject'])->name('quotes.reject');
         Route::get('employees', [OwnerController::class, 'employees'])->name('employees');
         Route::get('employees/create', [OwnerController::class, 'createEmployee'])->name('employees.create');
         Route::post('employees', [OwnerController::class, 'storeEmployee'])->name('employees.store');
