@@ -30,7 +30,7 @@
                             <line x1="12" y1="20" x2="12" y2="4"/>
                             <line x1="6" y1="20" x2="6" y2="14"/>
                         </svg>
-                        Reports
+                        Quotes
                     </a>
                     <a href="{{ route('owner.inventory.index') }}" class="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition {{ request()->routeIs('owner.inventory.*') ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300' }}">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

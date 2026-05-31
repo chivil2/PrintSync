@@ -28,7 +28,7 @@
                     <line x1="12" y1="20" x2="12" y2="4"/>
                     <line x1="6" y1="20" x2="6" y2="14"/>
                 </svg>
-                <span class="font-medium text-sm whitespace-nowrap">Reports</span>
+                <span class="font-medium text-sm whitespace-nowrap">Quotes</span>
             </a>
 
             <a href="{{ route('owner.inventory.index') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.inventory.*') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
