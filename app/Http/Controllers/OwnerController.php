@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quote;
-use App\Models\QuoteLineItem;
 use App\Models\ServiceJob;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
@@ -228,20 +226,22 @@ class OwnerController extends Controller
         $completedJobs = $jobsCountByStatus['completed'] ?? 0;
         $completionPercent = $totalJobs > 0 ? round(($completedJobs / $totalJobs) * 100) : 0;
 
-        // Get unassigned jobs (not completed and no employee assigned)
-        $unassignedJobs = ServiceJob::with(['customer', 'employee'])
-            ->whereNull('employee_id')
+        // Get active jobs for assignment queue (not completed, can be assigned or reassigned)
+        $activeJobs = ServiceJob::with(['customer', 'employee'])
             ->where('status', '!=', 'completed')
+            ->where('status', '!=', 'cancelled')
             ->latest()
             ->get();
+
+        $unassignedJobsCount = $activeJobs->whereNull('employee_id')->count();
 
         return view('owner.jobs', [
             'jobs' => $jobs,
             'employees' => $employees,
             'jobsCountByStatus' => $jobsCountByStatus,
             'completionPercent' => $completionPercent,
-            'unassignedJobs' => $unassignedJobs,
-            'unassignedJobsCount' => $unassignedJobs->count(),
+            'unassignedJobs' => $activeJobs,
+            'unassignedJobsCount' => $unassignedJobsCount,
         ]);
     }
 
@@ -332,6 +332,17 @@ class OwnerController extends Controller
                 ? "{$employee->first_name} {$employee->last_name} assigned to \"{$job->name}\""
                 : "Employee unassigned from \"{$job->name}\""
         );
+    }
+
+    /**
+     * Remove the specified job from the database.
+     */
+    public function destroyJob(ServiceJob $job)
+    {
+        $job->delete();
+
+        return redirect()->route('owner.jobs')
+            ->with('success', 'Job deleted successfully.');
     }
 
     public function earningsByPeriod(Request $request): JsonResponse

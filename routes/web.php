@@ -6,7 +6,7 @@ use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OwnerController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\QuoteController;
 use Illuminate\Support\Facades\Route;
 
@@ -72,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
         Route::get('dashboard/earnings', [OwnerController::class, 'earningsByPeriod'])->name('dashboard.earnings');
         Route::get('quotes', [QuoteController::class, 'ownerIndex'])->name('quotes');
-        Route::get('quotes/{quote}/edit', [QuoteController::class, 'ownerEdit'])->name('quotes.edit');
+        Route::get('quotes/{quote}/view', [QuoteController::class, 'ownerView'])->name('quotes.view');
         Route::put('quotes/{quote}', [QuoteController::class, 'ownerUpdate'])->name('quotes.update');
         Route::post('quotes/{quote}/send', [QuoteController::class, 'send'])->name('quotes.send');
         Route::post('quotes/{quote}/approve', [QuoteController::class, 'ownerApprove'])->name('quotes.approve');
@@ -87,8 +87,14 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('employees/{employee}', [OwnerController::class, 'destroyEmployee'])->name('employees.destroy');
         Route::get('jobs', [OwnerController::class, 'jobs'])->name('jobs');
         Route::get('jobs/{job}', [OwnerController::class, 'showJob'])->name('jobs.show');
+        Route::delete('jobs/{job}', [OwnerController::class, 'destroyJob'])->name('jobs.destroy');
         Route::resource('inventory', InventoryController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('products', ProductController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::get('services', [ServiceController::class, 'index'])->name('services.index');
+        Route::get('services/create', [ServiceController::class, 'create'])->name('services.create');
+        Route::post('services', [ServiceController::class, 'store'])->name('services.store');
+        Route::get('services/{id}/{serviceType}/edit', [ServiceController::class, 'edit'])->name('services.edit');
+        Route::put('services/{id}/{serviceType}', [ServiceController::class, 'update'])->name('services.update');
+        Route::delete('services/{id}/{serviceType}', [ServiceController::class, 'destroy'])->name('services.destroy');
     });
 });
 

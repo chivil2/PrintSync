@@ -36,7 +36,7 @@
                                 'rejected' => 'Rejected',
                             ];
                         @endphp
-                        <a href="{{ route('owner.quotes.edit', $quote) }}" class="block bg-white border border-slate-100 rounded-3xl p-6 hover:shadow-md hover:border-slate-200 transition-all cursor-pointer group">
+                        <a href="{{ route('owner.quotes.view', $quote) }}" class="block bg-white border border-slate-100 rounded-3xl p-6 hover:shadow-md hover:border-slate-200 transition-all cursor-pointer group">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-3 mb-3">

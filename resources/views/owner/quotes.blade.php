@@ -36,7 +36,7 @@
                                         <span>Total: ₱{{ number_format($quote->total, 0) }}</span>
                                     </div>
                                 </div>
-                                <a href="{{ route('owner.quotes.edit', $quote) }}" class="ml-4 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800">
+                                <a href="{{ route('owner.quotes.view', $quote) }}" class="ml-4 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800">
                                     View
                                 </a>
                             </div>

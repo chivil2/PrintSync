@@ -138,6 +138,11 @@ class QuoteController extends Controller
                 'employee_id' => 'nullable|exists:users,id',
             ]);
 
+            // Validate that employee can only be assigned if quote is approved
+            if (isset($validated['employee_id']) && $validated['employee_id'] && $quote->status !== 'accepted') {
+                return response()->json(['error' => 'Employee can only be assigned to approved quotes'], 422);
+            }
+
             $quote->update($validated);
 
             return response()->json($quote->load('lineItems'));
@@ -256,8 +261,12 @@ class QuoteController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        if ($quote->status !== 'pending') {
-            return response()->json(['success' => false, 'message' => 'Quote cannot be approved in current status']);
+        if (! in_array($quote->status, ['draft', 'pending'])) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Quote cannot be approved in current status']);
+            }
+
+            return redirect()->back()->with('error', 'Quote cannot be approved in current status');
         }
 
         $quote->update([
@@ -265,7 +274,11 @@ class QuoteController extends Controller
             'approved_at' => now(),
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Quote approved successfully']);
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Quote approved successfully']);
+        }
+
+        return redirect()->route('owner.quotes')->with('success', 'Quote approved successfully');
     }
 
     /**
@@ -315,11 +328,11 @@ class QuoteController extends Controller
     /**
      * Show the form for editing the specified quote.
      */
-    public function ownerEdit(Quote $quote)
+    public function ownerView(Quote $quote)
     {
         $quote->load(['customer', 'serviceJob', 'lineItems']);
 
-        return view('owner.quote-edit', compact('quote'));
+        return view('owner.quote-view', compact('quote'));
     }
 
     /**
@@ -334,6 +347,7 @@ class QuoteController extends Controller
             'total' => 'required|numeric',
             'terms' => 'nullable|string',
             'notes' => 'nullable|string',
+            'employee_id' => 'nullable|exists:users,id',
             'line_items' => 'required|array',
             'line_items.*.id' => 'nullable|exists:quote_line_items,id',
             'line_items.*.item_name' => 'required|string',
@@ -343,6 +357,11 @@ class QuoteController extends Controller
             'line_items.*.line_total' => 'required|numeric',
         ]);
 
+        // Validate that employee can only be assigned if quote is approved
+        if (isset($validated['employee_id']) && $validated['employee_id'] && $quote->status !== 'accepted') {
+            return redirect()->back()->with('error', 'Employee can only be assigned to approved quotes');
+        }
+
         $quote->update([
             'subtotal' => $validated['subtotal'],
             'tax' => $validated['tax'],
@@ -350,6 +369,7 @@ class QuoteController extends Controller
             'total' => $validated['total'],
             'terms' => $validated['terms'] ?? null,
             'notes' => $validated['notes'] ?? null,
+            'employee_id' => $validated['employee_id'] ?? null,
         ]);
 
         foreach ($validated['line_items'] as $item) {
@@ -373,7 +393,7 @@ class QuoteController extends Controller
             }
         }
 
-        return redirect()->route('owner.quotes.edit', $quote)
+        return redirect()->route('owner.quotes.view', $quote)
             ->with('success', 'Quote updated successfully');
     }
 

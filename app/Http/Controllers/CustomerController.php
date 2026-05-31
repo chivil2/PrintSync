@@ -25,17 +25,19 @@ class CustomerController extends Controller
 
         $totalOrders = $orders->count();
         $completedOrders = $orders->where('status', 'completed')->count();
+        $pendingOrders = $orders->where('status', 'pending')->count();
         $totalSpent = Quote::whereHas('serviceJob', function ($q) {
             $q->where('status', 'completed');
         })->where('status', 'accepted')->sum('total') ?? 0;
 
         $recentOrders = $orders->take(5);
-  
+
         $customer = auth()->user();
 
         return view('customer.dashboard', [
             'totalOrders' => $totalOrders,
             'completedOrders' => $completedOrders,
+            'pendingOrders' => $pendingOrders,
             'totalSpent' => $totalSpent,
             'recentOrders' => $recentOrders,
             'customer' => $customer,
@@ -85,8 +87,7 @@ class CustomerController extends Controller
             'customer_id' => auth()->id(),
             'service_id' => $service->id,
             'service_type' => $validated['service_type'] === 'printing' ? 'printing_service' : 'technical_service',
-            'status' => null,
-            'priority' => null,
+            'status' => 'pending',
             'deadline' => $validated['deadline'],
             'notes' => $validated['notes'] ?? null,
             'request_invoice' => isset($validated['request_invoice']),

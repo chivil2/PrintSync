@@ -301,48 +301,7 @@
                 </div>
             @endif
 
-            <!-- Payment Information Section -->
-            @if($order->quote)
-                <div class="bg-blue-50 rounded-xl p-6 border border-blue-200 mt-6">
-                    <h2 class="text-lg font-bold text-gray-900 mb-4">Payment Information</h2>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between py-2 border-b border-blue-200">
-                            <span class="text-gray-600">Preferred Payment Method</span>
-                            <span class="font-medium text-gray-900">{{ $customer->preferred_payment_method ? ucfirst($customer->preferred_payment_method) : 'Not set' }}</span>
-                        </div>
 
-                        <div class="flex items-center justify-between py-2 border-b border-blue-200">
-                            <span class="text-gray-600">Payment Status</span>
-                            @php
-                                $paymentStatusConfig = [
-                                    'pending' => ['bg-amber-100 text-amber-700', 'Pending'],
-                                    'paid' => ['bg-emerald-100 text-emerald-700', 'Paid'],
-                                    'partial' => ['bg-blue-100 text-blue-700', 'Partial'],
-                                    'overdue' => ['bg-red-100 text-red-700', 'Overdue'],
-                                ];
-                                $paymentStatusInfo = $paymentStatusConfig[$order->quote->payment_status ?? 'pending'] ?? ['bg-gray-100 text-gray-700', ucfirst($order->quote->payment_status ?? 'pending')];
-                            @endphp
-                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold {{ $paymentStatusInfo[0] }}">
-                                {{ $paymentStatusInfo[1] }}
-                            </span>
-                        </div>
-
-                        @if($order->quote->approved_at)
-                            <div class="flex items-center justify-between py-2">
-                                <span class="text-gray-600">Quote Approved</span>
-                                <span class="font-medium text-gray-900">{{ $order->quote->approved_at->format('M d, Y') }}</span>
-                            </div>
-                        @endif
-
-                        @if($order->quote->sent_at)
-                            <div class="flex items-center justify-between py-2">
-                                <span class="text-gray-600">Quote Sent</span>
-                                <span class="font-medium text-gray-900">{{ $order->quote->sent_at->format('M d, Y') }}</span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            @endif
         </div>
 
         <!-- Receipt Footer -->

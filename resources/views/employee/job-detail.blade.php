@@ -202,7 +202,7 @@
                                             </p>
                                         @endif
                                     </div>
-                                    <a href="{{ route('owner.quotes.edit', $job->quote) }}" class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors cursor-pointer shadow-sm">
+                                    <a href="{{ route('owner.quotes.view', $job->quote) }}" class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors cursor-pointer shadow-sm">
                                         <i class="fa-solid fa-file-lines text-xs"></i>
                                         View Quote
                                     </a>

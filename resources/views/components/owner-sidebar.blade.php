@@ -38,11 +38,11 @@
                 <span class="font-medium text-sm whitespace-nowrap">Inventory</span>
             </a>
 
-            <a href="{{ route('owner.products.index') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.products.*') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
+            <a href="{{ route('owner.services.index') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.services.*') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
                 </svg>
-                <span class="font-medium text-sm whitespace-nowrap">Products</span>
+                <span class="font-medium text-sm whitespace-nowrap">Services</span>
             </a>
 
             <a href="{{ route('owner.jobs') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.jobs*') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
@@ -53,7 +53,7 @@
             </a>
 
             <!-- Employee Management Section -->
-            <div x-data="{ employeesExpanded: false }">
+            <div x-data="{ employeesExpanded: localStorage.getItem('ownerSidebarEmployeesExpanded') === 'true' }" x-init="$watch('employeesExpanded', value => localStorage.setItem('ownerSidebarEmployeesExpanded', value))">
                 <button @click="employeesExpanded = !employeesExpanded" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg text-slate-900 hover:bg-slate-100 transition-all">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -86,9 +86,13 @@
                             <div class="text-xs font-medium text-slate-400 mb-2">Active Employees</div>
                             @foreach($employees as $employee)
                                 <a href="{{ route('owner.employees.edit', $employee) }}" class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-all">
-                                    <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-semibold">
-                                        {{ strtoupper(substr($employee->first_name, 0, 1)) }}{{ strtoupper(substr($employee->last_name, 0, 1)) }}
-                                    </div>
+                                    @if($employee->profile_photo_path)
+                                        <img src="{{ asset('storage/' . $employee->profile_photo_path) }}" alt="{{ $employee->first_name }} {{ $employee->last_name }}" class="w-6 h-6 rounded-full object-cover">
+                                    @else
+                                        <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-semibold">
+                                            {{ $employee->initials() }}
+                                        </div>
+                                    @endif
                                     <div class="flex-1 min-w-0">
                                         <div class="text-xs font-medium text-slate-900 truncate">{{ $employee->first_name }} {{ $employee->last_name }}</div>
                                         <div class="text-xs text-slate-500 truncate">{{ $employee->specialization ?? 'Employee' }}</div>

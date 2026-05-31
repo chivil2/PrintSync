@@ -4,77 +4,6 @@
             <x-printsync-toast :message="session('success')" />
         @endif
 
-        <!-- Order Status Overview -->
-        <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
-            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Order Status Overview</h3>
-            <div class="flex flex-col items-center gap-6 lg:flex-row lg:items-start">
-                @php
-                    $totalJobs = array_sum($jobsCountByStatus);
-                    $completed = $jobsCountByStatus['completed'] ?? 0;
-                    $inProgress = $jobsCountByStatus['in_progress'] ?? 0;
-                    $pending = $jobsCountByStatus['pending'] ?? 0;
-                    $overdue = $jobsCountByStatus['overdue'] ?? 0;
-                    
-                    $circumference = 2 * M_PI * 80; // 502
-                    $completedOffset = 0;
-                    $inProgressOffset = -($completed / $totalJobs) * $circumference;
-                    $pendingOffset = -(($completed + $inProgress) / $totalJobs) * $circumference;
-                    $overdueOffset = -(($completed + $inProgress + $pending) / $totalJobs) * $circumference;
-                    
-                    $completedDash = ($completed / $totalJobs) * $circumference;
-                    $inProgressDash = ($inProgress / $totalJobs) * $circumference;
-                    $pendingDash = ($pending / $totalJobs) * $circumference;
-                    $overdueDash = ($overdue / $totalJobs) * $circumference;
-                @endphp
-                <div class="relative w-[240px] h-[240px] shrink-0">
-                    <svg viewBox="0 0 240 240" class="w-full h-full">
-                        <!-- Pie chart segments -->
-                        <circle cx="120" cy="120" r="120" fill="none" stroke="#e2e8f0" stroke-width="40"/>
-                        @if($totalJobs > 0)
-                            <circle cx="120" cy="120" r="80" fill="none" stroke="#10b981" stroke-width="40" stroke-dasharray="{{ $completedDash }} {{ $circumference - $completedDash }}" stroke-dashoffset="{{ $completedOffset }}" transform="rotate(90 120 120)"/>
-                            <circle cx="120" cy="120" r="80" fill="none" stroke="#3b82f6" stroke-width="40" stroke-dasharray="{{ $inProgressDash }} {{ $circumference - $inProgressDash }}" stroke-dashoffset="{{ $inProgressOffset }}" transform="rotate(90 120 120)"/>
-                            <circle cx="120" cy="120" r="80" fill="none" stroke="#f97316" stroke-width="40" stroke-dasharray="{{ $pendingDash }} {{ $circumference - $pendingDash }}" stroke-dashoffset="{{ $pendingOffset }}" transform="rotate(90 120 120)"/>
-                            <circle cx="120" cy="120" r="80" fill="none" stroke="#ef4444" stroke-width="40" stroke-dasharray="{{ $overdueDash }} {{ $circumference - $overdueDash }}" stroke-dashoffset="{{ $overdueOffset }}" transform="rotate(90 120 120)"/>
-                        @endif
-                    </svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div class="text-4xl font-bold text-slate-900">{{ $completionPercent }}%</div>
-                        <div class="text-sm text-slate-500">Completion</div>
-                    </div>
-                </div>
-                <div class="grid w-full grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:flex-1">
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div class="flex items-center gap-3">
-                            <span class="w-3.5 h-3.5 rounded-full bg-green-500"></span>
-                            <span class="text-slate-700">Completed</span>
-                        </div>
-                        <span class="font-bold text-xl text-slate-900">{{ $completed }}</span>
-                    </div>
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div class="flex items-center gap-3">
-                            <span class="w-3.5 h-3.5 rounded-full bg-blue-500"></span>
-                            <span class="text-slate-700">In Progress</span>
-                        </div>
-                        <span class="font-bold text-xl text-slate-900">{{ $inProgress }}</span>
-                    </div>
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div class="flex items-center gap-3">
-                            <span class="w-3.5 h-3.5 rounded-full bg-orange-500"></span>
-                            <span class="text-slate-700">Pending</span>
-                        </div>
-                        <span class="font-bold text-xl text-slate-900">{{ $pending }}</span>
-                    </div>
-                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div class="flex items-center gap-3">
-                            <span class="w-3.5 h-3.5 rounded-full bg-red-500"></span>
-                            <span class="text-slate-700">Overdue</span>
-                        </div>
-                        <span class="font-bold text-xl text-slate-900">{{ $overdue }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Order Assignment Queue -->
         <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
             <div class="mb-4 flex items-center justify-between gap-3">
@@ -82,7 +11,7 @@
                     <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Order Assignment Queue</h3>
                     <p class="text-sm text-slate-500">Assign or reassign employees to active orders</p>
                 </div>
-                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{{ $unassignedJobsCount ?? 0 }} unassigned active orders</span>
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{{ $unassignedJobsCount ?? 0 }} unassigned · {{ $unassignedJobs->count() }} active orders</span>
             </div>
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 @foreach($unassignedJobs as $job)
@@ -92,23 +21,26 @@
                                 <p class="font-semibold text-slate-900 truncate">{{ $job->customer->first_name ?? 'N/A' }} {{ $job->customer->last_name ?? '' }}</p>
                                 <p class="text-xs text-slate-500 truncate">{{ ucfirst(str_replace('_', ' ', $job->service_type)) }} · {{ $job->name }} · Due {{ $job->deadline ? $job->deadline->format('M d, Y') : 'N/A' }}</p>
                             </div>
-                            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium {{ $job->status === 'pending' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
+                            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium {{ $job->status === 'completed' ? 'bg-green-100 text-green-700' : ($job->status === 'in_progress' ? 'bg-blue-100 text-blue-700' : ($job->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')) }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
                         </div>
                         <div class="mt-3 flex items-center justify-between gap-3">
                             <div class="text-xs text-slate-600">
                                 <span class="block text-slate-500">Assigned to</span>
                                 <span class="font-semibold text-slate-900">{{ $job->employee ? $job->employee->first_name . ' ' . $job->employee->last_name : 'Unassigned' }}</span>
                             </div>
-                            <button @click="assignEmployee({{ $job->id }})" class="flex items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                Assign
-                            </button>
+                            @if($job->status !== 'cancelled')
+                                <button @click="assignEmployee({{ $job->id }})" class="flex items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    {{ $job->employee ? 'Change Assign' : 'Assign' }}
+                                </button>
+                            @endif
                         </div>
                     </div>
                 @endforeach
                 @if($unassignedJobs->isEmpty())
                     <div class="col-span-full text-center py-8 text-slate-500 text-sm">No unassigned orders</div>
                 @endif
+
             </div>
         </div>
 
@@ -141,7 +73,10 @@
                                 <a href="{{ route('owner.jobs.show', $job) }}" class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-white/70" title="View details">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap {{ $job->status === 'completed' ? 'bg-green-100 text-green-700' : ($job->status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700') }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
+                                <button @click="confirmDeleteJob({{ $job->id }}, {{ Js::from($job->name) }})" class="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50" title="Delete job">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap {{ $job->status === 'completed' ? 'bg-green-100 text-green-700' : ($job->status === 'in_progress' ? 'bg-blue-100 text-blue-700' : ($job->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')) }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
                             </div>
                         </div>
                     @endforeach
@@ -160,7 +95,11 @@
                         ?>
                         <div class="border border-slate-200 rounded-lg p-4">
                             <div class="flex items-center gap-3 mb-3">
-                                <div class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-sm">{{ $employee->initials() }}</div>
+                                @if($employee->profile_photo_path)
+                                    <img src="{{ asset('storage/' . $employee->profile_photo_path) }}" alt="{{ $employee->first_name }} {{ $employee->last_name }}" class="w-9 h-9 rounded-lg object-cover">
+                                @else
+                                    <div class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-sm">{{ $employee->initials() }}</div>
+                                @endif
                                 <div>
                                     <div class="font-semibold text-slate-900">{{ $employee->first_name }} {{ $employee->last_name }}</div>
                                     <div class="text-xs text-slate-500">{{ $employee->specialization ?? 'Employee' }}</div>
@@ -174,13 +113,30 @@
                                         <div class="font-medium text-slate-900">{{ $job->name }}</div>
                                         <div class="flex justify-between text-xs text-slate-500 mt-1">
                                             <span>{{ $job->customer->first_name ?? 'N/A' }} {{ $job->customer->last_name ?? '' }}</span>
-                                            <span class="rounded-full px-2 py-0.5 font-medium {{ $job->status === 'completed' ? 'bg-green-100 text-green-700' : ($job->status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700') }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
+                                            <span class="rounded-full px-2 py-0.5 font-medium {{ $job->status === 'completed' ? 'bg-green-100 text-green-700' : ($job->status === 'in_progress' ? 'bg-blue-100 text-blue-700' : ($job->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')) }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
                                         </div>
                                     </div>
                                 @endforeach
                             @endif
                         </div>
                     @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div x-show="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="closeDeleteModal()" style="display: none;">
+            <div class="w-full max-w-sm mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="px-6 py-5">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <h3 class="text-base font-semibold text-center text-slate-900 mb-1">Delete Job</h3>
+                    <p class="text-sm text-center text-slate-500">Are you sure you want to delete <span x-text="deleteJobName" class="font-medium text-slate-700"></span>? This action cannot be undone.</p>
+                </div>
+                <div class="flex gap-3 px-6 py-4 bg-slate-50">
+                    <button @click="closeDeleteModal()" class="flex-1 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition">Cancel</button>
+                    <button @click="submitDelete()" class="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition">Delete</button>
                 </div>
             </div>
         </div>
@@ -218,11 +174,14 @@
                 jobStatusFilter: 'all',
                 showEmployeeModal: false,
                 selectedJobId: null,
-                
+                showDeleteModal: false,
+                deleteJobId: null,
+                deleteJobName: '',
+
                 initJobs() {
                     // Initialize any jobs-specific logic
                 },
-                
+
                 assignEmployee(jobId) {
                     this.selectedJobId = jobId;
                     this.showEmployeeModal = true;
@@ -258,6 +217,41 @@
                 closeModal() {
                     this.showEmployeeModal = false;
                     this.selectedJobId = null;
+                },
+
+                confirmDeleteJob(jobId, jobName) {
+                    this.deleteJobId = jobId;
+                    this.deleteJobName = jobName;
+                    this.showDeleteModal = true;
+                },
+
+                submitDelete() {
+                    fetch(`/owner/jobs/${this.deleteJobId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok || response.redirected) {
+                            window.location.reload();
+                        } else {
+                            alert('Failed to delete job');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to delete job');
+                    })
+                    .finally(() => {
+                        this.closeDeleteModal();
+                    });
+                },
+
+                closeDeleteModal() {
+                    this.showDeleteModal = false;
+                    this.deleteJobId = null;
+                    this.deleteJobName = '';
                 }
             };
         }

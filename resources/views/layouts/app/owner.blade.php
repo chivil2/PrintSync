@@ -38,11 +38,11 @@
                         </svg>
                         Inventory
                     </a>
-                    <a href="{{ route('owner.products.index') }}" class="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition {{ request()->routeIs('owner.products.*') ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300' }}">
+                    <a href="{{ route('owner.services.index') }}" class="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition {{ request()->routeIs('owner.services.*') ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300' }}">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
                         </svg>
-                        Products
+                        Services
                     </a>
                     <a href="{{ route('owner.employees') }}" class="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition {{ request()->routeIs('owner.employees*') ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300' }}">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
