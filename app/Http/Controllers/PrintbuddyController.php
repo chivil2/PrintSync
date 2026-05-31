@@ -22,33 +22,150 @@ class PrintbuddyController extends Controller
 
         $apiKey = config('services.groq.api_key');
         $model = config('services.groq.model');
+        $printbuddyApiKey = config('services.printbuddy.api_key');
+
+        // Define available tools for function calling
+        $tools = [
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'get_services',
+                    'description' => 'Get all available printing and technical services with their details',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => (object)[],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'get_inventory',
+                    'description' => 'Get all inventory items with their current stock levels and details',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => (object)[],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'get_employees',
+                    'description' => 'Get all employees with their status and details',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => (object)[],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'get_jobs',
+                    'description' => 'Get all jobs with their current status and details',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => (object)[],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'get_quotes',
+                    'description' => 'Get all quotes with their status and details',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => (object)[],
+                    ],
+                ],
+            ],
+        ];
 
         try {
+            $messages = [
+                [
+                    'role' => 'system',
+                    'content' => 'You are PrintBuddy, a helpful AI assistant for a printing business. You are talking with the business owner and your role is to assist them with managing their printing business. Help with printing services, pricing, inventory questions, employee management, customer inquiries, and general business operations. Be friendly, professional, and concise. Remember that you are the assistant and the user is the owner.
+
+When presenting lists (such as services, inventory items, or any enumerated data):
+- Show only 5 items by default
+- If the user asks for more, you can show up to 10 items maximum
+- Always indicate if there are more items available beyond what you show
+- Use Markdown formatting for lists and other structured content
+- We are using Php Currency
+You have access to tools to get real-time data about services, inventory, employees, jobs, and quotes. Use these tools when the user asks for information about these topics.',
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $validated['message'],
+                ],
+            ];
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$apiKey,
                 'Content-Type' => 'application/json',
             ])->withoutVerifying()->post('https://api.groq.com/openai/v1/chat/completions', [
                 'model' => $model,
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'You are PrintBuddy, a helpful AI assistant for a printing business. You help customers with printing services, pricing, inventory questions, and general business inquiries. Be friendly, professional, and concise.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => $validated['message'],
-                    ],
-                ],
+                'messages' => $messages,
+                'tools' => $tools,
+                'tool_choice' => 'auto',
                 'temperature' => 0.7,
                 'max_tokens' => 500,
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                $aiMessage = $data['choices'][0]['message']['content'] ?? 'Sorry, I could not generate a response.';
+                $aiMessage = $data['choices'][0]['message'] ?? null;
+
+                // Check if the AI wants to call a tool
+                if (isset($aiMessage['tool_calls'])) {
+                    // Execute the tool calls
+                    $toolResponses = [];
+                    foreach ($aiMessage['tool_calls'] as $toolCall) {
+                        $functionName = $toolCall['function']['name'];
+                        $functionArgs = json_decode($toolCall['function']['arguments'] ?? '{}', true);
+
+                        $toolResult = $this->executeTool($functionName, $functionArgs, $printbuddyApiKey);
+                        $toolResponses[] = [
+                            'tool_call_id' => $toolCall['id'],
+                            'role' => 'tool',
+                            'content' => json_encode($toolResult),
+                        ];
+                    }
+
+                    // Add the assistant message with tool calls and tool responses to the conversation
+                    $messages[] = $aiMessage;
+                    $messages = array_merge($messages, $toolResponses);
+
+                    // Get the final response from the AI
+                    $finalResponse = Http::withHeaders([
+                        'Authorization' => 'Bearer '.$apiKey,
+                        'Content-Type' => 'application/json',
+                    ])->withoutVerifying()->post('https://api.groq.com/openai/v1/chat/completions', [
+                        'model' => $model,
+                        'messages' => $messages,
+                        'temperature' => 0.7,
+                        'max_tokens' => 500,
+                    ]);
+
+                    if ($finalResponse->successful()) {
+                        $finalData = $finalResponse->json();
+                        $finalMessage = $finalData['choices'][0]['message']['content'] ?? 'Sorry, I could not generate a response.';
+
+                        return response()->json([
+                            'message' => $finalMessage,
+                            'conversation_id' => $validated['conversation_id'] ?? null,
+                        ]);
+                    }
+                }
+
+                // If no tool calls, return the direct message
+                $messageContent = $aiMessage['content'] ?? 'Sorry, I could not generate a response.';
 
                 return response()->json([
-                    'message' => $aiMessage,
+                    'message' => $messageContent,
                     'conversation_id' => $validated['conversation_id'] ?? null,
                 ]);
             }
@@ -76,6 +193,42 @@ class PrintbuddyController extends Controller
                 'message' => 'Sorry, something went wrong. Please try again.',
                 'conversation_id' => $validated['conversation_id'] ?? null,
             ], 500);
+        }
+    }
+
+    /**
+     * Execute a tool function and return the result.
+     */
+    private function executeTool(string $functionName, array $functionArgs, string $apiKey): array
+    {
+        try {
+            $endpoint = match($functionName) {
+                'get_services' => 'https://api.groq.com/openai/v1/chat/completions',
+                'get_inventory' => 'https://api.groq.com/openai/v1/chat/completions',
+                'get_employees' => 'https://api.groq.com/openai/v1/chat/completions',
+                'get_jobs' => 'https://api.groq.com/openai/v1/chat/completions',
+                'get_quotes' => 'https://api.groq.com/openai/v1/chat/completions',
+                default => null,
+            };
+
+            // Call the internal methods directly instead of making HTTP requests
+            $result = match($functionName) {
+                'get_services' => $this->getServices()->getData(true),
+                'get_inventory' => $this->getInventory()->getData(true),
+                'get_employees' => $this->getEmployees()->getData(true),
+                'get_jobs' => $this->getJobs()->getData(true),
+                'get_quotes' => $this->getQuotes()->getData(true),
+                default => ['error' => 'Unknown function'],
+            };
+
+            return $result;
+        } catch (\Exception $e) {
+            \Log::error('Tool execution error', [
+                'function' => $functionName,
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['error' => 'Failed to execute tool: ' . $e->getMessage()];
         }
     }
 
@@ -149,6 +302,104 @@ class PrintbuddyController extends Controller
 
         return response()->json([
             'inventory' => $inventory,
+        ]);
+    }
+
+    /**
+     * MCP: Get available tools/functions for PrintBuddy.
+     */
+    public function getTools(): JsonResponse
+    {
+        $tools = [
+            [
+                'name' => 'get_services',
+                'description' => 'Get all available printing and technical services with their details',
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => (object)[],
+                ],
+            ],
+            [
+                'name' => 'get_inventory',
+                'description' => 'Get all inventory items with their current stock levels and details',
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => (object)[],
+                ],
+            ],
+            [
+                'name' => 'get_employees',
+                'description' => 'Get all employees with their status and details',
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => (object)[],
+                ],
+            ],
+            [
+                'name' => 'get_jobs',
+                'description' => 'Get all jobs with their current status and details',
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => (object)[],
+                ],
+            ],
+            [
+                'name' => 'get_quotes',
+                'description' => 'Get all quotes with their status and details',
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => (object)[],
+                ],
+            ],
+        ];
+
+        return response()->json([
+            'tools' => $tools,
+        ]);
+    }
+
+    /**
+     * MCP: Get all employees.
+     */
+    public function getEmployees(): JsonResponse
+    {
+        $employees = DB::table('users')
+            ->join('employees', 'users.id', '=', 'employees.user_id')
+            ->select('users.id', 'users.name', 'users.email', 'employees.position', 'employees.status', 'employees.hire_date')
+            ->get();
+
+        return response()->json([
+            'employees' => $employees,
+        ]);
+    }
+
+    /**
+     * MCP: Get all jobs.
+     */
+    public function getJobs(): JsonResponse
+    {
+        $jobs = DB::table('service_jobs')
+            ->select('id', 'customer_name', 'service_name', 'status', 'created_at', 'updated_at', 'assigned_to')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'jobs' => $jobs,
+        ]);
+    }
+
+    /**
+     * MCP: Get all quotes.
+     */
+    public function getQuotes(): JsonResponse
+    {
+        $quotes = DB::table('quotes')
+            ->select('id', 'customer_name', 'total_amount', 'status', 'created_at', 'updated_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'quotes' => $quotes,
         ]);
     }
 }

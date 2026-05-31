@@ -8,11 +8,11 @@
             PrintBuddy
         </div>
         <div class="flex items-center gap-2">
-            <span class="bg-purple-100 text-purple-600 text-xs font-bold px-2 py-1 rounded-full">AI</span>
-            <svg x-show="!isExpanded" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <img src="{{ asset('images/guy_welcome.svg') }}" alt="PrintBuddy" class="w-6 h-6 rounded-full object-cover">
+            <svg x-show="!isExpanded" class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
             </svg>
-            <svg x-show="isExpanded" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg x-show="isExpanded" class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7 7" />
             </svg>
         </div>
@@ -23,29 +23,31 @@
         <div class="p-4 overflow-y-auto flex-1 min-h-0 space-y-3" id="printbuddy-messages">
             <!-- Welcome Message -->
             <div class="flex gap-2">
-                <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">PB</div>
+                <img src="{{ asset('images/guy_welcome.svg') }}" alt="PrintBuddy" class="w-8 h-8 rounded-full flex-shrink-0 object-cover">
                 <div class="bg-white border border-purple-200 rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm">
-                    <p class="text-sm text-slate-700">Hello! I'm PrintBuddy, your AI assistant. How can I help you manage your printing business today?</p>
+                    <div class="text-sm prose prose-sm prose-purple max-w-none" x-html="parseMarkdown('Hello! I\'m PrintBuddy, your AI assistant. How can I help you manage your printing business today?')"></div>
                 </div>
             </div>
 
             <!-- Dynamic Messages -->
             <template x-for="message in messages" :key="message.id">
                 <div class="flex gap-2" :class="message.role === 'user' ? 'flex-row-reverse' : ''">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0"
-                         :class="message.role === 'user' ? 'bg-gradient-to-br from-orange-400 to-pink-500' : 'bg-purple-500'">
-                        <span x-text="message.role === 'user' ? 'U' : 'PB'"></span>
-                    </div>
+                    <template x-if="message.role === 'user'">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">U</div>
+                    </template>
+                    <template x-if="message.role === 'assistant'">
+                        <img src="{{ asset('images/guy_welcome.svg') }}" alt="PrintBuddy" class="w-8 h-8 rounded-full flex-shrink-0 object-cover">
+                    </template>
                     <div class="rounded-2xl p-3 max-w-[85%] shadow-sm"
                          :class="message.role === 'user' ? 'bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-tr-none' : 'bg-white border border-purple-200 rounded-tl-none'">
-                        <p class="text-sm" x-text="message.content"></p>
+                        <div class="text-sm prose prose-sm prose-purple max-w-none" :class="message.role === 'user' ? 'prose-invert' : ''" x-html="message.role === 'assistant' ? parseMarkdown(message.content) : message.content"></div>
                     </div>
                 </div>
             </template>
 
             <!-- Loading Indicator -->
             <div x-show="isLoading" class="flex gap-2">
-                <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">PB</div>
+                <img src="{{ asset('images/guy_welcome.svg') }}" alt="PrintBuddy" class="w-8 h-8 rounded-full flex-shrink-0 object-cover">
                 <div class="bg-white border border-purple-200 rounded-2xl rounded-tl-none p-3 max-w-[85%] shadow-sm">
                     <div class="flex gap-1">
                         <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
@@ -80,6 +82,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 function printbuddyChat() {
     return {
@@ -97,6 +100,10 @@ function printbuddyChat() {
         toggleExpanded() {
             this.isExpanded = !this.isExpanded;
             this.$dispatch('toggle-printbuddy');
+        },
+
+        parseMarkdown(text) {
+            return marked.parse(text);
         },
 
         async sendMessage() {
