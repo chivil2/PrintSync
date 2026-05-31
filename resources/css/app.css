@@ -89,25 +89,33 @@ flux\\:sidebar-item {
     --blue: #4A6CF7;
     --blue-dark: #3A5CE0;
     --blue-light: #EEF1FE;
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Welcome Banner */
 .welcome-banner-wrap {
     position: relative;
     z-index: 1;
+    margin-top: 40px;
+}
+
+@media (min-width: 1024px) {
+    .welcome-banner-wrap {
+        margin-top: 50px;
+    }
 }
 
 .welcome-banner {
     position: relative;
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
     background: linear-gradient(90deg, var(--orange), var(--orange-dark), var(--blue));
-    padding: 36px;
+    padding: 28px 32px;
 }
 
 @media (min-width: 1024px) {
     .welcome-banner {
-        padding: 40px;
+        padding: 32px 36px;
     }
 }
 
@@ -157,27 +165,25 @@ flux\\:sidebar-item {
 .welcome-illustration {
     position: absolute;
     bottom: 0;
-    right: 32px;
+    right: 28px;
     z-index: 2;
     pointer-events: none;
     line-height: 0;
 }
 
 .welcome-illustration img {
-    height: 195px;
+    height: 180px;
     width: auto;
     display: block;
-    /* Align to bottom edge of banner */
-    vertical-align: bottom;
-    filter: drop-shadow(0 -4px 16px rgba(0,0,0,0.18));
+    filter: drop-shadow(0 -3px 14px rgba(0,0,0,0.16));
 }
 
 @media (min-width: 1024px) {
     .welcome-illustration {
-        right: 48px;
+        right: 40px;
     }
     .welcome-illustration img {
-        height: 230px;
+        height: 210px;
     }
 }
 
@@ -192,17 +198,19 @@ flux\\:sidebar-item {
     font-weight: 600;
     color: white;
     margin-bottom: 8px;
+    line-height: 1.2;
 }
 
 @media (min-width: 1024px) {
     .welcome-content h1 {
-        font-size: 32px;
+        font-size: 34px;
     }
 }
 
 .welcome-content p {
     font-size: 15px;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.88);
+    line-height: 1.4;
 }
 
 /* Status Pill */
@@ -246,161 +254,226 @@ flux\\:sidebar-item {
 .stats-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 16px;
 }
 
 @media (min-width: 640px) {
     .stats-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
     }
 }
 
 .stat-card {
-    border: 1px solid #F3F4F6;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #000000;
+    border-radius: 14px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-4px);
+    filter: brightness(1.05);
 }
 
 .stat-card-inner {
-    padding: 20px;
-    border-radius: 15px;
-}
-
-.stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    padding: 16px;
     display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+    gap: 16px;
 }
 
-.stat-icon.orange {
-    background: var(--orange-light);
-    color: var(--orange);
+/* Featured Total Orders card */
+.stat-card--featured {
+    background: linear-gradient(to bottom right, #FDBA74 0%, #EA580C 100%);
+}
+
+.stat-icon--featured {
+    color: white;
+}
+
+.stat-label--featured {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.stat-value--featured {
+    color: white;
+}
+
+.stat-trend--featured {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+}
+
+/* Green gradient card */
+.stat-card--green {
+    background: linear-gradient(to bottom right, #34D399 0%, #059669 100%);
+}
+
+.stat-label--green {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.stat-value--green {
+    color: white;
+}
+
+.stat-trend--green {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
 }
 
 .stat-icon.green {
-    background: #ECFDF5;
-    color: #22C55E;
+    color: white;
+}
+
+/* Blue gradient card */
+.stat-card--blue {
+    background: linear-gradient(to bottom right, #60A5FA 0%, #2563EB 100%);
+}
+
+.stat-label--blue {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.stat-value--blue {
+    color: white;
+}
+
+.stat-trend--blue {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
 }
 
 .stat-icon.blue {
-    background: var(--blue-light);
-    color: var(--blue);
+    color: white;
+}
+
+.stat-icon {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon svg {
+    width: 36px;
+    height: 36px;
+}
+
+.stat-icon.orange {
+    color: white;
+}
+
+.stat-icon.green {
+    color: white;
+}
+
+.stat-icon.blue {
+    color: white;
 }
 
 .stat-label {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 500;
-    color: #6B7280;
-    margin-top: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0;
+    letter-spacing: -0.01em;
 }
 
 .stat-value {
-    font-size: 26px;
-    font-weight: 600;
-    color: #111827;
+    font-size: 36px;
+    font-weight: 700;
+    color: white;
     margin-top: 4px;
+    line-height: 1.1;
 }
 
 .stat-trend {
-    font-size: 12px;
-    color: #6B7280;
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.4);
     margin-top: 4px;
 }
 
 /* Quick Actions */
-.quick-actions-card {
-    border: 1px solid #F3F4F6;
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-@media (min-width: 1024px) {
-    .quick-actions-card {
-        padding: 28px;
-    }
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.quick-actions-section {
     margin-bottom: 24px;
 }
 
-.section-title {
-    font-size: 17px;
-    font-weight: 600;
-    color: #111827;
+.quick-actions-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
-.section-accent {
-    width: 32px;
-    height: 4px;
+.quick-actions-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    letter-spacing: -0.01em;
+}
+
+.quick-actions-accent {
+    width: 24px;
+    height: 3px;
     background: linear-gradient(90deg, var(--orange), var(--blue));
-    opacity: 0.6;
+    opacity: 0.7;
     border-radius: 2px;
 }
 
 .quick-actions-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 @media (min-width: 640px) {
     .quick-actions-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (min-width: 1024px) {
-    .quick-actions-grid {
-        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
     }
 }
 
 .quick-action-btn {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    border: 1px solid #F3F4F6;
-    background: linear-gradient(180deg, white 0%, rgba(249, 250, 251, 0.5) 100%);
-    border-radius: 12px;
-    padding: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #E5E7EB;
+    background: linear-gradient(180deg, white 0%, rgba(249, 250, 251, 0.3) 100%);
+    border-radius: 10px;
+    padding: 10px 14px;
     text-decoration: none;
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .quick-action-btn:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+    border-color: #D1D5DB;
 }
 
 .quick-action-icon {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-action-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 .quick-action-btn:hover .quick-action-icon {
-    transform: scale(1.1) rotate(-3deg);
+    transform: scale(1.05);
 }
 
 .quick-action-icon.orange {
@@ -427,57 +500,55 @@ flux\\:sidebar-item {
     font-size: 14px;
     font-weight: 600;
     color: #111827;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
 }
 
 .quick-action-desc {
-    font-size: 12.5px;
-    color: #6B7280;
+    display: none;
 }
 
 .quick-action-arrow {
-    color: #D1D5DB;
-    transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.quick-action-btn:hover .quick-action-arrow {
-    transform: translateX(2px);
-    color: #9CA3AF;
+    display: none;
 }
 
 /* Recent Orders */
 .recent-orders-card {
-    border: 1px solid #F3F4F6;
+    border: 1px solid #E5E7EB;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .recent-orders-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #F3F4F6;
-    padding: 16px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    padding: 18px 24px;
+    background: #3B82F6;
+    border-radius: 14px 14px 0 0;
 }
 
 @media (min-width: 1024px) {
     .recent-orders-header {
-        padding: 16px 28px;
+        padding: 18px 26px;
     }
 }
 
 .recent-orders-title {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 600;
-    color: #111827;
+    color: white;
+    letter-spacing: -0.01em;
 }
 
 .view-all-link {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 500;
-    color: var(--orange);
+    color: white;
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .view-all-link:hover {
@@ -485,7 +556,7 @@ flux\\:sidebar-item {
 }
 
 .recent-orders-body {
-    padding: 12px;
+    padding: 14px;
 }
 
 @media (min-width: 1024px) {
@@ -495,16 +566,17 @@ flux\\:sidebar-item {
 }
 
 .order-card {
-    border: 1px solid #F3F4F6;
-    background: linear-gradient(180deg, rgba(249, 250, 251, 0.7) 0%, white 100%);
-    border-radius: 12px;
-    padding: 16px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #E5E7EB;
+    background: linear-gradient(180deg, rgba(249, 250, 251, 0.5) 0%, white 100%);
+    border-radius: 10px;
+    padding: 18px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .order-card:hover {
-    border-color: #E5E7EB;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #D1D5DB;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
 }
 
 .order-card-inner {
@@ -514,22 +586,28 @@ flux\\:sidebar-item {
 
 .order-icon {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     background: var(--blue-light);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--blue);
+    flex-shrink: 0;
+}
+
+.order-icon svg {
+    width: 24px;
+    height: 24px;
 }
 
 .order-status-dot {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 12px;
-    height: 12px;
+    bottom: -1px;
+    right: -1px;
+    width: 10px;
+    height: 10px;
     background: #FBBF24;
     border-radius: 50%;
     border: 2px solid white;
@@ -537,23 +615,26 @@ flux\\:sidebar-item {
 
 .order-info {
     flex: 1;
+    min-width: 0;
 }
 
 .order-name {
     font-size: 15px;
     font-weight: 600;
     color: #111827;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
+    letter-spacing: -0.01em;
 }
 
 .order-status-badge {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
 .order-status-badge.pending {
@@ -577,22 +658,36 @@ flux\\:sidebar-item {
     gap: 8px;
     font-size: 13px;
     color: #6B7280;
-    margin-top: 4px;
+    margin-top: 5px;
+}
+
+.order-meta svg {
+    width: 16px;
+    height: 16px;
 }
 
 .order-right {
     text-align: right;
+    flex-shrink: 0;
 }
 
 .order-amount {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     color: #111827;
+    letter-spacing: -0.01em;
 }
 
-.order-pending-label {
-    font-size: 12px;
-    color: #6B7280;
+.order-payment-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: #FEF3C7;
+    color: #B45309;
 }
 
 .order-details-btn {

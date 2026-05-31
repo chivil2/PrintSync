@@ -1,7 +1,7 @@
 @extends('layouts.app.customer')
 
 @section('content')
-<div class="max-w-[1280px] mx-auto px-6 py-8 lg:px-8 lg:py-8 space-y-8">
+<div class="max-w-[1280px] mx-auto px-5 py-6 lg:px-8 lg:py-7 space-y-6">
     <!-- Welcome Banner -->
     <div class="welcome-banner-wrap">
         {{-- Clipped background layer (keeps border-radius + overflow:hidden) --}}
@@ -21,95 +21,81 @@
         </div>
     </div>
 
+    <!-- Quick Actions -->
+    <div class="quick-actions-section">
+        <div class="quick-actions-header">
+            <h2 class="quick-actions-title">Quick Actions</h2>
+            <div class="quick-actions-accent"></div>
+        </div>
+        <div class="quick-actions-grid">
+            <a href="{{ route('customer.store') }}" class="quick-action-btn">
+                <div class="quick-action-icon orange">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                </div>
+                <span class="quick-action-label">Browse Store</span>
+            </a>
+
+            <a href="{{ route('customer.orders') }}" class="quick-action-btn">
+                <div class="quick-action-icon blue">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <span class="quick-action-label">My Orders</span>
+            </a>
+
+            <a href="{{ route('customer.profile') }}" class="quick-action-btn">
+                <div class="quick-action-icon purple">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <span class="quick-action-label">Profile</span>
+            </a>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card stat-card--featured">
             <div class="stat-card-inner">
-                <div class="stat-icon orange">
+                <div class="stat-icon stat-icon--featured">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                 </div>
-                <p class="stat-label">Total Orders</p>
-                <p class="stat-value">{{ $totalOrders }}</p>
-                <p class="stat-trend">All time</p>
+                <p class="stat-label stat-label--featured">Total Orders</p>
+                <p class="stat-value stat-value--featured">{{ $totalOrders }}</p>
+                <p class="stat-trend stat-trend--featured">All time</p>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card stat-card--green">
             <div class="stat-card-inner">
                 <div class="stat-icon green">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <p class="stat-label">Completed</p>
-                <p class="stat-value">{{ $completedOrders }}</p>
-                <p class="stat-trend">Successfully delivered</p>
+                <p class="stat-label stat-label--green">Completed</p>
+                <p class="stat-value stat-value--green">{{ $completedOrders }}</p>
+                <p class="stat-trend stat-trend--green">Successfully delivered</p>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card stat-card--blue">
             <div class="stat-card-inner">
                 <div class="stat-icon blue">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <p class="stat-label">Total Spent</p>
-                <p class="stat-value">₱{{ number_format($totalSpent, 2) }}</p>
-                <p class="stat-trend">Lifetime purchases</p>
+                <p class="stat-label stat-label--blue">Total Spent</p>
+                <p class="stat-value stat-value--blue">₱{{ number_format($totalSpent, 2) }}</p>
+                <p class="stat-trend stat-trend--blue">Lifetime purchases</p>
             </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions-card">
-        <div class="section-header">
-            <h2 class="section-title">Quick Actions</h2>
-            <div class="section-accent"></div>
-        </div>
-        <div class="quick-actions-grid">
-            <a href="{{ route('customer.store') }}" class="quick-action-btn">
-                <div class="quick-action-icon orange">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                </div>
-                <p class="quick-action-label">Browse Store</p>
-                <p class="quick-action-desc">View services</p>
-                <svg class="w-4 h-4 quick-action-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </a>
-
-            <a href="{{ route('customer.orders') }}" class="quick-action-btn">
-                <div class="quick-action-icon blue">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                </div>
-                <p class="quick-action-label">My Orders</p>
-                <p class="quick-action-desc">Track orders</p>
-                <svg class="w-4 h-4 quick-action-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </a>
-
-            <a href="{{ route('customer.profile') }}" class="quick-action-btn">
-                <div class="quick-action-icon purple">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                </div>
-                <p class="quick-action-label">Profile</p>
-                <p class="quick-action-desc">Update info</p>
-                <svg class="w-4 h-4 quick-action-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </a>
-
-
         </div>
     </div>
 
@@ -148,7 +134,9 @@
                             </div>
                             <div class="order-right">
                                 <p class="order-amount">₱{{ number_format($order->price, 2) }}</p>
-                                <p class="order-pending-label">{{ $order->status === 'pending' ? 'Pending payment' : '' }}</p>
+                                @if($order->status === 'pending')
+                                    <span class="order-payment-badge">Pending payment</span>
+                                @endif
                                 <a href="{{ route('customer.orders.show', $order) }}" class="order-details-btn">Details</a>
                             </div>
                         </div>
