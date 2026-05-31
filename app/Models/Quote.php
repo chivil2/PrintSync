@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Database\Factories\QuoteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['quote_number', 'customer_id', 'service_job_id', 'date', 'status', 'payment_status', 'currency', 'subtotal', 'tax', 'discount', 'total', 'terms', 'notes', 'employee_id', 'sent_at', 'approved_at', 'rejected_at', 'rejection_reason'])]
 class Quote extends Model
 {
+    /** @use HasFactory<QuoteFactory> */
+    use HasFactory;
+
     protected function casts(): array
     {
         return [

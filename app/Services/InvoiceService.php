@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Mail\InvoiceGenerated;
 use App\Models\ServiceJob;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceService
@@ -29,6 +31,8 @@ class InvoiceService
         $serviceJob->update([
             'invoice_path' => $filename,
         ]);
+
+        Mail::to($serviceJob->customer->email)->queue(new InvoiceGenerated($serviceJob));
 
         return $filename;
     }

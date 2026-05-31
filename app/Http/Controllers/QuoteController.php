@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\QuoteSent;
 use App\Models\Quote;
 use App\Models\QuoteLineItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class QuoteController extends Controller
 {
@@ -296,7 +299,14 @@ class QuoteController extends Controller
             ->latest()
             ->get();
 
-        return view('owner.quotes', compact('quotes'));
+        $topProducts = QuoteLineItem::select('item_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(line_total) as total_revenue'))
+            ->whereHas('quote', function ($q) { $q->where('status', 'accepted'); })
+            ->groupBy('item_name')
+            ->orderBy('total_qty', 'desc')
+            ->take(10)
+            ->get();
+
+        return view('owner.quotes', compact('quotes', 'topProducts'));
     }
 
     /**
@@ -377,6 +387,8 @@ class QuoteController extends Controller
             'status' => 'sent',
             'sent_at' => now(),
         ]);
+
+        Mail::to($quote->customer->email)->queue(new QuoteSent($quote));
 
         return redirect()->route('owner.quotes')
             ->with('success', 'Quote sent to customer successfully');
