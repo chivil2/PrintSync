@@ -47,6 +47,7 @@
                             <th class="pb-3 font-medium">Category</th>
                             <th class="pb-3 font-medium">Price</th>
                             <th class="pb-3 font-medium">Status</th>
+                            <th class="pb-3 font-medium">Completed Orders</th>
                             <th class="pb-3 font-medium">Actions</th>
                         </tr>
                     </thead>
@@ -62,6 +63,7 @@
                                         {{ $product->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </td>
+                                <td class="py-3 text-slate-500 text-xs">0</td>
                                 <td class="py-3">
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('owner.products.edit', $product) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</a>

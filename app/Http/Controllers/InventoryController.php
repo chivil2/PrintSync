@@ -106,7 +106,7 @@ class InventoryController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'sku' => ['required', 'string', 'unique:inventories,sku,' . $inventory->id],
+            'sku' => ['required', 'string', 'unique:inventories,sku,'.$inventory->id],
             'description' => ['nullable', 'string'],
             'quantity' => ['required', 'integer', 'min:0'],
             'min_stock_level' => ['required', 'integer', 'min:0'],

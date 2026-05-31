@@ -25,12 +25,14 @@
                     $initials = strtoupper(substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1));
                 @endphp
                 <div class="flex items-center justify-between px-8 py-6 border-b border-slate-100">
-                    <div class="relative w-80">
+                    <div class="relative w-80" x-data="{ searchQuery: '' }">
                         <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         <input
                             type="text"
+                            x-model="searchQuery"
+                            @keyup.enter="window.location.href = '/employee/jobs?search=' + searchQuery"
                             placeholder="Search something..."
-                            class="w-full bg-white pl-12 pr-4 py-3 text-sm border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 placeholder:text-slate-400 shadow-sm"
+                            class="w-full bg-white pl-12 pr-4 py-3 text-sm text-slate-900 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 placeholder:text-slate-400 shadow-sm"
                         />
                     </div>
 

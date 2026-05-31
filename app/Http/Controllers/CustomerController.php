@@ -120,7 +120,7 @@ class CustomerController extends Controller
     public function orders()
     {
         $orders = ServiceJob::where('customer_id', auth()->id())
-            ->with(['service', 'employee', 'quote'])
+            ->with(['service', 'employee', 'quote.lineItems'])
             ->orderBy('created_at', 'desc')
             ->get();
 

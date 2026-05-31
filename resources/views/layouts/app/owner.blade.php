@@ -57,7 +57,7 @@
             <div class="fixed inset-0 bg-blue-950/80 z-30 hidden lg:hidden backdrop-blur-sm" id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.add('-translate-x-full'); this.classList.add('hidden')"></div>
 
             <!-- Main Content -->
-            <main class="flex-1 lg:ml-0 pt-14 lg:pt-0">
+            <main class="flex-1 md:ml-[160px] lg:ml-0 pt-14 lg:pt-0">
                 {{ $slot }}
             </main>
         </div>

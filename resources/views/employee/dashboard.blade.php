@@ -53,12 +53,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between mb-4 px-1">
-                <h2 class="font-bold text-xl text-slate-900">Recent Jobs</h2>
-                <a href="{{ route('employee.jobs') }}" class="text-orange-600 text-sm font-semibold flex items-center gap-1 hover:underline cursor-pointer">
-                    View All <i class="fa-solid fa-arrow-right text-xs"></i>
-                </a>
-            </div>
+            <h2 class="font-bold text-xl text-slate-900 mb-4 px-1">Recent Jobs</h2>
 
             @if ($recentJobs->count() > 0)
                 <div class="bg-white border border-slate-100 rounded-3xl overflow-hidden">
@@ -69,7 +64,6 @@
                                 <th class="text-left py-4 px-6 text-xs font-semibold text-slate-400 tracking-wider">JOB TYPE</th>
                                 <th class="text-left py-4 px-6 text-xs font-semibold text-slate-400 tracking-wider">STATUS</th>
                                 <th class="text-left py-4 px-6 text-xs font-semibold text-slate-400 tracking-wider">DATE</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -91,11 +85,6 @@
                                         </span>
                                     </td>
                                     <td class="py-4 px-6 text-slate-500 text-sm">{{ $job->created_at->diffForHumans() }}</td>
-                                    <td class="py-4 px-6 text-right">
-                                        <a href="{{ route('employee.jobs.show', $job) }}" class="text-orange-600 opacity-0 group-hover:opacity-100 text-sm font-medium transition-opacity cursor-pointer">
-                                            View <i class="fa-solid fa-arrow-right text-xs"></i>
-                                        </a>
-                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

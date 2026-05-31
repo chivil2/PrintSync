@@ -250,7 +250,6 @@
                     <div class="p-6">
                         <form action="{{ route('owner.jobs.assign', $job) }}" method="POST">
                             @csrf
-                            @method('PATCH')
                             <select name="employee_id" class="w-full text-sm border border-zinc-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-zinc-700">
                                 <option value="">Unassigned</option>
                                 @foreach($employees as $employee)

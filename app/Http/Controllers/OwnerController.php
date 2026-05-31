@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -180,6 +181,9 @@ class OwnerController extends Controller
 
         $employees = User::role('employee')
             ->where('employee_status', 'active')
+            ->withCount(['serviceJobs as assigned_jobs_count' => function ($query) {
+                $query->whereIn('status', ['pending', 'in_progress']);
+            }])
             ->get();
 
         // Get job statistics
@@ -280,12 +284,30 @@ class OwnerController extends Controller
 
         $employee = $validated['employee_id'] ? User::find($validated['employee_id']) : null;
 
-        return response()->json([
-            'success' => true,
-            'message' => $employee 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $employee
+                    ? "{$employee->first_name} {$employee->last_name} assigned to \"{$job->name}\""
+                    : "Employee unassigned from \"{$job->name}\"",
+                'job' => $job->load('employee'),
+            ]);
+        }
+
+        return redirect()->route('owner.jobs.show', $job)->with(
+            'success',
+            $employee
                 ? "{$employee->first_name} {$employee->last_name} assigned to \"{$job->name}\""
-                : "Employee unassigned from \"{$job->name}\"",
-            'job' => $job->load('employee'),
-        ]);
+                : "Employee unassigned from \"{$job->name}\""
+        );
+    }
+
+    public function earningsByPeriod(Request $request): JsonResponse
+    {
+        $dashboardService = new DashboardDataService;
+
+        return response()->json(
+            $dashboardService->getEarningsByPeriod($request->get('period', 'month'))
+        );
     }
 }

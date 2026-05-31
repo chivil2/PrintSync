@@ -15,7 +15,7 @@
                     $pending = $jobsCountByStatus['pending'] ?? 0;
                     $overdue = $jobsCountByStatus['overdue'] ?? 0;
                     
-                    $circumference = 2 * M_PI * 120; // 754
+                    $circumference = 2 * M_PI * 80; // 502
                     $completedOffset = 0;
                     $inProgressOffset = -($completed / $totalJobs) * $circumference;
                     $pendingOffset = -(($completed + $inProgress) / $totalJobs) * $circumference;
@@ -31,10 +31,10 @@
                         <!-- Pie chart segments -->
                         <circle cx="120" cy="120" r="120" fill="none" stroke="#e2e8f0" stroke-width="40"/>
                         @if($totalJobs > 0)
-                            <circle cx="120" cy="120" r="120" fill="none" stroke="#10b981" stroke-width="40" stroke-dasharray="{{ $completedDash }} {{ $circumference - $completedDash }}" stroke-dashoffset="{{ $completedOffset }}" transform="rotate(90 120 120)"/>
-                            <circle cx="120" cy="120" r="120" fill="none" stroke="#3b82f6" stroke-width="40" stroke-dasharray="{{ $inProgressDash }} {{ $circumference - $inProgressDash }}" stroke-dashoffset="{{ $inProgressOffset }}" transform="rotate(90 120 120)"/>
-                            <circle cx="120" cy="120" r="120" fill="none" stroke="#f97316" stroke-width="40" stroke-dasharray="{{ $pendingDash }} {{ $circumference - $pendingDash }}" stroke-dashoffset="{{ $pendingOffset }}" transform="rotate(90 120 120)"/>
-                            <circle cx="120" cy="120" r="120" fill="none" stroke="#ef4444" stroke-width="40" stroke-dasharray="{{ $overdueDash }} {{ $circumference - $overdueDash }}" stroke-dashoffset="{{ $overdueOffset }}" transform="rotate(90 120 120)"/>
+                            <circle cx="120" cy="120" r="80" fill="none" stroke="#10b981" stroke-width="40" stroke-dasharray="{{ $completedDash }} {{ $circumference - $completedDash }}" stroke-dashoffset="{{ $completedOffset }}" transform="rotate(90 120 120)"/>
+                            <circle cx="120" cy="120" r="80" fill="none" stroke="#3b82f6" stroke-width="40" stroke-dasharray="{{ $inProgressDash }} {{ $circumference - $inProgressDash }}" stroke-dashoffset="{{ $inProgressOffset }}" transform="rotate(90 120 120)"/>
+                            <circle cx="120" cy="120" r="80" fill="none" stroke="#f97316" stroke-width="40" stroke-dasharray="{{ $pendingDash }} {{ $circumference - $pendingDash }}" stroke-dashoffset="{{ $pendingOffset }}" transform="rotate(90 120 120)"/>
+                            <circle cx="120" cy="120" r="80" fill="none" stroke="#ef4444" stroke-width="40" stroke-dasharray="{{ $overdueDash }} {{ $circumference - $overdueDash }}" stroke-dashoffset="{{ $overdueOffset }}" transform="rotate(90 120 120)"/>
                         @endif
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
@@ -184,41 +184,80 @@
                 </div>
             </div>
         </div>
+
+        <!-- Employee Assignment Modal -->
+        <div x-show="showEmployeeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="closeModal()" style="display: none;">
+            <div class="w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                    <h3 class="text-sm font-semibold text-slate-900">Select Employee</h3>
+                    <button @click="closeModal()" class="text-slate-400 hover:text-slate-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="max-h-[320px] overflow-y-auto p-2 space-y-1">
+                    <template x-for="employee in {{ Js::from($employees->values()->toArray()) }}" :key="employee.id">
+                        <button @click="confirmAssign(employee.id)" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#f5ede3] transition text-left">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm" x-text="(employee.first_name?.[0] ?? '') + (employee.last_name?.[0] ?? '')"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-semibold text-slate-900 text-sm" x-text="employee.first_name + ' ' + employee.last_name"></div>
+                                <div class="text-xs text-slate-500"><span x-text="'ID: ' + (employee.employee_id || 'N/A')"></span> · <span x-text="(employee.assigned_jobs_count || 0) + ' active jobs'"></span></div>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+                <div class="px-5 py-3 border-t border-slate-100">
+                    <button @click="closeModal()" class="w-full px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         function jobsData() {
             return {
                 jobStatusFilter: 'all',
+                showEmployeeModal: false,
+                selectedJobId: null,
                 
                 initJobs() {
                     // Initialize any jobs-specific logic
                 },
                 
                 assignEmployee(jobId) {
-                    const employeeId = prompt('Enter employee ID to assign:');
-                    if (employeeId) {
-                        fetch(`/owner/jobs/${jobId}/assign`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify({ employee_id: employeeId })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Failed to assign employee');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to assign employee');
-                        });
-                    }
+                    this.selectedJobId = jobId;
+                    this.showEmployeeModal = true;
+                },
+
+                confirmAssign(employeeId) {
+                    fetch(`/owner/jobs/${this.selectedJobId}/assign`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ employee_id: employeeId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Failed to assign employee');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to assign employee');
+                    })
+                    .finally(() => {
+                        this.showEmployeeModal = false;
+                        this.selectedJobId = null;
+                    });
+                },
+
+                closeModal() {
+                    this.showEmployeeModal = false;
+                    this.selectedJobId = null;
                 }
             };
         }

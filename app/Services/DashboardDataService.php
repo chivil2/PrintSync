@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class DashboardDataService
 {
@@ -16,25 +17,25 @@ class DashboardDataService
             'completedJobs' => $this->getCompletedJobsCount(),
             'averageOrderValue' => $this->getAverageOrderValue(),
             'highestOrderValue' => $this->getHighestOrderValue(),
-            
+
             // Jobs
             'recentJobs' => $this->getRecentJobs(),
             'jobsByStatus' => $this->getJobsByStatus(),
             'serviceTypes' => $this->getServiceTypes(),
-            
+
             // Quotes
             'pendingQuotes' => $this->getPendingQuotes(),
             'quotesCount' => Quote::count(),
             'sentQuotes' => Quote::where('status', 'sent')->count(),
             'acceptedQuotes' => Quote::where('status', 'accepted')->count(),
-            
+
             // Customers
             'customersCount' => User::role('customer')->count(),
             'recentCustomers' => $this->getRecentCustomers(),
-            
+
             // Employees
             'employees' => $this->getActiveEmployees(),
-            
+
             // Earnings breakdown
             'earningsBreakdown' => $this->getCurrentEarningsBreakdown(),
         ];
@@ -56,7 +57,7 @@ class DashboardDataService
     {
         $completedJobs = $this->getCompletedJobsCount();
         $revenue = $this->getCompletedJobRevenue();
-        
+
         return $completedJobs > 0 ? $revenue / $completedJobs : 0;
     }
 
@@ -75,14 +76,14 @@ class DashboardDataService
             ->get();
     }
 
-    private function getJobsByStatus(): \Illuminate\Support\Collection
+    private function getJobsByStatus(): Collection
     {
         return ServiceJob::selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status');
     }
 
-    private function getServiceTypes(): \Illuminate\Support\Collection
+    private function getServiceTypes(): Collection
     {
         return ServiceJob::selectRaw('type, count(*) as count')
             ->groupBy('type')
@@ -118,8 +119,8 @@ class DashboardDataService
     public function getEarningsByPeriod(string $period): array
     {
         $now = now();
-        
-        return match($period) {
+
+        return match ($period) {
             'week' => [
                 'fullyPaid' => $this->getRevenueByDateRange($now->startOfWeek(), $now->endOfWeek(), 'paid'),
                 'downpayment' => $this->getRevenueByDateRange($now->startOfWeek(), $now->endOfWeek(), 'partially_paid'),
@@ -148,33 +149,33 @@ class DashboardDataService
         return Quote::whereHas('serviceJob', function ($query) use ($startDate, $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
         })->where('status', 'accepted')
-        ->where('payment_status', $paymentStatus)
-        ->sum('total') ?? 0;
+            ->where('payment_status', $paymentStatus)
+            ->sum('total') ?? 0;
     }
 
     public function getCurrentEarningsBreakdown(): array
     {
         $totalRevenue = $this->getCompletedJobRevenue();
-        
+
         // Calculate actual breakdown based on payment status
         $fullyPaid = Quote::whereHas('serviceJob', function ($query) {
             $query->where('status', 'completed');
         })->where('status', 'accepted')
-        ->where('payment_status', 'paid')
-        ->sum('total') ?? 0;
-        
+            ->where('payment_status', 'paid')
+            ->sum('total') ?? 0;
+
         $downpayment = Quote::whereHas('serviceJob', function ($query) {
             $query->where('status', 'completed');
         })->where('status', 'accepted')
-        ->where('payment_status', 'partially_paid')
-        ->sum('total') ?? 0;
-        
+            ->where('payment_status', 'partially_paid')
+            ->sum('total') ?? 0;
+
         $nonPaid = Quote::whereHas('serviceJob', function ($query) {
             $query->where('status', 'completed');
         })->where('status', 'accepted')
-        ->where('payment_status', 'unpaid')
-        ->sum('total') ?? 0;
-        
+            ->where('payment_status', 'unpaid')
+            ->sum('total') ?? 0;
+
         return [
             'fullyPaid' => $fullyPaid,
             'downpayment' => $downpayment,

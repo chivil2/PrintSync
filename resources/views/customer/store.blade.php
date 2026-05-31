@@ -19,16 +19,6 @@
                     <p class="text-2xl font-bold">{{ $activeOrders ?? 0 }}</p>
                     <p class="text-xs text-gray-400">Active Orders</p>
                 </div>
-                <div class="w-px bg-white/10"></div>
-                <div class="text-center">
-                    <p class="text-2xl font-bold">{{ $wishlistCount ?? 0 }}</p>
-                    <p class="text-xs text-gray-400">Wishlist</p>
-                </div>
-                <div class="w-px bg-white/10"></div>
-                <div class="text-center">
-                    <p class="text-2xl font-bold">Gold</p>
-                    <p class="text-xs text-gray-400">Status</p>
-                </div>
             </div>
         </div>
     </div>
@@ -36,7 +26,7 @@
     <!-- Products Section -->
     <div class="flex flex-col lg:flex-row gap-8" x-data="{ 
         activeCategory: 'all',
-        sortBy: 'popular',
+        sortBy: 'price-low',
         search: '',
         allPrintingServices: {{ $printingServices->toJson() }},
         allTechnicalServices: {{ $technicalServices->toJson() }},
@@ -63,8 +53,6 @@
                 services.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
             } else if (this.sortBy === 'price-high') {
                 services.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-            } else if (this.sortBy === 'rating') {
-                services.sort((a, b) => (b.rating || 0) - (a.rating || 0));
             }
 
             return services;
@@ -143,13 +131,6 @@
                 <h3 class="text-sm font-semibold text-gray-900 mb-3">Sort By</h3>
                 <div class="space-y-1">
                     <button
-                        @click="sortBy = 'popular'"
-                        :class="sortBy === 'popular' ? 'text-[#E8743B] font-medium bg-[#E8743B]/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
-                        class="w-full text-left px-3 py-2 rounded-xl text-sm transition-all"
-                    >
-                        Most Popular
-                    </button>
-                    <button
                         @click="sortBy = 'price-low'"
                         :class="sortBy === 'price-low' ? 'text-[#E8743B] font-medium bg-[#E8743B]/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
                         class="w-full text-left px-3 py-2 rounded-xl text-sm transition-all"
@@ -163,13 +144,7 @@
                     >
                         Price: High to Low
                     </button>
-                    <button
-                        @click="sortBy = 'rating'"
-                        :class="sortBy === 'rating' ? 'text-[#E8743B] font-medium bg-[#E8743B]/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
-                        class="w-full text-left px-3 py-2 rounded-xl text-sm transition-all"
-                    >
-                        Highest Rated
-                    </button>
+
                 </div>
             </div>
         </aside>
@@ -190,7 +165,7 @@
                             type="text"
                             placeholder="Search services..."
                             x-model="search"
-                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#E8743B]/20 focus:border-[#E8743B]/30 transition-all"
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#E8743B]/20 focus:border-[#E8743B]/30 transition-all"
                         >
                     </div>
                 </div>
@@ -206,14 +181,7 @@
                             <div class="relative h-52 flex items-center justify-center" :class="service.type === 'printing' ? 'bg-gradient-to-br from-orange-50 to-amber-50' : 'bg-gradient-to-br from-blue-50 to-indigo-50'">
                                 <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-gray-900 text-white" x-text="service.type === 'printing' ? 'Printing' : 'Technical'">
                                 </span>
-                                <button
-                                    @click.stop
-                                    class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-                                >
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                </button>
+
                                 <div class="transition-transform duration-300 group-hover:scale-110">
                                     <svg class="w-14 h-14" :class="service.type === 'printing' ? 'text-orange-300' : 'text-blue-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path x-show="service.type === 'printing'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -225,22 +193,7 @@
 
                             <!-- Content -->
                             <div class="p-5">
-                                <div class="flex items-center gap-1.5 mb-2">
-                                    <div class="flex items-center gap-0.5">
-                                        <template x-for="i in 5">
-                                            <svg
-                                                :key="i"
-                                                class="w-3 h-3"
-                                                :class="i <= (service.rating || 5) ? 'text-amber-400 fill-amber-400' : 'text-gray-200'"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                        </template>
-                                    </div>
-                                    <span class="text-xs text-gray-400" x-text="'(' + (service.reviews || 0) + ')'"></span>
-                                </div>
+                
                                 <h3 class="font-semibold text-gray-900 mb-1" x-text="service.name"></h3>
                                 <p class="text-xs text-gray-400 mb-4 line-clamp-1" x-text="service.description"></p>
                                 <div class="flex items-center justify-between">
@@ -250,15 +203,7 @@
                                     </div>
                                 </div>
                                 <div class="flex gap-2 mt-4">
-                                    <button
-                                        @click.stop
-                                        class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all bg-gray-900 text-white hover:bg-gray-800"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
-                                        Add to Cart
-                                    </button>
+
                                     <button
                                         @click.stop="$dispatch('open-modal', { service: service, type: service.type })"
                                         class="px-4 py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-700 hover:border-[#E8743B] hover:text-[#E8743B] transition-all"
@@ -303,12 +248,12 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <template x-for="page in pageNumbers" :key="page">
+                            <template x-for="p in pageNumbers" :key="p">
                                 <button 
-                                    @click="page = page"
-                                    :class="page === page ? 'bg-[#E8743B] text-white font-semibold' : 'border border-gray-200 text-gray-600 hover:border-[#E8743B] hover:text-[#E8743B] hover:bg-orange-50 font-medium'"
+                                    @click="page = p"
+                                    :class="p === page ? 'bg-[#E8743B] text-white font-semibold' : 'border border-gray-200 text-gray-600 hover:border-[#E8743B] hover:text-[#E8743B] hover:bg-orange-50 font-medium'"
                                     class="flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
-                                    x-text="page">
+                                    x-text="p">
                                 </button>
                             </template>
                             <button 

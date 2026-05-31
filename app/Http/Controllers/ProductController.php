@@ -42,6 +42,7 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Product::select('category')->distinct()->pluck('category');
+
         return view('owner.products-create', compact('categories'));
     }
 
@@ -52,7 +53,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'sku' => ['required', 'string', 'unique:products,sku'],
+            'sku' => ['required', 'string', 'max:255', 'unique:products,sku'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'category' => ['required', 'string', 'max:100'],
@@ -80,6 +81,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Product::select('category')->distinct()->pluck('category');
+
         return view('owner.products-edit', compact('product', 'categories'));
     }
 
@@ -90,7 +92,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'sku' => ['required', 'string', 'unique:products,sku,' . $product->id],
+            'sku' => ['required', 'string', 'max:255', 'unique:products,sku,'.$product->id],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'category' => ['required', 'string', 'max:100'],

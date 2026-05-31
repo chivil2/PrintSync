@@ -300,7 +300,9 @@ class QuoteController extends Controller
             ->get();
 
         $topProducts = QuoteLineItem::select('item_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(line_total) as total_revenue'))
-            ->whereHas('quote', function ($q) { $q->where('status', 'accepted'); })
+            ->whereHas('quote', function ($q) {
+                $q->where('status', 'accepted');
+            })
             ->groupBy('item_name')
             ->orderBy('total_qty', 'desc')
             ->take(10)

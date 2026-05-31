@@ -171,10 +171,6 @@
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 Reject
                             </button>
-                            <a :href="`/owner/quotes/${quote.id}/edit`" class="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                Review
-                            </a>
                         </div>
                     </div>
                 </template>
@@ -261,7 +257,12 @@
                     <tbody class="divide-y divide-slate-50">
                         <template x-for="job in filteredOrders.slice(0, 5)" :key="job.id">
                             <tr class="hover:bg-slate-50/50">
-                                <td class="py-3 text-slate-700 capitalize" x-text="job.service_type || 'Service'"></td>
+                                <td class="py-3">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium" :class="job.service_type === 'printing' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'">
+                                        <span class="w-1.5 h-1.5 rounded-full" :class="job.service_type === 'printing' ? 'bg-orange-500' : 'bg-blue-500'"></span>
+                                        <span x-text="job.service_type || 'Service'"></span>
+                                    </span>
+                                </td>
                                 <td class="py-3 text-slate-600" x-text="new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })"></td>
                                 <td class="py-3 font-medium text-slate-900" x-text="job.customer ? `${job.customer.first_name} ${job.customer.last_name}` : 'N/A'"></td>
                                 <td class="py-3 text-slate-600 max-w-[180px] truncate" x-text="job.name"></td>
@@ -304,106 +305,7 @@
             </div>
         </div>
 
-        <!-- Operational Overview -->
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold text-zinc-900 mb-4">Operational Overview</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Job Status Pie Chart -->
-                <div class="bg-[#f5ede3]/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/60">
-                    <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Order Status</div>
-                    <div class="flex items-center justify-center">
-                        <div class="relative w-[280px] h-[280px] rounded-[32px] bg-[#f5ede3] p-4 shadow-inner">
-                            @php
-                                $totalJobs = array_sum($jobsByStatus->toArray());
-                                $colors = ['pending' => '#fbbf24', 'in_progress' => '#3b82f6', 'completed' => '#22c55e', 'cancelled' => '#ef4444'];
-                                $offset = 0;
-                                $completionPercent = $totalJobs > 0 ? round((($jobsByStatus['completed'] ?? 0) / $totalJobs) * 100) : 0;
-                            @endphp
-                            <svg viewBox="0 0 36 36" class="w-full h-full">
-                                @foreach($jobsByStatus as $status => $count)
-                                    @if($totalJobs > 0)
-                                        @php
-                                            $percentage = ($count / $totalJobs) * 100;
-                                            $dashArray = $percentage * 0.359;
-                                        @endphp
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="{{ $colors[$status] ?? '#94a3b8' }}" stroke-width="3" stroke-dasharray="{{ $dashArray }} 100" stroke-dashoffset="{{ $offset * -1 }}"></circle>
-                                        @php
-                                            $offset += $percentage;
-                                        @endphp
-                                    @endif
-                                @endforeach
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <div class="text-4xl font-bold text-slate-900">{{ $completionPercent }}%</div>
-                                <div class="text-sm text-slate-500">Completion</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-4 grid w-full grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                        @foreach(['pending' => 'Pending', 'in_progress' => 'In Progress', 'completed' => 'Completed', 'cancelled' => 'Cancelled'] as $status => $label)
-                            <div class="flex items-center justify-between p-4 bg-[#f5ede3] rounded-2xl">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-3.5 h-3.5 rounded-full" style="background-color: {{ $colors[$status] ?? '#94a3b8' }}"></span>
-                                    <span class="text-slate-700">{{ $label }}</span>
-                                </div>
-                                <span class="font-bold text-xl text-slate-900">{{ $jobsByStatus[$status] ?? 0 }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
 
-                <!-- Employee Workload -->
-                <div class="bg-[#f5ede3]/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/60">
-                    <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Employee Workload</div>
-                    <div class="space-y-3">
-                        @forelse($employees as $employee)
-                            <div class="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 flex items-center justify-center text-white text-sm font-semibold">
-                                        {{ $employee->initials() }}
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-slate-900">{{ $employee->first_name }} {{ $employee->last_name }}</p>
-                                        <p class="text-xs text-slate-500">{{ $employee->specializationLabel() }}</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-lg font-bold text-slate-900">{{ $employee->assigned_jobs_count }}</span>
-                                    <p class="text-xs text-slate-500">Active</p>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center text-sm text-slate-500 py-4">No active employees</div>
-                        @endforelse
-                    </div>
-                </div>
-
-                <!-- Service Type Breakdown -->
-                <div class="bg-[#f5ede3]/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/60">
-                    <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Service Types</div>
-                    <div class="space-y-3">
-                        @foreach($serviceTypes as $type => $count)
-                            <div class="p-4 bg-white rounded-2xl shadow-sm">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-sm font-medium text-slate-900">{{ ucfirst($type) }}</span>
-                                    <span class="text-sm font-bold text-slate-900">{{ $count }}</span>
-                                </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2">
-                                    @php
-                                        $totalServiceJobs = $serviceTypes->sum();
-                                        $percentage = $totalServiceJobs > 0 ? ($count / $totalServiceJobs) * 100 : 0;
-                                    @endphp
-                                    <div class="bg-gradient-to-r from-blue-500 to-orange-500 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
-                                </div>
-                            </div>
-                        @endforeach
-                        @if($serviceTypes->isEmpty())
-                            <div class="text-center text-sm text-slate-500 py-4">No service data</div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Recent Activity -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -458,34 +360,7 @@
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="mt-6">
-            <div class="bg-white/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/70">
-                <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Quick Actions</div>
-                <div class="flex flex-wrap gap-3">
-                    <a href="{{ route('owner.jobs') }}" class="inline-flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
-                        View All Jobs
-                    </a>
-                    <a href="{{ route('owner.quotes') }}" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="20" x2="18" y2="10"/>
-                            <line x1="12" y1="20" x2="12" y2="4"/>
-                            <line x1="6" y1="20" x2="6" y2="14"/>
-                        </svg>
-                        View All Quotes
-                    </a>
-                    <a href="{{ route('owner.employees') }}" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        Manage Employees
-                    </a>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <script>
@@ -493,6 +368,7 @@
             return {
                 // State
                 earningsPeriod: 'month',
+                earningsBreakdown: @js($earningsBreakdown),
                 orderFilter: 'all',
                 searchQuery: '',
                 quotePage: 0,
@@ -531,10 +407,6 @@
                     return Math.ceil(quotes.length / this.quotesPerPage);
                 },
                 
-                get earningsBreakdown() {
-                    return @js($earningsBreakdown);
-                },
-                
                 // Methods
                 initDashboard() {
                     // Load saved preferences from localStorage
@@ -548,7 +420,19 @@
                 setEarningsPeriod(period) {
                     this.earningsPeriod = period;
                     localStorage.setItem('dashboard_earnings_period', period);
-                    // In a real app, this would trigger an API call to fetch new data
+                    fetch('/owner/dashboard/earnings?period=' + period, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.earningsBreakdown = data;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching earnings:', error);
+                    });
                 },
                 
                 setOrderFilter(filter) {
