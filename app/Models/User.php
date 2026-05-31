@@ -35,6 +35,7 @@ use Spatie\Permission\Traits\HasRoles;
     'shipping_address',
     'credit_limit',
     'preferred_payment_method',
+    'profile_photo_path',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable

@@ -4,6 +4,8 @@ namespace Tests\Feature\Settings;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -25,7 +27,8 @@ class ProfileUpdateTest extends TestCase
         $this->actingAs($user);
 
         $response = Livewire::test('pages::settings.profile')
-            ->set('name', 'Test User')
+            ->set('first_name', 'Test')
+            ->set('last_name', 'User')
             ->set('email', 'test@example.com')
             ->call('updateProfileInformation');
 
@@ -45,7 +48,8 @@ class ProfileUpdateTest extends TestCase
         $this->actingAs($user);
 
         $response = Livewire::test('pages::settings.profile')
-            ->set('name', 'Test User')
+            ->set('first_name', $user->first_name)
+            ->set('last_name', $user->last_name)
             ->set('email', $user->email)
             ->call('updateProfileInformation');
 
@@ -85,5 +89,40 @@ class ProfileUpdateTest extends TestCase
         $response->assertHasErrors(['password']);
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_profile_photo_is_displayed_when_user_has_photo(): void
+    {
+        Storage::fake('public');
+
+        $path = UploadedFile::fake()->create('avatar.jpg', 100, 100)->store('avatars', 'public');
+        $user = User::factory()->create(['profile_photo_path' => $path]);
+
+        $this->actingAs($user);
+
+        $response = Livewire::test('pages::settings.profile');
+
+        $response->assertSet('profilePhotoPath', $path)
+            ->assertSee('avatars/');
+    }
+
+    public function test_profile_photo_can_be_removed(): void
+    {
+        Storage::fake('public');
+
+        $path = UploadedFile::fake()->create('avatar.jpg', 100, 100)->store('avatars', 'public');
+        $user = User::factory()->create(['profile_photo_path' => $path]);
+
+        $this->actingAs($user);
+
+        $response = Livewire::test('pages::settings.profile')
+            ->call('removePhoto');
+
+        $response->assertHasNoErrors();
+
+        $user->refresh();
+
+        $this->assertNull($user->profile_photo_path);
+        Storage::disk('public')->assertMissing($path);
     }
 }

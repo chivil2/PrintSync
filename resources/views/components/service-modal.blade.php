@@ -199,6 +199,29 @@ style="display: none;">
                     <input type="hidden" name="service_id" :value="service?.id">
                     <input type="hidden" name="service_type" :value="service?.type">
 
+                    <!-- Quantity -->
+                    <div>
+                        <label class="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1.5 block">Quantity</label>
+                        <div class="flex items-center border border-zinc-300 rounded-lg overflow-hidden">
+                            <button type="button"
+                                    @click="quantity = Math.max(1, quantity - 1)"
+                                    class="w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                </svg>
+                            </button>
+                            <input type="number" name="quantity" x-model.number="quantity" min="1"
+                                   class="w-full h-10 text-center text-sm font-medium text-zinc-900 border-x border-zinc-300 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
+                            <button type="button"
+                                    @click="quantity++"
+                                    class="w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Delivery Date -->
                     <div class="relative" @click.outside="calendarOpen = false">
                         <label class="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1.5 block">Delivery Date</label>
@@ -270,7 +293,7 @@ style="display: none;">
                             name="notes"
                             rows="3"
                             class="w-full px-3.5 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8743B]/30 focus:border-[#E8743B] text-sm text-zinc-900 placeholder:text-zinc-400 resize-none"
-                            placeholder="Specific requirements, quantity, timeline..."
+                            placeholder="Specific requirements, timeline..."
                         ></textarea>
                     </div>
 

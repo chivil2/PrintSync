@@ -1,6 +1,4 @@
-import {
-    defineConfig
-} from 'vite';
+import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import tailwindcss from "@tailwindcss/vite";
@@ -19,7 +17,12 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        host: '0.0.0.0',
+        port: 5173,
         cors: true,
+        hmr: {
+            host: '192.168.254.109', // ← your PC's LAN IP (run ipconfig to find it)
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

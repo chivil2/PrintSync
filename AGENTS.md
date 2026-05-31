@@ -41,6 +41,13 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
 
+## Dev Server
+
+- The development server is already running persistently. Do NOT suggest or attempt to restart `php artisan serve`, `npm run dev`, or `mailpit` — they are already up via `start.bat`.
+- PHP server: http://localhost:8000
+- Vite dev server: running (hot reload active)
+- Mailpit: http://localhost:8025
+
 ## Frontend Bundling
 
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.

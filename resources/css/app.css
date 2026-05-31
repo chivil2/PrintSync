@@ -92,6 +92,11 @@ flux\\:sidebar-item {
 }
 
 /* Welcome Banner */
+.welcome-banner-wrap {
+    position: relative;
+    z-index: 1;
+}
+
 .welcome-banner {
     position: relative;
     border-radius: 20px;
@@ -146,6 +151,40 @@ flux\\:sidebar-item {
 .welcome-content {
     position: relative;
     z-index: 1;
+}
+
+/* Girl illustration — sits outside the clipped banner, anchored via the wrapper */
+.welcome-illustration {
+    position: absolute;
+    bottom: 0;
+    right: 32px;
+    z-index: 2;
+    pointer-events: none;
+    line-height: 0;
+}
+
+.welcome-illustration img {
+    height: 195px;
+    width: auto;
+    display: block;
+    /* Align to bottom edge of banner */
+    vertical-align: bottom;
+    filter: drop-shadow(0 -4px 16px rgba(0,0,0,0.18));
+}
+
+@media (min-width: 1024px) {
+    .welcome-illustration {
+        right: 48px;
+    }
+    .welcome-illustration img {
+        height: 230px;
+    }
+}
+
+@media (max-width: 640px) {
+    .welcome-illustration {
+        display: none;
+    }
 }
 
 .welcome-content h1 {

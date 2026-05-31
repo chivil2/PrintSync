@@ -9,7 +9,6 @@ use App\Models\QuoteLineItem;
 use App\Models\ServiceJob;
 use App\Models\TechnicalService;
 use App\Services\InvoiceService;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,6 +66,7 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'service_id' => 'required|integer',
             'service_type' => 'required|in:printing,technical',
+            'quantity' => 'required|integer|min:1',
             'deadline' => 'required|date|after_or_equal:today',
             'notes' => 'nullable|string|max:1000',
             'request_invoice' => 'nullable|boolean',
@@ -90,6 +90,9 @@ class CustomerController extends Controller
             'request_invoice' => isset($validated['request_invoice']),
         ]);
 
+        $quantity = $validated['quantity'];
+        $subtotal = $service->price * $quantity;
+
         // Auto-generate quote
         $quoteNumber = 'QT-'.date('Ymd').'-'.str_pad((Quote::count() + 1), 4, '0', STR_PAD_LEFT);
         $quote = Quote::create([
@@ -99,19 +102,19 @@ class CustomerController extends Controller
             'date' => now(),
             'status' => 'draft',
             'currency' => 'PHP',
-            'subtotal' => $service->price,
+            'subtotal' => $subtotal,
             'tax' => 0,
             'discount' => 0,
-            'total' => $service->price,
+            'total' => $subtotal,
         ]);
 
         QuoteLineItem::create([
             'quote_id' => $quote->id,
             'item_name' => $service->name,
             'description' => $service->description,
-            'quantity' => 1,
+            'quantity' => $quantity,
             'unit_price' => $service->price,
-            'line_total' => $service->price,
+            'line_total' => $subtotal,
         ]);
 
         return redirect()->route('customer.quotes.show', $quote)->with('success', 'Service request submitted successfully! Your quote has been generated.');
@@ -164,14 +167,7 @@ class CustomerController extends Controller
 
     public function profile()
     {
-        $user = Auth::user();
-        $hasUnverifiedEmail = $user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail();
-
-        return view('customer.profile', [
-            'user' => $user,
-            'message' => 'lol',
-            'hasUnverifiedEmail' => $hasUnverifiedEmail,
-        ]);
+        return redirect()->route('profile.edit');
     }
 
     public function updateProfile(Request $request)

@@ -3,14 +3,21 @@
 @section('content')
 <div class="max-w-[1280px] mx-auto px-6 py-8 lg:px-8 lg:py-8 space-y-8">
     <!-- Welcome Banner -->
-    <div class="welcome-banner">
-        <div class="welcome-bg"></div>
-        <div class="welcome-dots"></div>
-        <div class="welcome-glow1"></div>
-        <div class="welcome-glow2"></div>
-        <div class="welcome-content">
-            <h1>Welcome back, {{ auth()->user()->first_name }}!</h1>
-            <p>Manage your printing and technical services from your personal dashboard.</p>
+    <div class="welcome-banner-wrap">
+        {{-- Clipped background layer (keeps border-radius + overflow:hidden) --}}
+        <div class="welcome-banner">
+            <div class="welcome-bg"></div>
+            <div class="welcome-dots"></div>
+            <div class="welcome-glow1"></div>
+            <div class="welcome-glow2"></div>
+            <div class="welcome-content">
+                <h1>Welcome back, {{ auth()->user()->first_name }}!</h1>
+                <p>Manage your printing and technical services from your personal dashboard.</p>
+            </div>
+        </div>
+        {{-- Illustration sits outside the clipped banner, above it in z-index --}}
+        <div class="welcome-illustration">
+            <img src="{{ asset('images/girl_welcome.svg') }}" alt="" aria-hidden="true">
         </div>
     </div>
 
