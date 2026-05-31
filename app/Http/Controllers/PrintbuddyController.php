@@ -202,16 +202,6 @@ You have access to tools to get real-time data about services, inventory, employ
     private function executeTool(string $functionName, array $functionArgs, string $apiKey): array
     {
         try {
-            $endpoint = match($functionName) {
-                'get_services' => 'https://api.groq.com/openai/v1/chat/completions',
-                'get_inventory' => 'https://api.groq.com/openai/v1/chat/completions',
-                'get_employees' => 'https://api.groq.com/openai/v1/chat/completions',
-                'get_jobs' => 'https://api.groq.com/openai/v1/chat/completions',
-                'get_quotes' => 'https://api.groq.com/openai/v1/chat/completions',
-                default => null,
-            };
-
-            // Call the internal methods directly instead of making HTTP requests
             $result = match($functionName) {
                 'get_services' => $this->getServices()->getData(true),
                 'get_inventory' => $this->getInventory()->getData(true),
@@ -379,8 +369,33 @@ You have access to tools to get real-time data about services, inventory, employ
     public function getJobs(): JsonResponse
     {
         $jobs = DB::table('service_jobs')
-            ->select('id', 'customer_name', 'service_name', 'status', 'created_at', 'updated_at', 'assigned_to')
-            ->orderBy('created_at', 'desc')
+            ->leftJoin('users as customers', 'service_jobs.customer_id', '=', 'customers.id')
+            ->leftJoin('users as employees', 'service_jobs.employee_id', '=', 'employees.id')
+            ->leftJoin('printing_services', function ($join) {
+                $join->on('service_jobs.service_id', '=', 'printing_services.id')
+                    ->where('service_jobs.service_type', '=', 'printing_service');
+            })
+            ->leftJoin('technical_services', function ($join) {
+                $join->on('service_jobs.service_id', '=', 'technical_services.id')
+                    ->where('service_jobs.service_type', '=', 'technical_service');
+            })
+            ->select(
+                'service_jobs.id',
+                'service_jobs.name',
+                'service_jobs.description',
+                'service_jobs.type',
+                'service_jobs.status',
+                'service_jobs.priority',
+                'service_jobs.started_at',
+                'service_jobs.completed_at',
+                'service_jobs.deadline',
+                'service_jobs.created_at',
+                'service_jobs.updated_at',
+                'customers.name as customer_name',
+                'employees.name as assigned_to',
+                DB::raw('COALESCE(printing_services.name, technical_services.name) as service_name')
+            )
+            ->orderBy('service_jobs.created_at', 'desc')
             ->get();
 
         return response()->json([
