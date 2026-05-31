@@ -156,8 +156,16 @@ class OwnerController extends Controller
             ->latest()
             ->paginate(20);
 
+        // Calculate report data
+        $totalRevenue = Quote::where('status', 'accepted')->sum('total') ?? 0;
+        $totalOrders = Quote::where('status', 'accepted')->count();
+        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
+
         return view('owner.quotes', [
             'quotes' => $quotes,
+            'totalRevenue' => $totalRevenue,
+            'totalOrders' => $totalOrders,
+            'averageOrderValue' => $averageOrderValue,
         ]);
     }
 
@@ -174,9 +182,30 @@ class OwnerController extends Controller
             ->where('employee_status', 'active')
             ->get();
 
+        // Get job statistics
+        $jobsCountByStatus = ServiceJob::select('status', \DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->toArray();
+
+        $totalJobs = array_sum($jobsCountByStatus);
+        $completedJobs = $jobsCountByStatus['completed'] ?? 0;
+        $completionPercent = $totalJobs > 0 ? round(($completedJobs / $totalJobs) * 100) : 0;
+
+        // Get unassigned jobs (not completed and no employee assigned)
+        $unassignedJobs = ServiceJob::with(['customer', 'employee'])
+            ->whereNull('employee_id')
+            ->where('status', '!=', 'completed')
+            ->latest()
+            ->get();
+
         return view('owner.jobs', [
             'jobs' => $jobs,
             'employees' => $employees,
+            'jobsCountByStatus' => $jobsCountByStatus,
+            'completionPercent' => $completionPercent,
+            'unassignedJobs' => $unassignedJobs,
+            'unassignedJobsCount' => $unassignedJobs->count(),
         ]);
     }
 
@@ -224,5 +253,39 @@ class OwnerController extends Controller
         }
 
         return back()->with('success', "Employee unassigned from \"{$job->name}\"");
+    }
+
+    /**
+     * Assign an employee to a job via API (JSON response).
+     */
+    public function assignEmployeeApi(Request $request, ServiceJob $job)
+    {
+        $validated = $request->validate([
+            'employee_id' => ['nullable', 'exists:users,id'],
+        ]);
+
+        if ($validated['employee_id']) {
+            $job->update([
+                'employee_id' => $validated['employee_id'],
+                'status' => 'in_progress',
+                'started_at' => now(),
+            ]);
+        } else {
+            $job->update([
+                'employee_id' => null,
+                'status' => 'pending',
+                'started_at' => null,
+            ]);
+        }
+
+        $employee = $validated['employee_id'] ? User::find($validated['employee_id']) : null;
+
+        return response()->json([
+            'success' => true,
+            'message' => $employee 
+                ? "{$employee->first_name} {$employee->last_name} assigned to \"{$job->name}\""
+                : "Employee unassigned from \"{$job->name}\"",
+            'job' => $job->load('employee'),
+        ]);
     }
 }

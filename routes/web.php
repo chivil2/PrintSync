@@ -4,11 +4,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuoteController;
 use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
+use App\Services\DashboardDataService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -71,66 +74,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['owner'])->prefix('owner')->name('owner.')->group(function () {
         Route::get('dashboard', function () {
-            $jobsCount = ServiceJob::count();
-            $recentJobs = ServiceJob::with(['customer', 'employee'])
-                ->latest()
-                ->take(10)
-                ->get();
-
-            $customersCount = User::role('customer')->count();
-            $recentCustomers = User::role('customer')
-                ->latest()
-                ->take(10)
-                ->get();
-
-            $jobsByStatus = ServiceJob::selectRaw('status, count(*) as count')
-                ->groupBy('status')
-                ->pluck('count', 'status');
-
-            $quotesCount = Quote::count();
-            $pendingQuotes = Quote::where('status', 'draft')->count();
-            $sentQuotes = Quote::where('status', 'sent')->count();
-            $acceptedQuotes = Quote::where('status', 'accepted')->count();
-            $totalRevenue = Quote::where('status', 'accepted')->sum('total');
-
-            $completedJobs = ServiceJob::where('status', 'completed')->count();
-            $completedJobRevenue = Quote::whereHas('serviceJob', function ($query) {
-                $query->where('status', 'completed');
-            })->where('status', 'accepted')->sum('total');
-            $averageOrderValue = $completedJobs > 0 ? $completedJobRevenue / $completedJobs : 0;
-            $highestOrderValue = Quote::whereHas('serviceJob', function ($query) {
-                $query->where('status', 'completed');
-            })->where('status', 'accepted')->max('total') ?? 0;
-
-            $serviceTypes = ServiceJob::selectRaw('type, count(*) as count')
-                ->groupBy('type')
-                ->pluck('count', 'type');
-
-            $employees = User::role('employee')
-                ->where('employee_status', 'active')
-                ->withCount(['serviceJobs as assigned_jobs_count' => function ($query) {
-                    $query->where('status', 'in_progress');
-                }])
-                ->get();
-
-            return view('owner.dashboard', [
-                'jobsCount' => $jobsCount,
-                'recentJobs' => $recentJobs,
-                'customersCount' => $customersCount,
-                'recentCustomers' => $recentCustomers,
-                'jobsByStatus' => $jobsByStatus,
-                'quotesCount' => $quotesCount,
-                'pendingQuotes' => $pendingQuotes,
-                'sentQuotes' => $sentQuotes,
-                'acceptedQuotes' => $acceptedQuotes,
-                'totalRevenue' => $totalRevenue,
-                'completedJobs' => $completedJobs,
-                'completedJobRevenue' => $completedJobRevenue,
-                'averageOrderValue' => $averageOrderValue,
-                'highestOrderValue' => $highestOrderValue,
-                'serviceTypes' => $serviceTypes,
-                'employees' => $employees,
-            ]);
+            $dashboardService = new DashboardDataService();
+            $data = $dashboardService->getDashboardData();
+            
+            return view('owner.dashboard', $data);
         })->name('dashboard');
         Route::get('quotes', [QuoteController::class, 'ownerIndex'])->name('quotes');
         Route::get('quotes/{quote}/edit', [QuoteController::class, 'ownerEdit'])->name('quotes.edit');
@@ -141,11 +88,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('employees', [OwnerController::class, 'storeEmployee'])->name('employees.store');
         Route::get('employees/{employee}/edit', [OwnerController::class, 'editEmployee'])->name('employees.edit');
         Route::put('employees/{employee}', [OwnerController::class, 'updateEmployee'])->name('employees.update');
+        Route::post('jobs/{job}/assign', [OwnerController::class, 'assignEmployeeApi'])->name('jobs.assign');
         Route::patch('employees/{employee}/toggle-status', [OwnerController::class, 'toggleEmployeeStatus'])->name('employees.toggle-status');
         Route::delete('employees/{employee}', [OwnerController::class, 'destroyEmployee'])->name('employees.destroy');
         Route::get('jobs', [OwnerController::class, 'jobs'])->name('jobs');
         Route::get('jobs/{job}', [OwnerController::class, 'showJob'])->name('jobs.show');
-        Route::patch('jobs/{job}/assign', [OwnerController::class, 'assignEmployee'])->name('jobs.assign');
+        Route::resource('inventory', InventoryController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('products', ProductController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
     });
 });
 

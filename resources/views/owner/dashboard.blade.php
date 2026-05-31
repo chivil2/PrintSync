@@ -1,78 +1,259 @@
 <x-layouts::app.owner>
-    <div class="p-6">
-        <div class="bg-gradient-to-r from-blue-600 to-orange-500 -mx-6 -mt-6 px-6 pt-6 pb-8 mb-8">
-            <div class="flex items-center justify-between">
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto" x-data="dashboardData()" x-init="initDashboard()">
+        <div class="bg-gradient-to-r from-[#14224a] via-[#2f4fae] to-[#ff6a2a] rounded-[24px] sm:rounded-[28px] p-5 sm:p-7 text-white mb-6 shadow-2xl shadow-blue-950/30 ring-1 ring-white/10">
+            <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start">
                 <div>
-                    <h1 class="text-2xl font-bold text-white">Dashboard</h1>
-                    <p class="text-white/80">Hello there, {{ ucfirst(auth()->user()->first_name) }} {{ ucfirst(auth()->user()->last_name) }}</p>
+                    <h1 class="text-2xl sm:text-[28px] font-bold tracking-tight">Dashboard</h1>
+                    <p class="text-white/85 mt-1">Hello there, {{ ucfirst(auth()->user()->first_name) }} {{ ucfirst(auth()->user()->last_name) }}</p>
                 </div>
                 <div class="text-right" x-data="{ time: '', date: '' }" x-init="time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }); setInterval(() => { time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }, 1000)">
-                    <div class="text-white text-4xl font-mono font-bold" x-text="time"></div>
-                    <div class="text-white/70 text-xs font-mono" x-text="date"></div>
+                    <div class="text-2xl sm:text-[32px] font-bold leading-none tracking-tight" x-text="time"></div>
+                    <div class="text-white/85 text-sm mt-1.5" x-text="date"></div>
                 </div>
             </div>
         </div>
 
         <!-- KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1">
-                        <p class="text-green-100 text-sm font-medium mb-1">From Completed Orders</p>
-                        <p class="text-3xl font-bold">₱{{ number_format($completedJobRevenue, 0) }}</p>
-                        <p class="text-green-100 text-xs mt-2">Total Revenue</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+            <div class="bg-white/95 rounded-[24px] p-6 shadow-xl shadow-blue-950/10 border border-white/70">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-[28px] font-bold tracking-tight text-slate-900">₱{{ number_format($completedJobRevenue, 0) }}</div>
+                        <div class="text-slate-600 text-[15px] mt-1 font-medium">From Completed Orders</div>
                     </div>
-                    <div class="bg-white/20 rounded-lg p-3 ml-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center text-[#1f347a]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1">
-                        <p class="text-blue-100 text-sm font-medium mb-1">Total Orders Fulfilled</p>
-                        <p class="text-3xl font-bold">{{ $completedJobs }}</p>
-                        <p class="text-blue-100 text-xs mt-2">Completed Jobs</p>
+            <div class="bg-white/95 rounded-[24px] p-6 shadow-xl shadow-blue-950/10 border border-white/70">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-[28px] font-bold tracking-tight text-slate-900">{{ $completedJobs }}</div>
+                        <div class="text-slate-600 text-[15px] mt-1 font-medium">Total Orders Fulfilled</div>
                     </div>
-                    <div class="bg-white/20 rounded-lg p-3 ml-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center text-[#1f347a]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"/>
+                            <circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1">
-                        <p class="text-purple-100 text-sm font-medium mb-1">Per Transaction</p>
-                        <p class="text-3xl font-bold">₱{{ number_format($averageOrderValue, 0) }}</p>
-                        <p class="text-purple-100 text-xs mt-2">Average Order Value</p>
+            <div class="bg-white/95 rounded-[24px] p-6 shadow-xl shadow-blue-950/10 border border-white/70">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-[28px] font-bold tracking-tight text-slate-900">₱{{ number_format($averageOrderValue, 0) }}</div>
+                        <div class="text-slate-600 text-[15px] mt-1 font-medium">Per Transaction</div>
                     </div>
-                    <div class="bg-white/20 rounded-lg p-3 ml-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center text-[#1f347a]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
                         </svg>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1">
-                        <p class="text-orange-100 text-sm font-medium mb-1">Single Order Record</p>
-                        <p class="text-3xl font-bold">₱{{ number_format($highestOrderValue, 0) }}</p>
-                        <p class="text-orange-100 text-xs mt-2">Highest Order</p>
-                    </div>
-                    <div class="bg-white/20 rounded-lg p-3 ml-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        <!-- Earnings Section -->
+        <div class="bg-[#f5ede3]/95 rounded-[24px] sm:rounded-[28px] p-5 sm:p-7 shadow-2xl shadow-blue-950/20 border border-white/60 mb-6">
+            <h2 class="text-[24px] font-bold text-slate-900 mb-6">Earnings</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <div>
+                    <div class="relative mx-auto h-[240px] w-[240px] sm:h-[280px] sm:w-[280px]">
+                        @php
+                            $totalEarnings = $completedJobRevenue;
+                            $colors = ['#f4a5c2', '#f5d87a', '#a8c8e8'];
+                        @endphp
+                        <svg viewBox="0 0 36 36" class="w-full h-full">
+                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f4a5c2" stroke-width="3" stroke-dasharray="60 40" stroke-dashoffset="25"></circle>
+                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#f5d87a" stroke-width="3" stroke-dasharray="25 75" stroke-dashoffset="-35"></circle>
+                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#a8c8e8" stroke-width="3" stroke-dasharray="15 85" stroke-dashoffset="-60"></circle>
                         </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-[36px] font-bold text-slate-900 leading-none">₱{{ number_format($totalEarnings / 1000, 1) }}k</div>
+                        </div>
+                        <div class="absolute top-[10%] left-[8%] w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center text-lg">💰</div>
+                        <div class="absolute top-[8%] right-[16%] w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center text-lg">💖</div>
+                        <div class="absolute bottom-[15%] left-[10%] w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center text-lg">📄</div>
+                    </div>
+
+                    <div class="flex justify-center mt-2">
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800">
+                                <span x-text="earningsPeriod === 'week' ? 'This week' : (earningsPeriod === 'month' ? 'This month' : 'This year')"></span>
+                                <svg class="h-4 w-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="absolute left-1/2 top-full z-20 mt-2 w-40 -translate-x-1/2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg transition-all duration-200" :class="open ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'">
+                                <button @click="setEarningsPeriod('week'); open = false" class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition" :class="earningsPeriod === 'week' ? 'bg-[#f5ede3] font-medium text-slate-900' : 'text-slate-600 hover:bg-slate-50'">
+                                    <span>This week</span>
+                                    <svg x-show="earningsPeriod === 'week'" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                                <button @click="setEarningsPeriod('month'); open = false" class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition" :class="earningsPeriod === 'month' ? 'bg-[#f5ede3] font-medium text-slate-900' : 'text-slate-600 hover:bg-slate-50'">
+                                    <span>This month</span>
+                                    <svg x-show="earningsPeriod === 'month'" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                                <button @click="setEarningsPeriod('year'); open = false" class="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition" :class="earningsPeriod === 'year' ? 'bg-[#f5ede3] font-medium text-slate-900' : 'text-slate-600 hover:bg-slate-50'">
+                                    <span>This year</span>
+                                    <svg x-show="earningsPeriod === 'year'" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="space-y-3">
+                    <div class="bg-[#fce0eb] rounded-2xl p-4 border border-[#f8c8d8]">
+                        <div class="flex items-center gap-2 text-[15px] font-medium text-slate-800"><span>💳</span>Payments received</div>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <div class="text-[26px] font-bold text-slate-900" x-text="`₱${earningsBreakdown.fullyPaid.toLocaleString()}`"></div>
+                            <div class="flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded-full">↑ +13%</div>
+                        </div>
+                        <div class="text-xs text-slate-600 mt-1">Total receipts value</div>
+                    </div>
+                    <div class="bg-[#dbeafe] rounded-2xl p-4 border border-[#bfdbfe]">
+                        <div class="flex items-center gap-2 text-[15px] font-medium text-slate-800"><span>📤</span>Downpayments</div>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <div class="text-[26px] font-bold text-slate-900" x-text="`₱${earningsBreakdown.downpayment.toLocaleString()}`"></div>
+                            <div class="flex items-center gap-1 text-xs font-medium text-red-700 bg-red-100 px-2.5 py-1 rounded-full">↓ -6%</div>
+                        </div>
+                        <div class="text-xs text-slate-600 mt-1">Partial payments received</div>
+                    </div>
+                    <div class="bg-[#fef3c7] rounded-2xl p-4 border border-[#fde68a]">
+                        <div class="flex items-center gap-2 text-[15px] font-medium text-slate-800"><span>🧾</span>Non-paid invoices</div>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <div class="text-[26px] font-bold text-slate-900" x-text="`₱${earningsBreakdown.nonPaid.toLocaleString()}`"></div>
+                            <div class="flex items-center gap-1 text-xs font-medium text-red-700 bg-red-100 px-2.5 py-1 rounded-full">↓ -17%</div>
+                        </div>
+                        <div class="text-xs text-slate-600 mt-1">Confirmed orders awaiting completion</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quote Approval Section -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-slate-900 text-[17px]">Quote Approval</h3>
+                <div class="text-xs text-slate-600 font-medium" x-text="`${@js($pendingQuotes).length} pending`"></div>
+            </div>
+            <div class="grid grid-cols-1 gap-3">
+                <template x-for="quote in paginatedQuotes" :key="quote.id">
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex items-start gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-blue-400 flex items-center justify-center text-white font-bold text-sm shrink-0" x-text="quote.customer ? quote.customer.first_name[0] + quote.customer.last_name[0] : 'NA'"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="font-semibold text-slate-900 truncate" x-text="quote.customer ? `${quote.customer.first_name} ${quote.customer.last_name}` : 'N/A'"></div>
+                                    <div class="font-bold text-slate-900 whitespace-nowrap" x-text="`₱${(quote.amount || 0).toLocaleString()}`"></div>
+                                </div>
+                                <div class="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                                    <span>Order ID: <b class="text-slate-700" x-text="`ORD-Q${quote.id}`"></b></span>
+                                    <span class="text-right">Expires: <b class="text-slate-700" x-text="quote.expires_at ? new Date(quote.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'"></b></span>
+                                    <span class="col-span-2 truncate" x-text="quote.service_job?.name || 'Service Request'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex justify-end gap-2">
+                            <a :href="`/owner/quotes/${quote.id}/edit`" class="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Review
+                            </a>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="@js($pendingQuotes).length === 0" class="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">No quotes awaiting approval.</div>
+            </div>
+            
+            <!-- Pagination -->
+            <div x-show="totalQuotePages > 1" class="flex items-center justify-center gap-2 mt-4">
+                <button @click="prevQuotePage()" :disabled="quotePage === 0" class="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <template x-for="page in totalQuotePages" :key="page">
+                    <button @click="goToQuotePage(page - 1)" :class="quotePage === page - 1 ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="w-8 h-8 rounded-lg text-sm font-medium transition" x-text="page"></button>
+                </template>
+                <button @click="nextQuotePage()" :disabled="quotePage === totalQuotePages - 1" class="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/70 mb-6">
+            <div class="flex items-center gap-2 mb-4 flex-wrap">
+                <button @click="setOrderFilter('all')" :class="orderFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'" class="px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all">All</button>
+                <button @click="setOrderFilter('printing')" :class="orderFilter === 'printing' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'" class="px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all">Printing</button>
+                <button @click="setOrderFilter('technical')" :class="orderFilter === 'technical' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'" class="px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-all">Technical</button>
+                <div class="ml-auto">
+                    <input type="text" x-model="searchQuery" placeholder="Search orders..." class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-[13px] text-slate-500 border-b border-slate-100">
+                            <th class="pb-3 font-medium">Type</th>
+                            <th class="pb-3 font-medium">Date Placed</th>
+                            <th class="pb-3 font-medium">Customer</th>
+                            <th class="pb-3 font-medium">Order</th>
+                            <th class="pb-3 font-medium text-right pr-8">Amount</th>
+                            <th class="pb-3 font-medium">Due Date</th>
+                            <th class="pb-3 font-medium">Status</th>
+                            <th class="pb-3 font-medium">Assign</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        <template x-for="job in filteredOrders.slice(0, 5)" :key="job.id">
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="py-3 text-slate-700 capitalize" x-text="job.service_type || 'Service'"></td>
+                                <td class="py-3 text-slate-600" x-text="new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })"></td>
+                                <td class="py-3 font-medium text-slate-900" x-text="job.customer ? `${job.customer.first_name} ${job.customer.last_name}` : 'N/A'"></td>
+                                <td class="py-3 text-slate-600 max-w-[180px] truncate" x-text="job.name"></td>
+                                <td class="py-3 text-right font-semibold text-slate-900 pr-8" x-text="`₱${(job.quote?.amount || 0).toLocaleString()}`"></td>
+                                <td class="py-3 text-slate-600" x-text="job.deadline ? new Date(job.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'"></td>
+                                <td class="py-3">
+                                    <span class="inline-flex px-2.5 py-1 rounded-full text-[12px] font-medium" :class="{
+                                        'bg-amber-100 text-amber-700': job.status === 'pending',
+                                        'bg-blue-100 text-blue-700': job.status === 'in_progress',
+                                        'bg-green-100 text-green-700': job.status === 'completed',
+                                        'bg-red-100 text-red-700': job.status === 'cancelled',
+                                        'bg-slate-100 text-slate-600': !['pending', 'in_progress', 'completed', 'cancelled'].includes(job.status)
+                                    }" x-text="job.status.replace('_', ' ')"></span>
+                                </td>
+                                <td class="py-3">
+                                    <div class="relative" x-data="{ open: false }">
+                                        <button @click="open = !open" class="flex items-center gap-1 rounded-lg bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                            Assign
+                                        </button>
+                                        <div x-show="open" @click.away="open = false" class="absolute right-0 top-full z-20 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg transition-all" style="display: none;">
+                                            <div class="p-2">
+                                                <template x-for="employee in @js($employees)" :key="employee.id">
+                                                    <button @click="assignEmployee(job.id, employee.id); open = false" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50">
+                                                        <div class="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 flex items-center justify-center text-white text-[10px] font-semibold" x-text="employee.first_name[0] + employee.last_name[0]"></div>
+                                                        <span x-text="`${employee.first_name} ${employee.last_name}`"></span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="filteredOrders.length === 0">
+                            <td colspan="8" class="py-10 text-center text-slate-500">No orders found.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -81,14 +262,15 @@
             <h2 class="text-lg font-semibold text-zinc-900 mb-4">Operational Overview</h2>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Job Status Pie Chart -->
-                <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                    <div class="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">Order Status</div>
+                <div class="bg-[#f5ede3]/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/60">
+                    <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Order Status</div>
                     <div class="flex items-center justify-center">
-                        <div class="relative w-40 h-40">
+                        <div class="relative w-[280px] h-[280px] rounded-[32px] bg-[#f5ede3] p-4 shadow-inner">
                             @php
                                 $totalJobs = array_sum($jobsByStatus->toArray());
                                 $colors = ['pending' => '#fbbf24', 'in_progress' => '#3b82f6', 'completed' => '#22c55e', 'cancelled' => '#ef4444'];
                                 $offset = 0;
+                                $completionPercent = $totalJobs > 0 ? round((($jobsByStatus['completed'] ?? 0) / $totalJobs) * 100) : 0;
                             @endphp
                             <svg viewBox="0 0 36 36" class="w-full h-full">
                                 @foreach($jobsByStatus as $status => $count)
@@ -104,77 +286,72 @@
                                     @endif
                                 @endforeach
                             </svg>
-                            @if($totalJobs > 0)
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <span class="text-2xl font-bold text-zinc-900">{{ $totalJobs }}</span>
-                                </div>
-                            @else
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <span class="text-sm text-zinc-400">No jobs</span>
-                                </div>
-                            @endif
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <div class="text-4xl font-bold text-slate-900">{{ $completionPercent }}%</div>
+                                <div class="text-sm text-slate-500">Completion</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-4 space-y-2">
+                    <div class="mt-4 grid w-full grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                         @foreach(['pending' => 'Pending', 'in_progress' => 'In Progress', 'completed' => 'Completed', 'cancelled' => 'Cancelled'] as $status => $label)
-                            <div class="flex items-center justify-between text-sm">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-full" style="background-color: {{ $colors[$status] ?? '#94a3b8' }}"></div>
-                                    <span class="text-zinc-600">{{ $label }}</span>
+                            <div class="flex items-center justify-between p-4 bg-[#f5ede3] rounded-2xl">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3.5 h-3.5 rounded-full" style="background-color: {{ $colors[$status] ?? '#94a3b8' }}"></span>
+                                    <span class="text-slate-700">{{ $label }}</span>
                                 </div>
-                                <span class="font-medium text-zinc-900">{{ $jobsByStatus[$status] ?? 0 }}</span>
+                                <span class="font-bold text-xl text-slate-900">{{ $jobsByStatus[$status] ?? 0 }}</span>
                             </div>
                         @endforeach
                     </div>
                 </div>
 
                 <!-- Employee Workload -->
-                <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                    <div class="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">Employee Workload</div>
+                <div class="bg-[#f5ede3]/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/60">
+                    <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Employee Workload</div>
                     <div class="space-y-3">
                         @forelse($employees as $employee)
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-teal-400 flex items-center justify-center text-white text-xs font-semibold">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 flex items-center justify-center text-white text-sm font-semibold">
                                         {{ $employee->initials() }}
                                     </div>
                                     <div>
-                                        <p class="text-sm font-medium text-zinc-900">{{ $employee->first_name }} {{ $employee->last_name }}</p>
-                                        <p class="text-xs text-zinc-500">{{ $employee->specializationLabel() }}</p>
+                                        <p class="text-sm font-medium text-slate-900">{{ $employee->first_name }} {{ $employee->last_name }}</p>
+                                        <p class="text-xs text-slate-500">{{ $employee->specializationLabel() }}</p>
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-lg font-bold text-blue-600">{{ $employee->assigned_jobs_count }}</span>
-                                    <p class="text-xs text-zinc-500">Active</p>
+                                    <span class="text-lg font-bold text-slate-900">{{ $employee->assigned_jobs_count }}</span>
+                                    <p class="text-xs text-slate-500">Active</p>
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center text-sm text-zinc-500 py-4">No active employees</div>
+                            <div class="text-center text-sm text-slate-500 py-4">No active employees</div>
                         @endforelse
                     </div>
                 </div>
 
                 <!-- Service Type Breakdown -->
-                <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                    <div class="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">Service Types</div>
+                <div class="bg-[#f5ede3]/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/60">
+                    <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Service Types</div>
                     <div class="space-y-3">
                         @foreach($serviceTypes as $type => $count)
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-sm text-zinc-600">{{ ucfirst($type) }}</span>
-                                    <span class="text-sm font-medium text-zinc-900">{{ $count }}</span>
+                            <div class="p-4 bg-white rounded-2xl shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-slate-900">{{ ucfirst($type) }}</span>
+                                    <span class="text-sm font-bold text-slate-900">{{ $count }}</span>
                                 </div>
-                                <div class="w-full bg-zinc-200 rounded-full h-2">
+                                <div class="w-full bg-slate-100 rounded-full h-2">
                                     @php
                                         $totalServiceJobs = $serviceTypes->sum();
                                         $percentage = $totalServiceJobs > 0 ? ($count / $totalServiceJobs) * 100 : 0;
                                     @endphp
-                                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
+                                    <div class="bg-gradient-to-r from-blue-500 to-orange-500 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
                                 </div>
                             </div>
                         @endforeach
                         @if($serviceTypes->isEmpty())
-                            <div class="text-center text-sm text-zinc-500 py-4">No service data</div>
+                            <div class="text-center text-sm text-slate-500 py-4">No service data</div>
                         @endif
                     </div>
                 </div>
@@ -183,52 +360,52 @@
 
         <!-- Recent Activity -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col">
-                <div class="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Recent Jobs</div>
+            <div class="bg-white/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/70 flex flex-col">
+                <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Recent Jobs</div>
                 <div class="mt-4 flex-1 overflow-y-auto max-h-64 space-y-2">
                     @forelse($recentJobs as $job)
-                        <div class="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2">
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
                             <div class="min-w-0 flex-1">
-                                <div class="truncate text-sm font-medium text-zinc-800">{{ $job->name }}</div>
-                                <div class="mt-0.5 flex items-center gap-2 text-xs text-zinc-400">
+                                <div class="truncate text-sm font-medium text-slate-900">{{ $job->name }}</div>
+                                <div class="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
                                     <span>{{ $job->customer?->first_name }} {{ $job->customer?->last_name }}</span>
                                     @if($job->employee)
-                                        <span class="text-zinc-300">|</span>
-                                        <span class="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">{{ $job->employee?->first_name }} {{ $job->employee?->last_name }}</span>
+                                        <span class="text-slate-300">|</span>
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">{{ $job->employee?->first_name }} {{ $job->employee?->last_name }}</span>
                                     @endif
                                 </div>
                             </div>
                             <div class="ml-2 flex-shrink-0 text-right">
-                                <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium {{ match($job->status) {
-                                    'pending' => 'bg-yellow-100 text-yellow-700',
+                                <span class="inline-block rounded-full px-2.5 py-1 text-[12px] font-medium {{ match($job->status) {
+                                    'pending' => 'bg-amber-100 text-amber-700',
                                     'in_progress' => 'bg-blue-100 text-blue-700',
                                     'completed' => 'bg-green-100 text-green-700',
                                     'cancelled' => 'bg-red-100 text-red-700',
-                                    default => 'bg-zinc-100 text-zinc-600',
+                                    default => 'bg-slate-100 text-slate-600',
                                 } }}">{{ str_replace('_', ' ', $job->status) }}</span>
-                                <div class="mt-0.5 text-xs text-zinc-400">{{ $job->created_at->format('M d') }}</div>
+                                <div class="mt-0.5 text-xs text-slate-400">{{ $job->created_at->format('M d') }}</div>
                             </div>
                         </div>
                     @empty
-                        <div class="py-6 text-center text-sm text-zinc-400">No jobs yet</div>
+                        <div class="py-6 text-center text-sm text-slate-500">No jobs yet</div>
                     @endforelse
                 </div>
             </div>
-            <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col">
-                <div class="text-zinc-400 text-xs font-semibold uppercase tracking-wider">Recent Customers</div>
+            <div class="bg-white/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/70 flex flex-col">
+                <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider">Recent Customers</div>
                 <div class="mt-4 flex-1 overflow-y-auto max-h-64 space-y-2">
                     @forelse($recentCustomers as $customer)
-                        <div class="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2">
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
                             <div class="min-w-0 flex-1">
-                                <div class="truncate text-sm font-medium text-zinc-800">{{ $customer->first_name }} {{ $customer->last_name }}</div>
-                                <div class="text-xs text-zinc-400">{{ $customer->email }}</div>
+                                <div class="truncate text-sm font-medium text-slate-900">{{ $customer->first_name }} {{ $customer->last_name }}</div>
+                                <div class="text-xs text-slate-500">{{ $customer->email }}</div>
                             </div>
-                            <div class="ml-2 flex-shrink-0 text-xs text-zinc-400">
+                            <div class="ml-2 flex-shrink-0 text-xs text-slate-400">
                                 {{ $customer->created_at->format('M d, Y') }}
                             </div>
                         </div>
                     @empty
-                        <div class="py-6 text-center text-sm text-zinc-400">No customers yet</div>
+                        <div class="py-6 text-center text-sm text-slate-500">No customers yet</div>
                     @endforelse
                 </div>
             </div>
@@ -236,24 +413,26 @@
 
         <!-- Quick Actions -->
         <div class="mt-6">
-            <div class="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <div class="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-4">Quick Actions</div>
+            <div class="bg-white/95 rounded-[24px] p-5 shadow-xl shadow-blue-950/10 border border-white/70">
+                <div class="text-[13px] font-semibold text-slate-500 uppercase tracking-wider mb-4">Quick Actions</div>
                 <div class="flex flex-wrap gap-3">
-                    <a href="{{ route('owner.jobs') }}" class="inline-flex items-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    <a href="{{ route('owner.jobs') }}" class="inline-flex items-center px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
                         View All Jobs
                     </a>
-                    <a href="{{ route('owner.quotes') }}" class="inline-flex items-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <a href="{{ route('owner.quotes') }}" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
                         </svg>
                         View All Quotes
                     </a>
-                    <a href="{{ route('owner.employees') }}" class="inline-flex items-center px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <a href="{{ route('owner.employees') }}" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
                         Manage Employees
                     </a>
@@ -261,4 +440,115 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function dashboardData() {
+            return {
+                // State
+                earningsPeriod: 'month',
+                orderFilter: 'all',
+                searchQuery: '',
+                quotePage: 0,
+                quotesPerPage: 3,
+                
+                // Computed
+                get filteredOrders() {
+                    let orders = @js($recentJobs);
+                    
+                    if (this.orderFilter !== 'all') {
+                        orders = orders.filter(job => 
+                            job.service_type?.toLowerCase() === this.orderFilter.toLowerCase()
+                        );
+                    }
+                    
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        orders = orders.filter(job =>
+                            job.name?.toLowerCase().includes(query) ||
+                            job.customer?.first_name?.toLowerCase().includes(query) ||
+                            job.customer?.last_name?.toLowerCase().includes(query)
+                        );
+                    }
+                    
+                    return orders;
+                },
+                
+                get paginatedQuotes() {
+                    const quotes = @js($pendingQuotes);
+                    const start = this.quotePage * this.quotesPerPage;
+                    return quotes.slice(start, start + this.quotesPerPage);
+                },
+                
+                get totalQuotePages() {
+                    const quotes = @js($pendingQuotes);
+                    return Math.ceil(quotes.length / this.quotesPerPage);
+                },
+                
+                get earningsBreakdown() {
+                    return @js($earningsBreakdown);
+                },
+                
+                // Methods
+                initDashboard() {
+                    // Load saved preferences from localStorage
+                    const savedPeriod = localStorage.getItem('dashboard_earnings_period');
+                    if (savedPeriod) this.earningsPeriod = savedPeriod;
+                    
+                    const savedFilter = localStorage.getItem('dashboard_order_filter');
+                    if (savedFilter) this.orderFilter = savedFilter;
+                },
+                
+                setEarningsPeriod(period) {
+                    this.earningsPeriod = period;
+                    localStorage.setItem('dashboard_earnings_period', period);
+                    // In a real app, this would trigger an API call to fetch new data
+                },
+                
+                setOrderFilter(filter) {
+                    this.orderFilter = filter;
+                    localStorage.setItem('dashboard_order_filter', filter);
+                },
+                
+                nextQuotePage() {
+                    if (this.quotePage < this.totalQuotePages - 1) {
+                        this.quotePage++;
+                    }
+                },
+                
+                prevQuotePage() {
+                    if (this.quotePage > 0) {
+                        this.quotePage--;
+                    }
+                },
+                
+                goToQuotePage(page) {
+                    this.quotePage = page;
+                },
+                
+                assignEmployee(jobId, employeeId) {
+                    fetch(`/owner/jobs/${jobId}/assign`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ employee_id: employeeId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Refresh the page to show updated data
+                            window.location.reload();
+                        } else {
+                            alert('Failed to assign employee');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to assign employee');
+                    });
+                }
+            };
+        }
+    </script>
 </x-layouts::app.owner>
