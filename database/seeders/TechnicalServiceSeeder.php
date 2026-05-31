@@ -25,6 +25,18 @@ class TechnicalServiceSeeder extends Seeder
                 'price' => 1000.00,
                 'is_active' => true,
             ],
+            [
+                'name' => 'Maintenance',
+                'description' => 'Regular maintenance services for printing equipment and installed signage. Preventive care to extend equipment life.',
+                'price' => 800.00,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Consultation',
+                'description' => 'Expert printing and signage consultation. Design advice, material selection, and project planning services.',
+                'price' => 500.00,
+                'is_active' => true,
+            ],
         ];
 
         foreach ($services as $service) {

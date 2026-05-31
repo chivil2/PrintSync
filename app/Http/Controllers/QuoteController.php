@@ -297,6 +297,7 @@ class QuoteController extends Controller
     {
         $quotes = Quote::with(['customer', 'serviceJob', 'lineItems'])
             ->latest()
+            ->distinct('quotes.id')
             ->get();
 
         $topProducts = QuoteLineItem::select('item_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(line_total) as total_revenue'))

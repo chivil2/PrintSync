@@ -39,6 +39,18 @@
                 </svg>
                 Print Receipt
             </button>
+            @if($order->status === null || $order->status === 'pending')
+                <form action="{{ route('customer.orders.cancel', $order) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                    @method('PATCH')
+                    @csrf
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg text-sm transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Cancel Order
+                    </button>
+                </form>
+            @endif
             @if($order->invoice_path && $order->status === 'completed')
                 <a href="{{ route('customer.orders.invoice', $order) }}" class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg text-sm transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,12 +81,13 @@
                 <div class="text-right space-y-2">
                     @php
                         $statusConfig = [
+                            null => ['bg-amber-500', 'Pending Review'],
                             'pending' => ['bg-amber-500', 'Pending Review'],
                             'in_progress' => ['bg-blue-500', 'In Progress'],
                             'completed' => ['bg-emerald-500', 'Completed'],
                             'cancelled' => ['bg-red-500', 'Cancelled'],
                         ];
-                        $statusInfo = $statusConfig[$order->status] ?? ['bg-gray-500', ucfirst($order->status)];
+                        $statusInfo = $statusConfig[$order->status] ?? ['bg-gray-500', ucfirst($order->status ?? 'pending')];
                     @endphp
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold {{ $statusInfo[0] }} text-white">
                         <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
@@ -194,7 +207,7 @@
                                                 <p class="font-medium text-gray-900">{{ $item->description ?? 'Item' }}</p>
                                                 <p class="text-sm text-gray-500">{{ $item->quantity }} x ₱{{ number_format($item->unit_price, 2) }}</p>
                                             </div>
-                                            <span class="font-semibold text-gray-900">₱{{ number_format($item->total, 2) }}</span>
+                                            <span class="font-semibold text-gray-900">₱{{ number_format($item->line_total, 2) }}</span>
                                         </div>
                                     @endforeach
                                 </div>
@@ -276,6 +289,49 @@
                             </svg>
                             Download Invoice
                         </a>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Payment Information Section -->
+            @if($order->quote)
+                <div class="bg-blue-50 rounded-xl p-6 border border-blue-200 mt-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Payment Information</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between py-2 border-b border-blue-200">
+                            <span class="text-gray-600">Preferred Payment Method</span>
+                            <span class="font-medium text-gray-900">{{ $customer->preferred_payment_method ? ucfirst($customer->preferred_payment_method) : 'Not set' }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2 border-b border-blue-200">
+                            <span class="text-gray-600">Payment Status</span>
+                            @php
+                                $paymentStatusConfig = [
+                                    'pending' => ['bg-amber-100 text-amber-700', 'Pending'],
+                                    'paid' => ['bg-emerald-100 text-emerald-700', 'Paid'],
+                                    'partial' => ['bg-blue-100 text-blue-700', 'Partial'],
+                                    'overdue' => ['bg-red-100 text-red-700', 'Overdue'],
+                                ];
+                                $paymentStatusInfo = $paymentStatusConfig[$order->quote->payment_status ?? 'pending'] ?? ['bg-gray-100 text-gray-700', ucfirst($order->quote->payment_status ?? 'pending')];
+                            @endphp
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold {{ $paymentStatusInfo[0] }}">
+                                {{ $paymentStatusInfo[1] }}
+                            </span>
+                        </div>
+
+                        @if($order->quote->approved_at)
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-gray-600">Quote Approved</span>
+                                <span class="font-medium text-gray-900">{{ $order->quote->approved_at->format('M d, Y') }}</span>
+                            </div>
+                        @endif
+
+                        @if($order->quote->sent_at)
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-gray-600">Quote Sent</span>
+                                <span class="font-medium text-gray-900">{{ $order->quote->sent_at->format('M d, Y') }}</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif

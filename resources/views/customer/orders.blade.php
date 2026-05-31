@@ -3,6 +3,7 @@
 @section('content')
 <div class="max-w-[1280px] mx-auto px-8 py-7 space-y-6" x-data="{ 
     activeStatus: 'all',
+    preferredPaymentMethod: '{{ $customer->preferred_payment_method ?? '' }}',
     orders: {{ $orders->map(function($order) {
         return [
             'id' => $order->id,
@@ -15,6 +16,7 @@
             'notes' => $order->notes,
             'employee' => $order->employee ? $order->employee->first_name . ' ' . $order->employee->last_name : null,
             'quote_status' => $order->quote ? $order->quote->status : null,
+            'payment_status' => $order->quote ? $order->quote->payment_status : null,
             'invoice_path' => $order->invoice_path,
             'line_items_count' => $order->quote ? $order->quote->lineItems->count() : 0,
             'quote_total' => $order->quote?->total,
@@ -41,6 +43,24 @@
             'cancelled': 'Cancelled',
         };
         return labels[status] || status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    },
+    getPaymentStatusColor(status) {
+        const colors = {
+            'pending': 'bg-amber-100 text-amber-700',
+            'paid': 'bg-emerald-100 text-emerald-700',
+            'partial': 'bg-blue-100 text-blue-700',
+            'overdue': 'bg-red-100 text-red-700',
+        };
+        return colors[status] || 'bg-gray-100 text-gray-700';
+    },
+    getPaymentStatusLabel(status) {
+        const labels = {
+            'pending': 'Pending',
+            'paid': 'Paid',
+            'partial': 'Partial',
+            'overdue': 'Overdue',
+        };
+        return labels[status] || status ? status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A';
     },
     getOrderId(id) {
         const year = new Date().getFullYear();
@@ -173,7 +193,8 @@
     <!-- Orders List -->
     <div x-show="filteredOrders.length > 0" class="flex flex-col gap-3">
         <template x-for="order in filteredOrders" :key="order.id">
-            <div class="bg-white rounded-[14px] border border-gray-200 p-4 flex items-center gap-4 hover:shadow-md hover:border-gray-300 transition-all">
+            <div class="bg-white rounded-[14px] border p-4 flex items-center gap-4 hover:shadow-md transition-all"
+                 :class="order.status === 'cancelled' ? 'border-red-200 bg-red-50/30' : 'border-gray-200 hover:border-gray-300'">
                 <a :href="'/customer/orders/' + order.id" class="flex items-center gap-4 flex-1 min-w-0">
                     <!-- Thumbnail -->
                     <div class="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100">
@@ -197,6 +218,9 @@
                                 x-text="getStatusLabel(order.status)"></span>
                             <span class="text-gray-300 text-sm">•</span>
                             <span class="text-gray-500 text-sm font-semibold" x-text="getOrderId(order.id)"></span>
+                            <span x-show="order.payment_status" class="px-2.5 py-1 rounded-md text-xs font-bold"
+                                :class="getPaymentStatusColor(order.payment_status)"
+                                x-text="'Payment: ' + getPaymentStatusLabel(order.payment_status)"></span>
                         </div>
                         <p x-show="order.description" class="text-gray-500 text-base mt-1 line-clamp-1" x-text="order.description"></p>
                         <div class="flex items-center gap-3 mt-2 text-sm text-gray-500 flex-wrap">
@@ -211,14 +235,15 @@
                     <div class="text-right text-base flex-shrink-0">
                         <div class="text-gray-500"><span class="font-semibold" x-text="order.line_items_count || 1"></span> item<span x-show="order.line_items_count !== 1">s</span></div>
                         <div class="font-extrabold text-base text-zinc-900 mt-0.5" x-text="order.quote_total ? '₱' + parseFloat(order.quote_total).toFixed(2) : '₱500'"></div>
+                        <div x-show="preferredPaymentMethod" class="text-xs text-gray-400 mt-1" x-text="preferredPaymentMethod.charAt(0).toUpperCase() + preferredPaymentMethod.slice(1)"></div>
                     </div>
                 </a>
 
                 <!-- Cancel Button -->
-                <form x-show="order.status === 'pending'" method="POST" :action="'/customer/orders/' + order.id" @click.stop>
+                <form x-show="order.status === 'pending'" method="POST" :action="'/customer/orders/' + order.id + '/cancel'" @click.stop>
                     @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-800">Cancel</button>
+                    @method('PATCH')
+                    <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-800" onclick="return confirm('Are you sure you want to cancel this order?')">Cancel</button>
                 </form>
             </div>
         </template>

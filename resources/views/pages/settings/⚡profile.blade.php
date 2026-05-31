@@ -5,13 +5,8 @@ use App\Concerns\ProfileValidationRules;
 use Flux\Flux;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
-use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
-use Laravel\Fortify\Features;
-use Laravel\Fortify\Fortify;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -38,12 +33,6 @@ new #[Title('Profile settings')] class extends Component {
 
     public string $password_confirmation = '';
 
-    public bool $canManageTwoFactor;
-
-    public bool $twoFactorEnabled;
-
-    public bool $requiresConfirmation;
-
     public $photo;
 
     public ?string $profilePhotoPath = null;
@@ -57,26 +46,6 @@ new #[Title('Profile settings')] class extends Component {
         $this->email = $user->email;
         $this->phone = $user->phone ?? '';
         $this->profilePhotoPath = $user->profile_photo_path;
-
-        if (class_exists(Features::class)) {
-            $this->canManageTwoFactor = Features::canManageTwoFactorAuthentication();
-
-            if ($this->canManageTwoFactor) {
-                /** @var DisableTwoFactorAuthentication $disable */
-                $disable = app(DisableTwoFactorAuthentication::class);
-
-                if (Fortify::confirmsTwoFactorAuthentication() && is_null($user->two_factor_confirmed_at)) {
-                    $disable($user);
-                }
-
-                $this->twoFactorEnabled = $user->hasEnabledTwoFactorAuthentication();
-                $this->requiresConfirmation = Features::optionEnabled(Features::twoFactorAuthentication(), 'confirm');
-            }
-        } else {
-            $this->canManageTwoFactor = false;
-            $this->twoFactorEnabled = false;
-            $this->requiresConfirmation = false;
-        }
     }
 
     public function switchTab(string $tab): void
@@ -122,41 +91,22 @@ new #[Title('Profile settings')] class extends Component {
 
     public function updatePassword(): void
     {
-        try {
-            $validated = $this->validate([
-                'current_password' => $this->currentPasswordRules(),
-                'password' => $this->passwordRules(),
-            ]);
-        } catch (ValidationException $e) {
-            $this->reset('current_password', 'password', 'password_confirmation');
+        $validated = $this->validate([
+            'current_password' => $this->currentPasswordRules(),
+            'password' => $this->passwordRules(),
+        ], [
+            'current_password.current_password' => __('The current password is incorrect.'),
+            'password.confirmed' => __('The password confirmation does not match.'),
+        ]);
 
-            throw $e;
-        }
-
-        Auth::user()->update([
+        $user = Auth::user();
+        $user->update([
             'password' => $validated['password'],
         ]);
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
-        Flux::toast(variant: 'success', text: __('Password updated.'));
-    }
-
-    #[On('two-factor-enabled')]
-    public function onTwoFactorEnabled(): void
-    {
-        $this->twoFactorEnabled = true;
-    }
-
-    public function disable(): void
-    {
-        if (class_exists(DisableTwoFactorAuthentication::class)) {
-            /** @var DisableTwoFactorAuthentication $disable */
-            $disable = app(DisableTwoFactorAuthentication::class);
-            $disable(auth()->user());
-        }
-
-        $this->twoFactorEnabled = false;
+        Flux::toast(variant: 'success', text: __('Password updated successfully.'));
     }
 
     #[Computed]
@@ -573,6 +523,9 @@ class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3
                                             class="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
                                         />
                                     </div>
+                                    @error('current_password')
+                                        <p class="text-xs text-red-500">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 {{-- New Password --}}
@@ -598,6 +551,9 @@ class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3
                                             class="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
                                         />
                                     </div>
+                                    @error('password')
+                                        <p class="text-xs text-red-500">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 {{-- Confirm Password --}}
@@ -623,50 +579,11 @@ class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3
                                             class="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
                                         />
                                     </div>
+                                    @error('password_confirmation')
+                                        <p class="text-xs text-red-500">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
-                                {{-- 2FA section --}}
-                                @if ($canManageTwoFactor)
-                                    @if ($twoFactorEnabled)
-                                        <div class="space-y-4 rounded-xl border p-4" style="border-color: rgba(232,112,26,0.2); background: rgba(232,112,26,0.04)">
-                                            <div class="flex items-start gap-3.5">
-                                                <svg class="mt-0.5 h-5 w-5 shrink-0" style="color: #e8701a" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                                </svg>
-                                                <div class="flex-1">
-                                                    <p class="text-sm font-semibold text-gray-800">{{ __('Two-Factor Authentication') }}</p>
-                                                    <p class="mt-0.5 text-xs text-gray-500">
-                                                        {{ __('You will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
-                                                    </p>
-                                                    <div class="mt-3">
-                                                        <button type="button" wire:click="disable" class="rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90" style="background: #dc2626">
-                                                            {{ __('Disable 2FA') }}
-                                                        </button>
-                                                    </div>
-                                                    <div class="mt-4">
-                                                        <livewire:pages::settings.two-factor.recovery-codes :requires-confirmation="$requiresConfirmation" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="flex items-start gap-3.5 rounded-xl border p-4" style="border-color: rgba(232,112,26,0.2); background: rgba(232,112,26,0.04)">
-                                            <svg class="mt-0.5 h-5 w-5 shrink-0" style="color: #e8701a" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                            </svg>
-                                            <div>
-                                                <p class="text-sm font-semibold text-gray-800">{{ __('Two-Factor Authentication') }}</p>
-                                                <p class="mt-0.5 text-xs text-gray-500">{{ __('Add an extra layer of security to your account.') }}</p>
-                                                <flux:modal.trigger name="two-factor-setup-modal">
-                                                    <button type="button" wire:click="$dispatch('start-two-factor-setup')" class="mt-2 cursor-pointer text-xs font-semibold transition-colors hover:opacity-80" style="color: #e8701a">
-                                                        {{ __('Enable 2FA') }} →
-                                                    </button>
-                                                </flux:modal.trigger>
-                                                <livewire:pages::settings.two-factor-setup-modal :requires-confirmation="$requiresConfirmation" />
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endif
                             </div>
 
                             {{-- Footer --}}

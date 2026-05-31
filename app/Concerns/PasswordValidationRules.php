@@ -10,20 +10,29 @@ trait PasswordValidationRules
     /**
      * Get the validation rules used to validate passwords.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array|string>
      */
     protected function passwordRules(): array
     {
-        return ['required', 'string', Password::default(), 'confirmed'];
+        return [
+            'required',
+            'string',
+            Password::default()->min(12)->mixedCase()->numbers()->symbols()->uncompromised(),
+            'confirmed',
+        ];
     }
 
     /**
      * Get the validation rules used to validate the current password.
      *
-     * @return array<int, ValidationRule|array<mixed>|string>
+     * @return array<int, ValidationRule|array|string>
      */
     protected function currentPasswordRules(): array
     {
-        return ['required', 'string', 'current_password'];
+        return [
+            'required',
+            'string',
+            'current_password:web',
+        ];
     }
 }

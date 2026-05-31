@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -47,6 +48,18 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         View::addNamespace('pages', resource_path('views/pages'));
+
+        if (app()->environment('local') && ! app()->runningInConsole()) {
+            $request = request();
+
+            if ($request !== null) {
+                URL::forceRootUrl($request->getSchemeAndHttpHost());
+
+                if ($request->isSecure()) {
+                    URL::forceScheme('https');
+                }
+            }
+        }
 
         Password::defaults(fn (): ?Password => app()->isProduction()
             ? Password::min(12)

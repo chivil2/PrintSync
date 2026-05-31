@@ -62,6 +62,7 @@ class EmployeeController extends Controller
         })
             ->with(['serviceJob', 'serviceJob.customer', 'lineItems'])
             ->orderBy('created_at', 'desc')
+            ->distinct()
             ->get();
 
         return view('employee.quotes', [

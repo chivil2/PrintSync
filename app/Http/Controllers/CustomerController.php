@@ -19,21 +19,25 @@ class CustomerController extends Controller
     public function dashboard()
     {
         $orders = ServiceJob::where('customer_id', auth()->id())
-            ->with(['service', 'employee'])
+            ->with(['service', 'employee', 'quote'])
             ->orderBy('created_at', 'desc')
             ->get();
 
         $totalOrders = $orders->count();
         $completedOrders = $orders->where('status', 'completed')->count();
-        $totalSpent = $orders->where('status', 'completed')->sum('price');
+        $totalSpent = Quote::whereHas('serviceJob', function ($q) {
+            $q->where('status', 'completed');
+        })->where('status', 'accepted')->sum('total') ?? 0;
 
         $recentOrders = $orders->take(5);
+        $customer = auth()->user();
 
         return view('customer.dashboard', [
             'totalOrders' => $totalOrders,
             'completedOrders' => $completedOrders,
             'totalSpent' => $totalSpent,
             'recentOrders' => $recentOrders,
+            'customer' => $customer,
         ]);
     }
 
@@ -124,8 +128,11 @@ class CustomerController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $customer = auth()->user();
+
         return view('customer.orders', [
             'orders' => $orders,
+            'customer' => $customer,
         ]);
     }
 
@@ -135,20 +142,30 @@ class CustomerController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        $order->load(['service', 'employee', 'quote']);
+        $order->load(['service', 'employee', 'quote.lineItems']);
+        $customer = auth()->user();
 
-        return view('customer.order-detail', compact('order'));
+        return view('customer.order-detail', compact('order', 'customer'));
     }
 
-    public function destroyOrder(ServiceJob $order)
+    public function cancelOrder(ServiceJob $order)
     {
-        if ($order->customer_id !== auth()->id()) {
-            abort(403);
+        if (! auth()->user()->can('cancel_own_orders')) {
+            abort(403, 'You do not have permission to cancel orders.');
         }
 
-        $order->delete();
+        if ($order->customer_id !== auth()->id()) {
+            abort(403, 'You can only cancel your own orders.');
+        }
 
-        return redirect()->route('customer.orders')->with('success', 'Order deleted successfully.');
+        if ($order->status !== null && $order->status !== 'pending') {
+            return redirect()->route('customer.orders.show', $order)
+                ->with('error', 'Only pending orders can be cancelled.');
+        }
+
+        $order->update(['status' => 'cancelled']);
+
+        return redirect()->route('customer.orders')->with('success', 'Order cancelled successfully.');
     }
 
     public function downloadInvoice(ServiceJob $order)

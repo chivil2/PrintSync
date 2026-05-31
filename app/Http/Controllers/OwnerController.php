@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quote;
+use App\Models\QuoteLineItem;
 use App\Models\ServiceJob;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -153,7 +155,7 @@ class OwnerController extends Controller
      */
     public function quotes()
     {
-        $quotes = Quote::with(['customer', 'employee', 'lineItems'])
+        $quotes = Quote::with(['customer', 'serviceJob', 'lineItems'])
             ->latest()
             ->paginate(20);
 
@@ -162,11 +164,22 @@ class OwnerController extends Controller
         $totalOrders = Quote::where('status', 'accepted')->count();
         $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
 
+        // Calculate top products
+        $topProducts = QuoteLineItem::select('item_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(line_total) as total_revenue'))
+            ->whereHas('quote', function ($q) {
+                $q->where('status', 'accepted');
+            })
+            ->groupBy('item_name')
+            ->orderBy('total_qty', 'desc')
+            ->take(10)
+            ->get();
+
         return view('owner.quotes', [
             'quotes' => $quotes,
             'totalRevenue' => $totalRevenue,
             'totalOrders' => $totalOrders,
             'averageOrderValue' => $averageOrderValue,
+            'topProducts' => $topProducts,
         ]);
     }
 

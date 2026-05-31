@@ -49,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('request-service', [CustomerController::class, 'requestService'])->name('request-service');
         Route::get('orders', [CustomerController::class, 'orders'])->name('orders');
         Route::get('orders/{order}', [CustomerController::class, 'showOrder'])->name('orders.show');
-        Route::delete('orders/{order}', [CustomerController::class, 'destroyOrder'])->name('orders.destroy');
+        Route::patch('orders/{order}/cancel', [CustomerController::class, 'cancelOrder'])->name('orders.cancel');
         Route::get('orders/{order}/invoice', [CustomerController::class, 'downloadInvoice'])->name('orders.invoice');
         Route::get('profile', [CustomerController::class, 'profile'])->name('profile');
         Route::post('profile', [CustomerController::class, 'updateProfile'])->name('profile.update');

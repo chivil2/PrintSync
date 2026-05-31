@@ -96,6 +96,21 @@
                 <p class="stat-trend stat-trend--blue">Lifetime purchases</p>
             </div>
         </div>
+
+        @if($customer->preferred_payment_method)
+            <div class="stat-card stat-card--purple">
+                <div class="stat-card-inner">
+                    <div class="stat-icon purple">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </div>
+                    <p class="stat-label stat-label--purple">Payment Method</p>
+                    <p class="stat-value stat-value--purple">{{ ucfirst($customer->preferred_payment_method) }}</p>
+                    <p class="stat-trend stat-trend--purple">Preferred option</p>
+                </div>
+            </div>
+        @endif
     </div>
 
     <!-- Recent Orders -->
@@ -119,9 +134,25 @@
                             </div>
                             <div class="order-info">
                                 <p class="order-name">{{ $order->service->name ?? 'Service' }}</p>
-                                <span class="order-status-badge {{ $order->status === 'completed' ? 'completed' : ($order->status === 'in_progress' ? 'processing' : 'pending') }}">
-                                    {{ ucfirst($order->status) }}
-                                </span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="order-status-badge {{ $order->status === 'completed' ? 'completed' : ($order->status === 'in_progress' ? 'processing' : 'pending') }}">
+                                        {{ ucfirst($order->status) }}
+                                    </span>
+                                    @if($order->quote && $order->quote->payment_status)
+                                        @php
+                                            $paymentStatusColors = [
+                                                'pending' => 'bg-amber-100 text-amber-700',
+                                                'paid' => 'bg-emerald-100 text-emerald-700',
+                                                'partial' => 'bg-blue-100 text-blue-700',
+                                                'overdue' => 'bg-red-100 text-red-700',
+                                            ];
+                                            $paymentStatusColor = $paymentStatusColors[$order->quote->payment_status] ?? 'bg-gray-100 text-gray-700';
+                                        @endphp
+                                        <span class="px-2 py-0.5 rounded-md text-xs font-semibold {{ $paymentStatusColor }}">
+                                            {{ ucfirst($order->quote->payment_status) }}
+                                        </span>
+                                    @endif
+                                </div>
                                 <div class="order-meta">
                                     <span>Order #{{ $order->id }}</span>
                                     <span>•</span>
@@ -132,7 +163,7 @@
                                 </div>
                             </div>
                             <div class="order-right">
-                                <p class="order-amount">₱{{ number_format($order->price, 2) }}</p>
+                                <p class="order-amount">₱{{ number_format($order->quote->total ?? 0, 2) }}</p>
                                 @if($order->status === 'pending')
                                     <span class="order-payment-badge">Pending payment</span>
                                 @endif

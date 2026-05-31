@@ -232,7 +232,7 @@
                             </div>
                             @if($job->customer->phone)
                                 <div class="text-sm">
-                                    <span class="text-zinc-500">Phone:</span>
+                                    <span class="text-zinc-500">Phone Number:</span>
                                     <p class="text-zinc-900">{{ $job->customer->phone }}</p>
                                 </div>
                             @endif
