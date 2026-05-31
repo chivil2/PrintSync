@@ -85,15 +85,15 @@
                 <table class="w-full text-xs border-collapse">
                     <thead>
                         <tr class="bg-slate-50 border-b-2 border-slate-300">
-                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100">Image</th>
-                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100">ID</th>
-                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100">Name</th>
-                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100">Type</th>
-                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100">Description</th>
-                            <th class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-700 bg-slate-100">Price</th>
-                            <th class="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-700 bg-slate-100">Production Time</th>
-                            <th class="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-700 bg-slate-100">Status</th>
-                            <th class="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-700 bg-slate-100">Actions</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100 w-20">Image</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100 w-16">ID</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100 w-32">Name</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100 w-24">Type</th>
+                            <th class="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100 w-48">Description</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-700 bg-slate-100 w-24">Price</th>
+                            <th class="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-700 bg-slate-100 w-28">Production Time</th>
+                            <th class="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-700 bg-slate-100 w-24">Status</th>
+                            <th class="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-700 bg-slate-100 w-20">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

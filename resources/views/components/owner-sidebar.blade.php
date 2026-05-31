@@ -52,6 +52,13 @@
                 <span class="font-medium text-sm whitespace-nowrap">Orders</span>
             </a>
 
+            <a href="{{ route('owner.reports') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.reports') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="font-medium text-sm whitespace-nowrap">Reports</span>
+            </a>
+
             <!-- Employee Management Section -->
             <div x-data="{ employeesExpanded: localStorage.getItem('ownerSidebarEmployeesExpanded') === 'true' }" x-init="$watch('employeesExpanded', value => localStorage.setItem('ownerSidebarEmployeesExpanded', value))">
                 <button @click="employeesExpanded = !employeesExpanded" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg text-slate-900 hover:bg-slate-100 transition-all">
@@ -95,7 +102,7 @@
                                     @endif
                                     <div class="flex-1 min-w-0">
                                         <div class="text-xs font-medium text-slate-900 truncate">{{ $employee->first_name }} {{ $employee->last_name }}</div>
-                                        <div class="text-xs text-slate-500 truncate">{{ $employee->specialization ?? 'Employee' }}</div>
+                                        <div class="text-xs text-slate-500 truncate">{{ $employee->specializationLabel() }}</div>
                                     </div>
                                 </a>
                             @endforeach

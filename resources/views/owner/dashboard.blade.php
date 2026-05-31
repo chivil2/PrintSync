@@ -34,7 +34,7 @@
                     </svg>
                 </div>
                 <div class="text-3xl font-bold text-slate-900">{{ $totalOrders }}</div>
-                <div class="text-xs text-slate-500 mt-0.5">Total Orders</div>
+                <div class="text-xs text-slate-500 mt-0.5">Total Completed Orders</div>
             </a>
 
             <a href="{{ route('owner.employees') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
@@ -88,7 +88,7 @@
                             @endif
                             <div class="flex-1 min-w-0">
                                 <div class="text-sm font-medium text-slate-900 truncate">{{ $employee->first_name }} {{ $employee->last_name }}</div>
-                                <div class="text-xs text-slate-500 truncate">{{ $employee->specialization ?? 'Employee' }}</div>
+                                <div class="text-xs text-slate-500 truncate">{{ $employee->specializationLabel() }}</div>
                             </div>
                         </div>
                     @empty

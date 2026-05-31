@@ -102,7 +102,7 @@
                                 @endif
                                 <div>
                                     <div class="font-semibold text-slate-900">{{ $employee->first_name }} {{ $employee->last_name }}</div>
-                                    <div class="text-xs text-slate-500">{{ $employee->specialization ?? 'Employee' }}</div>
+                                    <div class="text-xs text-slate-500">{{ $employee->specializationLabel() }}</div>
                                 </div>
                             </div>
                             @if($empJobs->isEmpty())

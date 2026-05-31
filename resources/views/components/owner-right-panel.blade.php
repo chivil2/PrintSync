@@ -29,7 +29,7 @@
 
 <div x-data="{ printbuddyExpanded: false, ...calendar() }" x-init="initCalendar({{ now()->year }}, {{ now()->month }})">
 
-<aside class="w-96 p-4 flex-shrink-0 hidden xl:block sticky top-4 self-start">
+<aside class="w-[380px] p-4 flex-shrink-0 hidden xl:block sticky top-4 self-start">
     <div class="bg-white rounded-lg h-[calc(100vh-2rem)] p-6 shadow-sm border border-slate-200 flex flex-col overflow-hidden">
 
         <div class="flex items-center gap-3 mb-8" x-show="!printbuddyExpanded">

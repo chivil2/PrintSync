@@ -6,6 +6,7 @@ use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\QuoteController;
 use Illuminate\Support\Facades\Route;
@@ -95,6 +96,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('services/{id}/{serviceType}/edit', [ServiceController::class, 'edit'])->name('services.edit');
         Route::put('services/{id}/{serviceType}', [ServiceController::class, 'update'])->name('services.update');
         Route::delete('services/{id}/{serviceType}', [ServiceController::class, 'destroy'])->name('services.destroy');
+        Route::get('reports', [ReportsController::class, 'index'])->name('reports');
     });
 });
 

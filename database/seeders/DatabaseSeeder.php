@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             PrintingServiceSeeder::class,
             TechnicalServiceSeeder::class,
             DemoUserSeeder::class,
+            InventorySeeder::class,
         ]);
     }
 }
