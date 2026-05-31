@@ -13,69 +13,19 @@ class ServiceController extends Controller
      */
     public function index(Request $request)
     {
-        // Get printing services
         $printingServices = DB::table('printing_services')
             ->select('id', 'name', 'description', 'price', 'image', 'is_active', 'created_at', 'updated_at', 'production_time')
-            ->selectRaw("'printing' as service_type");
+            ->selectRaw("'printing' as service_type")
+            ->get();
 
-        // Get technical services
         $technicalServices = DB::table('technical_services')
             ->select('id', 'name', 'description', 'price', 'image', 'is_active', 'created_at', 'updated_at', 'production_time')
-            ->selectRaw("'technical' as service_type");
+            ->selectRaw("'technical' as service_type")
+            ->get();
 
-        // Combine both queries
-        $combinedQuery = $printingServices->union($technicalServices);
+        $services = $printingServices->concat($technicalServices);
 
-        // Build the final query with filters
-        $sql = $combinedQuery->toSql();
-        $bindings = $combinedQuery->getBindings();
-
-        // Apply search filter if provided
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $sql .= " WHERE name LIKE ?";
-            $bindings = array_merge($bindings, ["%{$search}%"]);
-        }
-
-        // Apply service type filter if provided
-        if ($request->filled('service_type')) {
-            $operator = $request->filled('search') ? 'AND' : 'WHERE';
-            $sql .= " {$operator} service_type = ?";
-            $bindings[] = $request->service_type;
-        }
-
-        // Add ordering
-        $sql .= " ORDER BY created_at DESC";
-
-        // Execute the query and paginate manually
-        $page = $request->get('page', 1);
-        $perPage = 20;
-        $offset = ($page - 1) * $perPage;
-
-        // Get total count
-        $countSql = "SELECT COUNT(*) as total FROM ($sql) as combined";
-        $total = DB::selectOne($countSql, $bindings)->total;
-
-        // Get paginated results
-        $paginatedSql = $sql . " LIMIT $perPage OFFSET $offset";
-        $services = DB::select($paginatedSql, $bindings);
-
-        // Convert to paginator
-        $services = new \Illuminate\Pagination\LengthAwarePaginator(
-            $services,
-            $total,
-            $perPage,
-            $page,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
-
-        // Get service types for filter
-        $serviceTypes = ['printing', 'technical'];
-
-        return view('owner.services', [
-            'services' => $services,
-            'serviceTypes' => $serviceTypes,
-        ]);
+        return view('owner.services', compact('services'));
     }
 
     /**
