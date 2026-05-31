@@ -8,7 +8,8 @@
     $colors = config('colors');
 @endphp
 
-<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#E5E7EB] bg-white px-6 py-0" style="height:48px">
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#E5E7EB] px-6 py-0 relative" style="height:48px; background: linear-gradient(to right, white 0%, white 60%, #3B82F6 85%, #F97316 95%, #EA580C 100%);">
+    <div class="absolute inset-0 pointer-events-none" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 24px 24px; opacity: 0.15;"></div>
     <div class="flex items-center gap-6 h-full">
                 <a href="{{ route($logoRoute) }}" class="block overflow-hidden" style="width:160px;height:48px">
                     <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-[160px] h-[80px] object-cover" style="margin-top:-16px">
@@ -43,11 +44,16 @@
                     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                         <button
                             @click="open = !open"
-                            class="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] px-2.5 py-1 transition-colors hover:border-[#D1D5DB] hover:bg-[#F9FAFB]"
+                            class="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] px-2 py-0.5 transition-colors hover:border-[#D1D5DB] hover:bg-[#F9FAFB]"
+                            style="background: #F5F5F5;"
                         >
-                            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#FEF0E7]">
-                                <span class="text-[12px] font-semibold text-[#F47C3C]">{{ substr(auth()->user()->first_name, 0, 1) }}{{ substr(auth()->user()->last_name, 0, 1) }}</span>
-                            </div>
+                            @if(auth()->user()->profile_photo_path)
+                                <img src="{{ asset('storage/' . auth()->user()->profile_photo_path) }}" alt="{{ auth()->user()->first_name }}" class="h-7 w-7 rounded-full object-cover">
+                            @else
+                                <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#FEF0E7]">
+                                    <span class="text-[12px] font-semibold text-[#F47C3C]">{{ substr(auth()->user()->first_name, 0, 1) }}{{ substr(auth()->user()->last_name, 0, 1) }}</span>
+                                </div>
+                            @endif
                             <span class="hidden text-[14px] font-medium text-[#374151] sm:block">{{ auth()->user()->first_name }}</span>
                             <svg class="h-[14px] w-[14px] text-[#6B7280] transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
