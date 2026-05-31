@@ -8,7 +8,7 @@
     $colors = config('colors');
 @endphp
 
-<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#E5E7EB] px-6 py-0 relative bg-white" style="height:48px;">
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#E5E7EB] px-6 py-0 relative bg-white no-print" style="height:48px;">
     <div class="flex items-center gap-6 h-full">
                 <a href="{{ route($logoRoute) }}" class="block overflow-hidden" style="width:160px;height:48px">
                     <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-[160px] h-[80px] object-cover" style="margin-top:-16px">

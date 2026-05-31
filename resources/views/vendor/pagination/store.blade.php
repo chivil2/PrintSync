@@ -2,13 +2,11 @@
     <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-between gap-4">
         
         {{-- Results Info --}}
-        <div class="text-sm text-gray-600">
+        <div class="text-sm text-gray-500">
             Showing 
-            <span class="font-semibold text-gray-900">{{ $paginator->firstItem() ?? 0 }}</span> 
-            to 
-            <span class="font-semibold text-gray-900">{{ $paginator->lastItem() ?? 0 }}</span> 
+            <span>{{ $paginator->lastItem() ?? 0 }}</span> 
             of 
-            <span class="font-semibold text-gray-900">{{ $paginator->total() }}</span> 
+            <span>{{ $paginator->total() }}</span> 
             results
         </div>
 

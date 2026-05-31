@@ -820,7 +820,7 @@ flux\\:sidebar-item {
 .store-hero-glow2 {
     position: absolute;
     border-radius: 50%;
-    filter: blur(60px);
+    filter: blur(80px);
 }
 
 .store-hero-glow1 {
@@ -1617,4 +1617,29 @@ flux\\:sidebar-item {
 
 .cta-btn-secondary:hover {
     background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .no-print { 
+        display: none !important; 
+    }
+    
+    body { 
+        background: white !important; 
+    }
+    
+    .receipt-container { 
+        box-shadow: none !important; 
+        border: 1px solid #ddd !important;
+        max-width: 100% !important;
+    }
+    
+    /* Ensure receipt uses full page width */
+    .max-w-\[900px\] {
+        max-width: 100% !important;
+    }
 }
