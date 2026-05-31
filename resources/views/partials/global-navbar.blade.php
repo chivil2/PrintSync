@@ -8,8 +8,8 @@
     $colors = config('colors');
 @endphp
 
-<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#E5E7EB] bg-white px-6 py-3">
-    <div class="flex items-center gap-8">
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-[#E5E7EB] bg-white px-6 py-1">
+    <div class="flex items-center gap-6">
                 <a href="{{ route($logoRoute) }}" class="flex items-center gap-2">
                     <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-[160px] h-[80px] object-cover">
                 </a>
@@ -29,7 +29,7 @@
 
                         <a
                             href="{{ route($route) }}"
-                            class="flex items-center gap-2 rounded-full px-4 py-2 text-[14px] font-medium transition-colors {{ $isActive ? 'bg-[#FEF0E7] text-[#F47C3C]' : 'text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#374151]' }}"
+                            class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-medium transition-colors {{ $isActive ? 'bg-[#FEF0E7] text-[#F47C3C]' : 'text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#374151]' }}"
                         >
                             <i class="{{ $link['icon'] }} h-4 w-4"></i>
                             <span>{{ $link['label'] }}</span>
@@ -43,7 +43,7 @@
                     <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                         <button
                             @click="open = !open"
-                            class="flex items-center gap-2 rounded-full border border-[#E5E7EB] px-3 py-1.5 transition-colors hover:border-[#D1D5DB] hover:bg-[#F9FAFB]"
+                            class="flex items-center gap-1.5 rounded-full border border-[#E5E7EB] px-2.5 py-1 transition-colors hover:border-[#D1D5DB] hover:bg-[#F9FAFB]"
                         >
                             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#FEF0E7]">
                                 <span class="text-[12px] font-semibold text-[#F47C3C]">{{ substr(auth()->user()->first_name, 0, 1) }}{{ substr(auth()->user()->last_name, 0, 1) }}</span>
