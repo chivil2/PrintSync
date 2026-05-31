@@ -30,6 +30,7 @@ class CustomerController extends Controller
         })->where('status', 'accepted')->sum('total') ?? 0;
 
         $recentOrders = $orders->take(5);
+  
         $customer = auth()->user();
 
         return view('customer.dashboard', [

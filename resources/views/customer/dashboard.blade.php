@@ -163,7 +163,15 @@
                                 </div>
                             </div>
                             <div class="order-right">
-                                <p class="order-amount">₱{{ number_format($order->quote->total ?? 0, 2) }}</p>
+                                <p class="order-amount">
+                                    @if($order->quote?->total)
+                                        ₱{{ number_format($order->quote->total, 2) }}
+                                    @elseif($order->service?->price)
+                                        ₱{{ number_format($order->service->price * ($order->quote?->lineItems->first()?->quantity ?? 1), 2) }}
+                                    @else
+                                        No Price Yet
+                                    @endif
+                                </p>
                                 @if($order->status === 'pending')
                                     <span class="order-payment-badge">Pending payment</span>
                                 @endif

@@ -127,6 +127,14 @@
                         <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Order Date</span>
                         <p class="text-gray-700 font-medium mt-1">{{ $order->created_at->format('F d, Y') }}</p>
                     </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Quantity</span>
+                        <p class="text-gray-700 font-medium mt-1">{{ $order->quote?->lineItems->first()?->quantity ?? 1 }}</p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Cost</span>
+                        <p class="text-gray-700 font-bold mt-1 text-lg">₱{{ number_format($order->quote?->total ?? $order->service->price ?? 0, 2) }}</p>
+                    </div>
                     @if($order->employee)
                         <div>
                             <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Assigned To</span>
