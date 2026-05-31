@@ -6,14 +6,17 @@ use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\PrintbuddyController;
+use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\QuoteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('landing');
 })->name('home');
+
+Route::post('/printbuddy/chat', [PrintbuddyController::class, 'chat'])->name('printbuddy.chat.api');
 
 Route::get('/database', [DatabaseController::class, 'index'])->name('database');
 
@@ -40,7 +43,7 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('customer.store');
         }
 
-        return view('dashboard');
+        abort(403, 'Unauthorized role');
     })->name('dashboard');
 
     Route::prefix('customer')->name('customer.')->group(function () {
@@ -98,6 +101,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('services/{id}/{serviceType}', [ServiceController::class, 'destroy'])->name('services.destroy');
         Route::get('reports', [ReportsController::class, 'index'])->name('reports');
     });
+});
+
+// MCP API routes for PrintBuddy (protected with API key)
+Route::middleware(['api.key'])->prefix('api/printbuddy')->name('printbuddy.')->group(function () {
+    Route::get('/services', [PrintbuddyController::class, 'getServices'])->name('services');
+    Route::get('/inventory', [PrintbuddyController::class, 'getInventory'])->name('inventory');
 });
 
 require __DIR__.'/settings.php';

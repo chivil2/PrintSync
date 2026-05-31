@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApiKeyMiddleware;
 use App\Http\Middleware\EnsureEmployeeRole;
 use App\Http\Middleware\EnsureOwnerRole;
 use Illuminate\Foundation\Application;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'employee' => EnsureEmployeeRole::class,
             'owner' => EnsureOwnerRole::class,
+            'api.key' => ApiKeyMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
