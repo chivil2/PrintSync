@@ -22,10 +22,7 @@ class QuoteFactory extends Factory
             'status' => 'draft',
             'currency' => 'PHP',
             'subtotal' => 1000,
-            'tax' => 120,
-            'discount' => 0,
-            'total' => 1120,
-            'terms' => 'Payment due within 30 days.',
+            'total' => 1000,
             'notes' => null,
             'employee_id' => null,
         ];

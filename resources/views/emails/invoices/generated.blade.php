@@ -12,10 +12,6 @@ Great news! Your service has been completed. Please find your invoice attached t
 | Description | Amount |
 |:----------- |:------:|
 | {{ $serviceJob->name }} | ₱{{ number_format($quote->subtotal, 2) }} |
-| Tax | ₱{{ number_format($quote->tax, 2) }} |
-@if ((float) $quote->discount > 0)
-| Discount | -₱{{ number_format($quote->discount, 2) }} |
-@endif
 </x-mail::table>
 
 <table width="100%" cellpadding="4" cellspacing="0" style="margin-top: 4px;">

@@ -19,24 +19,88 @@
             </div>
         </div>
 
-        <!-- Order Assignment Queue -->
-        <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
+        <!-- Section 1: Pending Quote Approval -->
+        <div class="bg-amber-50 rounded-lg p-5 sm:p-6 shadow-sm border border-amber-200 mb-6">
             <div class="mb-4 flex items-center justify-between gap-3">
-                <div>
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Order Assignment Queue</h3>
-                    <p class="text-sm text-slate-500">Assign or reassign employees to active orders</p>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                        <h3 class="text-xs font-semibold text-amber-800 uppercase tracking-wider">Pending Quote Approval</h3>
+                        <p class="text-sm text-amber-600">These orders are waiting for customer approval</p>
+                    </div>
                 </div>
-                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">{{ $unassignedJobsCount ?? 0 }} unassigned · {{ $unassignedJobs->count() }} active orders</span>
+                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">{{ $pendingQuoteJobs->count() }} orders awaiting approval</span>
             </div>
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                @foreach($unassignedJobs as $job)
-                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                @foreach($pendingQuoteJobs as $job)
+                    <div class="rounded-lg border border-amber-200 bg-white p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <p class="font-semibold text-slate-900 truncate">{{ $job->customer->first_name ?? 'N/A' }} {{ $job->customer->last_name ?? '' }}</p>
-                                <p class="text-xs text-slate-500 truncate">{{ ucfirst(str_replace('_', ' ', $job->service_type)) }} · {{ $job->name }} · Due {{ $job->deadline ? $job->deadline->format('M d, Y') : 'N/A' }}</p>
+                                <p class="text-xs text-slate-500 truncate">{{ ucfirst(str_replace('_', ' ', $job->service_type)) }} · {{ $job->name }}</p>
+                                <p class="text-xs text-amber-600 mt-1">Due {{ $job->deadline ? $job->deadline->format('M d, Y') : 'N/A' }}</p>
                             </div>
-                            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium {{ $job->status === 'completed' ? 'bg-green-100 text-green-700' : ($job->status === 'in_progress' ? 'bg-blue-100 text-blue-700' : ($job->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700')) }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
+                            @php
+                                $quoteStatusColors = [
+                                    'draft' => 'bg-slate-100 text-slate-700',
+                                    'sent' => 'bg-blue-100 text-blue-700',
+                                    'accepted' => 'bg-emerald-100 text-emerald-700',
+                                    'rejected' => 'bg-red-100 text-red-700',
+                                ];
+                                $quoteStatusColor = $quoteStatusColors[$job->quote->status ?? 'draft'] ?? 'bg-slate-100 text-slate-700';
+                            @endphp
+                            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium {{ $quoteStatusColor }}">{{ ucfirst($job->quote->status ?? 'draft') }}</span>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between gap-3">
+                            <div class="text-xs text-slate-600">
+                                @if($job->quote && $job->quote->status === 'draft')
+                                    <span class="block text-amber-600">Review quote & send to customer</span>
+                                @elseif($job->quote && $job->quote->status === 'sent')
+                                    <span class="block text-blue-600">Waiting for customer approval</span>
+                                @endif
+                            </div>
+                            <a href="{{ route('owner.quotes.view', $job->quote) }}" class="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-amber-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                View Quote
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+                @if($pendingQuoteJobs->isEmpty())
+                    <div class="col-span-full text-center py-8 text-amber-700 text-sm">No orders pending quote approval</div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Section 2: Ready to Assign -->
+        <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
+            <div class="mb-4 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ready to Assign</h3>
+                        <p class="text-sm text-slate-500">Quote accepted - assign employees to these orders</p>
+                    </div>
+                </div>
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">{{ $unassignedJobsCount ?? 0 }} unassigned · {{ $readyToAssignJobs->count() }} total</span>
+            </div>
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                @foreach($readyToAssignJobs as $job)
+                    <div class="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="font-semibold text-slate-900 truncate">{{ $job->customer->first_name ?? 'N/A' }} {{ $job->customer->last_name ?? '' }}</p>
+                                <p class="text-xs text-slate-500 truncate">{{ ucfirst(str_replace('_', ' ', $job->service_type)) }} · {{ $job->name }}</p>
+                                <p class="text-xs text-emerald-600 mt-1">Due {{ $job->deadline ? $job->deadline->format('M d, Y') : 'N/A' }}</p>
+                            </div>
+                            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium bg-emerald-100 text-emerald-700">Accepted</span>
                         </div>
                         <div class="mt-3 flex items-center justify-between gap-3">
                             <div class="text-xs text-slate-600">
@@ -44,7 +108,7 @@
                                 <span class="font-semibold text-slate-900">{{ $job->employee ? $job->employee->first_name . ' ' . $job->employee->last_name : 'Unassigned' }}</span>
                             </div>
                             @if($job->status !== 'cancelled')
-                                <button @click="assignEmployee({{ $job->id }})" class="flex items-center gap-1 rounded-lg bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                                <button @click="assignEmployee({{ $job->id }})" class="flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-emerald-700">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                     {{ $job->employee ? 'Change Assign' : 'Assign' }}
                                 </button>
@@ -52,10 +116,9 @@
                         </div>
                     </div>
                 @endforeach
-                @if($unassignedJobs->isEmpty())
-                    <div class="col-span-full text-center py-8 text-slate-500 text-sm">No unassigned orders</div>
+                @if($readyToAssignJobs->isEmpty())
+                    <div class="col-span-full text-center py-8 text-slate-500 text-sm">No jobs ready for assignment</div>
                 @endif
-
             </div>
         </div>
 

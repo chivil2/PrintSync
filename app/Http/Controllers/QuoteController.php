@@ -54,10 +54,7 @@ class QuoteController extends Controller
             'status' => 'required|string|in:pending,sent,accepted,rejected',
             'currency' => 'required|string|max:3',
             'subtotal' => 'required|numeric',
-            'tax' => 'required|numeric',
-            'discount' => 'required|numeric',
             'total' => 'required|numeric',
-            'terms' => 'nullable|string',
             'notes' => 'nullable|string',
             'employee_id' => 'nullable|exists:users,id',
             'line_items' => 'required|array',
@@ -75,10 +72,7 @@ class QuoteController extends Controller
             'status' => $validated['status'],
             'currency' => $validated['currency'],
             'subtotal' => $validated['subtotal'],
-            'tax' => $validated['tax'],
-            'discount' => $validated['discount'],
             'total' => $validated['total'],
-            'terms' => $validated['terms'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'employee_id' => $validated['employee_id'] ?? null,
         ]);
@@ -130,10 +124,7 @@ class QuoteController extends Controller
             $validated = $request->validate([
                 'status' => 'required|string|in:pending,sent,accepted,rejected',
                 'subtotal' => 'required|numeric',
-                'tax' => 'required|numeric',
-                'discount' => 'required|numeric',
                 'total' => 'required|numeric',
-                'terms' => 'nullable|string',
                 'notes' => 'nullable|string',
                 'employee_id' => 'nullable|exists:users,id',
             ]);
@@ -342,10 +333,8 @@ class QuoteController extends Controller
     {
         $validated = $request->validate([
             'subtotal' => 'required|numeric',
-            'tax' => 'required|numeric',
-            'discount' => 'required|numeric',
+            'adjustment' => 'nullable|numeric',
             'total' => 'required|numeric',
-            'terms' => 'nullable|string',
             'notes' => 'nullable|string',
             'employee_id' => 'nullable|exists:users,id',
             'line_items' => 'required|array',
@@ -364,10 +353,8 @@ class QuoteController extends Controller
 
         $quote->update([
             'subtotal' => $validated['subtotal'],
-            'tax' => $validated['tax'],
-            'discount' => $validated['discount'],
+            'adjustment' => $validated['adjustment'] ?? 0,
             'total' => $validated['total'],
-            'terms' => $validated['terms'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'employee_id' => $validated['employee_id'] ?? null,
         ]);

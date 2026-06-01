@@ -88,7 +88,7 @@ class ServiceController extends Controller
         $table = $serviceType === 'printing' ? 'printing_services' : 'technical_services';
         $service = DB::table($table)->where('id', $id)->first();
 
-        if (!$service) {
+        if (! $service) {
             abort(404);
         }
 
@@ -150,11 +150,11 @@ class ServiceController extends Controller
     public function destroy($id, $serviceType)
     {
         $table = $serviceType === 'printing' ? 'printing_services' : 'technical_services';
-        
+
         // Get service to delete image
         $service = DB::table($table)->where('id', $id)->first();
-        
-        if (!$service) {
+
+        if (! $service) {
             return redirect()->route('owner.services.index')
                 ->with('error', 'Service not found.');
         }

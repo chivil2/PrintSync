@@ -33,7 +33,7 @@ class PrintbuddyController extends Controller
                     'description' => 'Get all available printing and technical services with their details',
                     'parameters' => [
                         'type' => 'object',
-                        'properties' => (object)[],
+                        'properties' => (object) [],
                     ],
                 ],
             ],
@@ -44,7 +44,7 @@ class PrintbuddyController extends Controller
                     'description' => 'Get all inventory items with their current stock levels and details',
                     'parameters' => [
                         'type' => 'object',
-                        'properties' => (object)[],
+                        'properties' => (object) [],
                     ],
                 ],
             ],
@@ -55,7 +55,7 @@ class PrintbuddyController extends Controller
                     'description' => 'Get all employees with their status and details',
                     'parameters' => [
                         'type' => 'object',
-                        'properties' => (object)[],
+                        'properties' => (object) [],
                     ],
                 ],
             ],
@@ -66,7 +66,7 @@ class PrintbuddyController extends Controller
                     'description' => 'Get all jobs with their current status and details',
                     'parameters' => [
                         'type' => 'object',
-                        'properties' => (object)[],
+                        'properties' => (object) [],
                     ],
                 ],
             ],
@@ -77,7 +77,7 @@ class PrintbuddyController extends Controller
                     'description' => 'Get all quotes with their status and details',
                     'parameters' => [
                         'type' => 'object',
-                        'properties' => (object)[],
+                        'properties' => (object) [],
                     ],
                 ],
             ],
@@ -202,7 +202,7 @@ You have access to tools to get real-time data about services, inventory, employ
     private function executeTool(string $functionName, array $functionArgs, string $apiKey): array
     {
         try {
-            $result = match($functionName) {
+            $result = match ($functionName) {
                 'get_services' => $this->getServices()->getData(true),
                 'get_inventory' => $this->getInventory()->getData(true),
                 'get_employees' => $this->getEmployees()->getData(true),
@@ -218,7 +218,7 @@ You have access to tools to get real-time data about services, inventory, employ
                 'error' => $e->getMessage(),
             ]);
 
-            return ['error' => 'Failed to execute tool: ' . $e->getMessage()];
+            return ['error' => 'Failed to execute tool: '.$e->getMessage()];
         }
     }
 
@@ -306,7 +306,7 @@ You have access to tools to get real-time data about services, inventory, employ
                 'description' => 'Get all available printing and technical services with their details',
                 'parameters' => [
                     'type' => 'object',
-                    'properties' => (object)[],
+                    'properties' => (object) [],
                 ],
             ],
             [
@@ -314,7 +314,7 @@ You have access to tools to get real-time data about services, inventory, employ
                 'description' => 'Get all inventory items with their current stock levels and details',
                 'parameters' => [
                     'type' => 'object',
-                    'properties' => (object)[],
+                    'properties' => (object) [],
                 ],
             ],
             [
@@ -322,7 +322,7 @@ You have access to tools to get real-time data about services, inventory, employ
                 'description' => 'Get all employees with their status and details',
                 'parameters' => [
                     'type' => 'object',
-                    'properties' => (object)[],
+                    'properties' => (object) [],
                 ],
             ],
             [
@@ -330,7 +330,7 @@ You have access to tools to get real-time data about services, inventory, employ
                 'description' => 'Get all jobs with their current status and details',
                 'parameters' => [
                     'type' => 'object',
-                    'properties' => (object)[],
+                    'properties' => (object) [],
                 ],
             ],
             [
@@ -338,7 +338,7 @@ You have access to tools to get real-time data about services, inventory, employ
                 'description' => 'Get all quotes with their status and details',
                 'parameters' => [
                     'type' => 'object',
-                    'properties' => (object)[],
+                    'properties' => (object) [],
                 ],
             ],
         ];

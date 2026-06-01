@@ -227,22 +227,45 @@ class OwnerController extends Controller
         $completedJobs = $jobsCountByStatus['completed'] ?? 0;
         $completionPercent = $totalJobs > 0 ? round(($completedJobs / $totalJobs) * 100) : 0;
 
-        // Get active jobs for assignment queue (not completed, can be assigned or reassigned)
-        $activeJobs = ServiceJob::with(['customer', 'employee'])
+        // Pending quote approval (draft or sent) - these are waiting for customer
+        $pendingQuoteJobs = ServiceJob::with(['customer', 'quote'])
+            ->whereHas('quote', function ($q) {
+                $q->whereIn('status', ['draft', 'sent']);
+            })
             ->where('status', '!=', 'completed')
             ->where('status', '!=', 'cancelled')
             ->latest()
             ->get();
 
-        $unassignedJobsCount = $activeJobs->whereNull('employee_id')->count();
+        // Ready to assign (quote accepted) - these can be assigned to employees
+        $readyToAssignJobs = ServiceJob::with(['customer', 'employee', 'quote'])
+            ->whereHas('quote', function ($q) {
+                $q->where('status', 'accepted');
+            })
+            ->where('status', '!=', 'completed')
+            ->where('status', '!=', 'cancelled')
+            ->latest()
+            ->get();
+
+        $unassignedJobsCount = $readyToAssignJobs->whereNull('employee_id')->count();
+
+        // Notification badge count - accepted quotes needing assignment
+        $acceptedQuotesNeedingAssignment = Quote::where('status', 'accepted')
+            ->whereHas('serviceJob', function ($q) {
+                $q->whereNull('employee_id');
+            })
+            ->count();
 
         return view('owner.jobs', [
             'jobs' => $jobs,
             'employees' => $employees,
             'jobsCountByStatus' => $jobsCountByStatus,
             'completionPercent' => $completionPercent,
-            'unassignedJobs' => $activeJobs,
+            'pendingQuoteJobs' => $pendingQuoteJobs,
+            'readyToAssignJobs' => $readyToAssignJobs,
+            'unassignedJobs' => $readyToAssignJobs,
             'unassignedJobsCount' => $unassignedJobsCount,
+            'acceptedQuotesNeedingAssignment' => $acceptedQuotesNeedingAssignment,
         ]);
     }
 
@@ -297,6 +320,25 @@ class OwnerController extends Controller
      */
     public function assignEmployeeApi(Request $request, ServiceJob $job)
     {
+        // Check if quote is accepted before allowing assignment
+        if ($job->quote && $job->quote->status !== 'accepted') {
+            $message = match ($job->quote->status) {
+                'draft' => 'Quote is still in draft. Please review and send it to the customer first.',
+                'sent' => 'Quote has been sent to customer but not yet accepted. Waiting for customer approval.',
+                'rejected' => 'Quote was rejected by customer. Please create a new quote.',
+                default => 'Quote must be accepted by customer before assigning an employee.',
+            };
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ], 422);
+            }
+
+            return back()->with('error', $message);
+        }
+
         $validated = $request->validate([
             'employee_id' => ['nullable', 'exists:users,id'],
         ]);

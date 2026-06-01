@@ -136,10 +136,7 @@ class ImportQuotesFromCsv extends Command
         $status = $this->getValue($rowData, 'status') ?? $this->getValue($rowData, 3) ?? 'pending';
         $currency = $this->getValue($rowData, 'currency') ?? $this->getValue($rowData, 6) ?? 'PHP';
         $subtotal = (float) ($this->getValue($rowData, 'subtotal') ?? $this->getValue($rowData, 9) ?? 0);
-        $tax = (float) ($this->getValue($rowData, 'tax') ?? $this->getValue($rowData, 12) ?? 0);
-        $discount = (float) ($this->getValue($rowData, 'discount') ?? $this->getValue($rowData, 13) ?? 0);
         $total = (float) ($this->getValue($rowData, 'total') ?? $this->getValue($rowData, 14) ?? 0);
-        $terms = $this->getValue($rowData, 'terms') ?? $this->getValue($rowData, 17);
         $notes = $this->getValue($rowData, 'notes');
 
         return Quote::create([
@@ -149,10 +146,7 @@ class ImportQuotesFromCsv extends Command
             'status' => $status,
             'currency' => $currency,
             'subtotal' => $subtotal,
-            'tax' => $tax,
-            'discount' => $discount,
             'total' => $total,
-            'terms' => $terms,
             'notes' => $notes,
         ]);
     }
@@ -162,8 +156,6 @@ class ImportQuotesFromCsv extends Command
         $quote->update([
             'status' => $this->getValue($rowData, 'status') ?? $this->getValue($rowData, 3) ?? $quote->status,
             'subtotal' => (float) ($this->getValue($rowData, 'subtotal') ?? $this->getValue($rowData, 9) ?? $quote->subtotal),
-            'tax' => (float) ($this->getValue($rowData, 'tax') ?? $this->getValue($rowData, 12) ?? $quote->tax),
-            'discount' => (float) ($this->getValue($rowData, 'discount') ?? $this->getValue($rowData, 13) ?? $quote->discount),
             'total' => (float) ($this->getValue($rowData, 'total') ?? $this->getValue($rowData, 14) ?? $quote->total),
         ]);
 

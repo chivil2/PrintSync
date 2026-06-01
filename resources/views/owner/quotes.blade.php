@@ -36,9 +36,42 @@
                                         <span>Total: ₱{{ number_format($quote->total, 0) }}</span>
                                     </div>
                                 </div>
-                                <a href="{{ route('owner.quotes.view', $quote) }}" class="ml-4 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800">
-                                    View
-                                </a>
+                                @if($quote->status === 'draft')
+                                    <a href="{{ route('owner.quotes.view', $quote) }}" class="ml-4 px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-medium hover:bg-orange-600 transition-colors">
+                                        Review & Send
+                                    </a>
+                                @elseif($quote->status === 'sent')
+                                    <div class="flex items-center gap-2 ml-4">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium">
+                                            Awaiting Customer
+                                        </span>
+                                        <a href="{{ route('owner.quotes.view', $quote) }}" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors">
+                                            View
+                                        </a>
+                                    </div>
+                                @elseif($quote->status === 'accepted')
+                                    <div class="flex items-center gap-2 ml-4">
+                                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <a href="{{ route('owner.quotes.view', $quote) }}" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors">
+                                            View
+                                        </a>
+                                    </div>
+                                @elseif($quote->status === 'rejected')
+                                    <div class="flex items-center gap-2 ml-4">
+                                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <a href="{{ route('owner.quotes.view', $quote) }}" class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors">
+                                            View
+                                        </a>
+                                    </div>
+                                @else
+                                    <a href="{{ route('owner.quotes.view', $quote) }}" class="ml-4 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors">
+                                        View
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     @endforeach

@@ -115,31 +115,12 @@
                         <span class="text-zinc-500">Subtotal:</span>
                         <span class="text-zinc-900">₱{{ number_format($quote->subtotal, 2) }}</span>
                     </div>
-                    @if($quote->tax > 0)
-                        <div class="flex justify-between text-sm">
-                            <span class="text-zinc-500">Tax:</span>
-                            <span class="text-zinc-900">₱{{ number_format($quote->tax, 2) }}</span>
-                        </div>
-                    @endif
-                    @if($quote->discount > 0)
-                        <div class="flex justify-between text-sm">
-                            <span class="text-zinc-500">Discount:</span>
-                            <span class="text-green-600">-₱{{ number_format($quote->discount, 2) }}</span>
-                        </div>
-                    @endif
                     <div class="flex justify-between text-lg font-bold pt-2 border-t border-zinc-200">
                         <span class="text-zinc-900">Total:</span>
                         <span class="text-zinc-900">₱{{ number_format($quote->total, 2) }}</span>
                     </div>
                 </div>
             </div>
-
-            @if($quote->terms)
-                <div class="mt-6 p-4 bg-zinc-50 rounded-lg">
-                    <h3 class="text-sm font-medium text-zinc-900 mb-2">Terms & Conditions</h3>
-                    <p class="text-sm text-zinc-600">{{ $quote->terms }}</p>
-                </div>
-            @endif
 
             @if($quote->rejection_reason)
                 <div class="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">

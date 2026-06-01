@@ -160,14 +160,6 @@
                 <span class="total-value">₱{{ number_format($quote->subtotal, 2) }}</span>
             </div>
             <div class="total-row">
-                <span class="total-label">Tax:</span>
-                <span class="total-value">₱{{ number_format($quote->tax, 2) }}</span>
-            </div>
-            <div class="total-row">
-                <span class="total-label">Discount:</span>
-                <span class="total-value">₱{{ number_format($quote->discount, 2) }}</span>
-            </div>
-            <div class="total-row">
                 <span class="total-label grand-total">Total:</span>
                 <span class="total-value grand-total">₱{{ number_format($quote->total, 2) }}</span>
             </div>

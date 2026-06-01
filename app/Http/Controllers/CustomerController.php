@@ -106,8 +106,6 @@ class CustomerController extends Controller
             'status' => 'draft',
             'currency' => 'PHP',
             'subtotal' => $subtotal,
-            'tax' => 0,
-            'discount' => 0,
             'total' => $subtotal,
         ]);
 

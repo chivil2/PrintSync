@@ -22,16 +22,6 @@ Thank you for choosing **PrintSync**! We have prepared a detailed quote for your
         <td align="right" width="120" style="color: #334155; font-size: 14px;">₱{{ number_format($quote->subtotal, 2) }}</td>
     </tr>
     <tr>
-        <td align="right" style="color: #64748B; font-size: 14px; padding-right: 16px;">Tax:</td>
-        <td align="right" style="color: #334155; font-size: 14px;">₱{{ number_format($quote->tax, 2) }}</td>
-    </tr>
-@if ((float) $quote->discount > 0)
-    <tr>
-        <td align="right" style="color: #16a34a; font-size: 14px; padding-right: 16px;">Discount:</td>
-        <td align="right" style="color: #16a34a; font-size: 14px;">-₱{{ number_format($quote->discount, 2) }}</td>
-    </tr>
-@endif
-    <tr>
         <td align="right" style="border-top: 2px solid #0F172A; padding-top: 8px; padding-right: 16px; font-weight: 700; color: #0F172A; font-size: 16px;">Total:</td>
         <td align="right" style="border-top: 2px solid #0F172A; padding-top: 8px; font-weight: 700; color: #0F172A; font-size: 16px;">₱{{ number_format($quote->total, 2) }}</td>
     </tr>

@@ -3,6 +3,23 @@
     $recentJobs = $recentJobs ?? collect();
     $initials = strtoupper(substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1));
 
+    // Notification count for accepted quotes needing assignment
+    $notificationCount = \App\Models\Quote::where('status', 'accepted')
+        ->whereHas('serviceJob', function($q) {
+            $q->whereNull('employee_id');
+        })
+        ->count();
+
+    // Get the accepted quotes needing assignment for display
+    $acceptedQuotesNeedingAssignment = \App\Models\Quote::where('status', 'accepted')
+        ->whereHas('serviceJob', function($q) {
+            $q->whereNull('employee_id');
+        })
+        ->with(['serviceJob', 'customer'])
+        ->latest()
+        ->take(5)
+        ->get();
+
     $currentMonth = now()->format('F');
     $currentYear = now()->format('Y');
     $today = now()->day;
@@ -55,11 +72,36 @@
                     </svg>
                     Notifications
                 </div>
-                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ $recentJobs->count() }}</span>
+                @if($notificationCount > 0)
+                    <a href="{{ route('owner.jobs') }}" class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full hover:bg-orange-600 transition-colors cursor-pointer">
+                        {{ $notificationCount }}
+                    </a>
+                @else
+                    <span class="bg-slate-300 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+                @endif
             </div>
 
             <div class="space-y-3">
-                @if($recentJobs->count() > 0)
+                @if($acceptedQuotesNeedingAssignment->count() > 0)
+                    <div class="text-xs font-medium text-slate-500 mb-2">Quotes ready to assign</div>
+                    @foreach($acceptedQuotesNeedingAssignment as $quote)
+                        <a href="{{ route('owner.jobs') }}" class="block p-3 rounded-xl bg-emerald-50 border border-emerald-100 cursor-pointer hover:opacity-80 transition-colors">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-slate-900">{{ $quote->serviceJob->name ?? 'Service Job' }}</p>
+                                    <p class="text-xs text-slate-500 mt-1">{{ $quote->customer->first_name ?? 'Unknown' }} {{ $quote->customer->last_name ?? '' }}</p>
+                                    <p class="text-xs text-emerald-600 mt-1 font-medium">Quote accepted - ready to assign</p>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                @elseif($recentJobs->count() > 0)
+                    <div class="text-xs font-medium text-slate-500 mb-2">Recent activity</div>
                     @foreach($recentJobs as $job)
                         @php
                             $statusColor = $statusColors[$job->status] ?? $statusColors['pending'];
@@ -81,7 +123,7 @@
                     @endforeach
                 @else
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
-                        <p class="text-sm text-slate-500">No recent jobs</p>
+                        <p class="text-sm text-slate-500">No pending notifications</p>
                     </div>
                 @endif
             </div>
