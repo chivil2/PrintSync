@@ -21,7 +21,8 @@ class OwnerController extends Controller
         $data['user'] = auth()->user();
         $data['recentJobs'] = ServiceJob::with(['customer', 'service'])->latest()->take(5)->get();
         $data['employees'] = User::role('employee')->where('employee_status', 'active')->latest()->take(5)->get();
-        $data['jobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->paginate(5);
+        $data['jobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->take(10)->get();
+        $data['allJobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->get();
 
         // Stat card data - compute from completed service jobs
         $completedJobIds = ServiceJob::where('status', 'completed')->pluck('id');

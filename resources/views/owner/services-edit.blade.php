@@ -116,7 +116,6 @@
                             <input type="number" id="production_time" name="production_time" value="{{ old('production_time', $service->production_time) }}" min="1"
                                 class="w-full px-4 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="7">
-                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">days</span>
                         </div>
                         @error('production_time') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>

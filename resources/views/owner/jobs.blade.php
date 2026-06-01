@@ -4,6 +4,21 @@
             <x-printsync-toast :message="session('success')" />
         @endif
 
+        <!-- Banner -->
+        <div class="bg-gradient-to-r from-orange-500 to-blue-600 rounded-3xl p-8 text-white relative overflow-hidden mb-8">
+            <div class="welcome-dots"></div>
+            <div class="relative z-10 flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Jobs</h1>
+                    <p class="text-orange-100">Manage assignments, track progress, and oversee all active print jobs.</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold">{{ $jobs->total() }}</div>
+                    <div class="text-orange-100 text-sm">Total Jobs</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Order Assignment Queue -->
         <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 mb-6">
             <div class="mb-4 flex items-center justify-between gap-3">
@@ -49,7 +64,7 @@
             <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col">
                 <div class="flex flex-col gap-3 mb-4">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Jobs Overview</h3>
+                        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-5">Jobs Overview</h3>
                         <div class="flex items-baseline gap-2">
                             <div class="text-3xl font-bold text-blue-500">{{ $jobs->total() }}</div>
                             <div class="text-slate-500 text-sm">Total Jobs</div>
@@ -84,16 +99,29 @@
             </div>
 
             <!-- Employee Schedule -->
-            <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col">
-                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Employee Schedule</h3>
-                <div class="space-y-4 overflow-y-auto max-h-[400px] pr-2 -mr-2">
+            <div class="bg-white rounded-lg p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col" x-data="{ scheduleFilter: 'all' }">
+                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-5">Employee Schedule</h3>
+                <div class="flex gap-1.5 mb-4">
+                    <button @click="scheduleFilter = 'all'" :class="scheduleFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="rounded-full px-3 py-1 text-xs font-medium transition">All</button>
+                    <button @click="scheduleFilter = 'technical_staff'" :class="scheduleFilter === 'technical_staff' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="rounded-full px-3 py-1 text-xs font-medium transition">Technician</button>
+                    <button @click="scheduleFilter = 'printing_staff'" :class="scheduleFilter === 'printing_staff' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="rounded-full px-3 py-1 text-xs font-medium transition">Printing</button>
+                </div>
+                <div class="space-y-4 overflow-y-auto max-h-[400px] pr-2 -mr-2 flex-1 h-[380px]">
                     @foreach($employees as $employee)
                         <?php
                             $empJobs = $jobs->filter(function($job) use ($employee) {
                                 return $job->employee_id === $employee->id;
                             });
                         ?>
-                        <div class="border border-slate-200 rounded-lg p-4">
+                        <div class="border border-slate-200 rounded-lg p-4"
+                             x-show="scheduleFilter === 'all' || scheduleFilter === '{{ $employee->specialization }}'"
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                        >
                             <div class="flex items-center gap-3 mb-3">
                                 @if($employee->profile_photo_path)
                                     <img src="{{ asset('storage/' . $employee->profile_photo_path) }}" alt="{{ $employee->first_name }} {{ $employee->last_name }}" class="w-9 h-9 rounded-lg object-cover">

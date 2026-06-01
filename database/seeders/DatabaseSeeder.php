@@ -20,4 +20,4 @@ class DatabaseSeeder extends Seeder
             InventorySeeder::class,
         ]);
     }
-}
+}w

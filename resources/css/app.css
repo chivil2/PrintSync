@@ -74,6 +74,30 @@ img[src*="logo.png"] {
     [x-cloak] {
         display: none !important;
     }
+
+    /* Minimal blue scrollbar */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #93c5fd;
+        border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #3b82f6;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: #93c5fd transparent;
+    }
 }
 
 [data-flux-field]:not(ui-radio, ui-checkbox) {

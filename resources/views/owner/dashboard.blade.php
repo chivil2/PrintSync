@@ -97,10 +97,10 @@
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow" x-data="{ showAllJobs: false }">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-sm font-semibold text-slate-900">Recent Jobs</h3>
-                    <a href="{{ route('owner.jobs') }}" class="text-xs text-pink-600 hover:text-pink-700 font-medium">View All</a>
+                    <button @click="showAllJobs = true" class="text-xs text-pink-600 hover:text-pink-700 font-medium">View All</button>
                 </div>
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-pink-50 w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm text-pink-600">
@@ -109,14 +109,14 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="text-2xl font-bold text-slate-900">{{ $jobs->total() }}</div>
+                        <div class="text-2xl font-bold text-slate-900">{{ $allJobs->count() }}</div>
                         <div class="text-xs text-slate-500">Total Jobs</div>
                     </div>
                 </div>
-                <div class="mt-4 space-y-2">
+                <div class="mt-4 space-y-2 overflow-y-auto max-h-72 pr-1">
                     @forelse($jobs as $job)
                         <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                            <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-semibold text-sm">
+                            <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-semibold text-sm flex-shrink-0">
                                 {{ strtoupper(substr($job->customer->first_name ?? 'C', 0, 1)) }}
                             </div>
                             <div class="flex-1 min-w-0">
@@ -124,7 +124,7 @@
                                 <div class="text-xs text-slate-500 truncate">{{ $job->customer->first_name ?? 'Unknown' }} {{ $job->customer->last_name ?? '' }}</div>
                                 <div class="text-xs text-slate-400">{{ $job->service->name ?? 'Unknown Service' }} • {{ $job->created_at->format('M j, Y') }}</div>
                             </div>
-                            <div class="text-xs px-2 py-1 rounded-full
+                            <div class="text-xs px-2 py-1 rounded-full flex-shrink-0
                                 @if($job->status === 'completed') bg-emerald-100 text-emerald-700
                                 @elseif($job->status === 'in_progress') bg-blue-100 text-blue-700
                                 @elseif($job->status === 'pending') bg-amber-100 text-amber-700
@@ -138,11 +138,83 @@
                         <div class="text-sm text-slate-500 text-center py-4">No jobs yet</div>
                     @endforelse
                 </div>
-                @if($jobs->hasPages())
-                    <div class="mt-4 flex justify-center">
-                        {{ $jobs->appends(request()->query())->links() }}
+                @if($jobs->count() >= 10)
+                    <div class="mt-3 text-center">
+                        <button @click="showAllJobs = true" class="text-xs text-pink-600 hover:text-pink-700 font-medium">View All Jobs →</button>
                     </div>
                 @endif
+
+                <!-- All Jobs Modal -->
+                <div
+                    x-show="showAllJobs"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+                    @click.self="showAllJobs = false"
+                    style="display: none;"
+                >
+                    <div
+                        x-show="showAllJobs"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col"
+                    >
+                        <div class="flex items-center justify-between p-5 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-pink-50 w-9 h-9 rounded-xl flex items-center justify-center text-pink-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-semibold text-slate-900">All Jobs</h2>
+                                    <p class="text-xs text-slate-500">{{ $allJobs->count() }} total jobs</p>
+                                </div>
+                            </div>
+                            <button @click="showAllJobs = false" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-5 space-y-2">
+                            @forelse($allJobs as $job)
+                                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                                    <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-semibold text-sm flex-shrink-0">
+                                        {{ strtoupper(substr($job->customer->first_name ?? 'C', 0, 1)) }}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-slate-900 truncate">{{ $job->name }}</div>
+                                        <div class="text-xs text-slate-500 truncate">{{ $job->customer->first_name ?? 'Unknown' }} {{ $job->customer->last_name ?? '' }}</div>
+                                        <div class="text-xs text-slate-400">{{ $job->service->name ?? 'Unknown Service' }} • {{ $job->created_at->format('M j, Y') }}</div>
+                                    </div>
+                                    <div class="text-xs px-2 py-1 rounded-full flex-shrink-0
+                                        @if($job->status === 'completed') bg-emerald-100 text-emerald-700
+                                        @elseif($job->status === 'in_progress') bg-blue-100 text-blue-700
+                                        @elseif($job->status === 'pending') bg-amber-100 text-amber-700
+                                        @elseif($job->status === 'cancelled') bg-red-100 text-red-700
+                                        @else bg-slate-100 text-slate-700
+                                        @endif">
+                                        {{ ucfirst(str_replace('_', ' ', $job->status)) }}
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-sm text-slate-500 text-center py-8">No jobs yet</div>
+                            @endforelse
+                        </div>
+                        <div class="p-4 border-t border-slate-100 flex justify-end">
+                            <a href="{{ route('owner.jobs') }}" class="text-xs bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl font-medium transition-colors">Go to Jobs Page</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
