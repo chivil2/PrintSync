@@ -1,17 +1,17 @@
 <x-layouts::auth :title="$isOwner ?? false ? __('Owner Register') : __('Register')">
     <div class="flex flex-col gap-6">
-        <div class="flex w-full flex-col items-center gap-2 text-center">
-            <flux:badge color="{{ $isOwner ?? false ? 'red' : 'zinc' }}" variant="outline" size="sm" class="mb-1">
+        <div class="text-center">
+            <span class="inline-block px-2.5 py-0.5 mb-2 rounded-md text-[10px] font-bold uppercase tracking-wider {{ $isOwner ?? false ? 'bg-red-100 text-red-700' : 'bg-zinc-100 text-zinc-700' }}">
                 {{ $isOwner ?? false ? __('Owner Registration') : __('User Registration') }}
-            </flux:badge>
-            <flux:heading size="xl">{{ $isOwner ?? false ? __('Create an owner account') : __('Create an account') }}</flux:heading>
-            <flux:subheading>{{ __('Enter your details below to create your account') }}</flux:subheading>
+            </span>
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">{{ $isOwner ?? false ? __('Create an owner account') : __('Create an account') }}</h1>
+            <p class="mt-1.5 text-sm text-zinc-600">{{ __('Enter your details below to create your account') }}</p>
         </div>
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ $isOwner ?? false ? route('owner.register') : route('register') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ $isOwner ?? false ? route('owner.register') : route('register') }}" class="flex flex-col gap-5">
             @csrf
             <!-- First Name -->
             <flux:input
@@ -69,16 +69,15 @@
                 viewable
             />
 
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Create account') }}
-                </flux:button>
-            </div>
+            <button type="submit" class="inline-flex items-center justify-center w-full gap-2 px-5 py-2.5 bg-[#E8743B] hover:bg-[#d66532] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm cursor-pointer" data-test="register-user-button">
+                {{ __('Create account') }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+            </button>
         </form>
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
+        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600">
             <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
+            <a href="{{ route('login') }}" wire:navigate class="font-semibold text-[#E8743B] hover:text-[#d66532] transition-colors">{{ __('Log in') }}</a>
         </div>
     </div>
 </x-layouts::auth>

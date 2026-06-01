@@ -1,27 +1,31 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
     <head>
         @include('partials.head')
         <style>
-            @import url('https://fonts.cdnfonts.com/css/neue-haas-grotesk-display-pro');
-            
-            body {
-                font-family: 'Neue Haas Grotesk Display Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            .hero-bg {
+                background-color: #fafafa;
+                background-image:
+                    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(232, 116, 59, 0.10), transparent 60%),
+                    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(25, 167, 206, 0.10), transparent 60%),
+                    radial-gradient(circle, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+                background-size: auto, auto, 22px 22px;
+            }
+            @media (min-width: 768px) {
+                .hero-bg { background-size: auto, auto, 26px 26px; }
             }
         </style>
     </head>
-    <body class="min-h-screen bg-white antialiased">
-        <div class="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10" style="background: linear-gradient(rgba(30, 58, 138, 0.7), rgba(30, 58, 138, 0.7)), url('https://images.unsplash.com/photo-1562564055-71e051d33c19?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-attachment: fixed;">
-            <div class="flex w-full max-w-sm flex-col gap-2 text-black">
-                <a href="{{ route('home') }}" class="flex flex-col items-center gap-3 font-medium mb-4 text-black" wire:navigate>
-                    <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="size-16 object-cover">
-                </a>
-                <div class="flex flex-col gap-6 bg-white/50 backdrop-blur-xl rounded-2xl shadow-2xl p-8 text-black" style="color: black !important;">
-                    <style>
-                        .text-black * {
-                            color: black !important;
-                        }
-                    </style>
+    <body class="font-sans antialiased text-zinc-900 bg-zinc-50">
+        <x-navbar />
+
+        <div class="relative min-h-svh flex items-center justify-center -mt-20 pt-28 pb-12 px-4 sm:px-6 overflow-hidden">
+            <div class="absolute inset-0 hero-bg pointer-events-none"></div>
+            <div class="absolute -top-10 -left-16 w-72 h-72 bg-orange-300/25 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute top-32 -right-16 w-72 h-72 bg-blue-300/25 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative w-full max-w-sm">
+                <div class="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8">
                     {{ $slot }}
                 </div>
             </div>

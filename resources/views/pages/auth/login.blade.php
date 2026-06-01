@@ -1,11 +1,14 @@
 <x-layouts::auth :title="__('Log in')">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+        <div class="text-center">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">{{ __('Log in to your account') }}</h1>
+            <p class="mt-1.5 text-sm text-zinc-600">{{ __('Enter your email and password below to log in') }}</p>
+        </div>
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-5">
             @csrf
 
             <!-- Email Address -->
@@ -42,17 +45,16 @@
             <!-- Remember Me -->
             <flux:checkbox name="remember" :label="__('Remember me')" :checked="old('remember')" />
 
-            <div class="flex items-center justify-end">
-                <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
-                    {{ __('Log in') }}
-                </flux:button>
-            </div>
+            <button type="submit" class="inline-flex items-center justify-center w-full gap-2 px-5 py-2.5 bg-[#E8743B] hover:bg-[#d66532] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm cursor-pointer" data-test="login-button">
+                {{ __('Log in') }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+            </button>
         </form>
 
         @if (Route::has('register'))
-            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
+            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600">
                 <span>{{ __('Don\'t have an account?') }}</span>
-                <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+                <a href="{{ route('register') }}" wire:navigate class="font-semibold text-[#E8743B] hover:text-[#d66532] transition-colors">{{ __('Sign up') }}</a>
             </div>
         @endif
     </div>

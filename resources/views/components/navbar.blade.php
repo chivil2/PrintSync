@@ -22,12 +22,16 @@
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-zinc-100 cursor-pointer">
-                        Log in
-                    </a>
-                    <a href="{{ route('register') }}" class="text-sm font-semibold text-white bg-[#E8743B] hover:bg-[#d66532] px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer shadow-sm">
-                        Get Started
-                    </a>
+                    @if(!Route::is('login'))
+                        <a href="{{ route('login') }}" class="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-zinc-100 cursor-pointer">
+                            Log in
+                        </a>
+                    @endif
+                    @if(!Route::is('register') && !Route::is('owner.register'))
+                        <a href="{{ route('register') }}" class="text-sm font-semibold text-white bg-[#E8743B] hover:bg-[#d66532] px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer shadow-sm">
+                            Get Started
+                        </a>
+                    @endif
                 @endauth
             </div>
         </div>
