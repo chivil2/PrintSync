@@ -61,6 +61,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('quotes/{quote}', [QuoteController::class, 'customerShow'])->name('quotes.show');
         Route::post('quotes/{quote}/approve', [QuoteController::class, 'approve'])->name('quotes.approve');
         Route::post('quotes/{quote}/reject', [QuoteController::class, 'reject'])->name('quotes.reject');
+        Route::post('quotes/{quote}/negotiate', [QuoteController::class, 'negotiate'])->name('quotes.negotiate');
+        Route::post('quotes/{quote}/cancel', [QuoteController::class, 'cancelOrder'])->name('quotes.cancel');
     });
 
     Route::middleware(['employee'])->prefix('employee')->name('employee.')->group(function () {
@@ -77,7 +79,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard/earnings', [OwnerController::class, 'earningsByPeriod'])->name('dashboard.earnings');
         Route::get('quotes', [QuoteController::class, 'ownerIndex'])->name('quotes');
         Route::get('quotes/{quote}/view', [QuoteController::class, 'ownerView'])->name('quotes.view');
-        Route::put('quotes/{quote}', [QuoteController::class, 'ownerUpdate'])->name('quotes.update');
         Route::post('quotes/{quote}/send', [QuoteController::class, 'send'])->name('quotes.send');
         Route::post('quotes/{quote}/approve', [QuoteController::class, 'ownerApprove'])->name('quotes.approve');
         Route::post('quotes/{quote}/reject', [QuoteController::class, 'ownerReject'])->name('quotes.reject');

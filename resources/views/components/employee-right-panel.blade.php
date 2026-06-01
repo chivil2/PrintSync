@@ -69,17 +69,50 @@
                     <div>{{ $d }}</div>
                 @endforeach
             </div>
-            <div class="grid grid-cols-7 gap-1 text-center text-base">
+            <div class="grid grid-cols-7 gap-1 text-center text-base" @click.outside="activeDay = null">
                 <template x-for="day in calendarDays" :key="day">
-                    <div x-show="day !== null" class="py-1.5 rounded-xl transition-colors cursor-pointer relative"
-                         :class="day === today && currentMonth === {{ now()->month }} && currentYear === {{ now()->year }} ? 'bg-orange-500 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'">
+                    <div x-show="day !== null"
+                         class="py-1.5 rounded-xl transition-colors cursor-pointer relative select-none"
+                         :class="{
+                             'bg-orange-500 text-white font-bold': day === today && currentMonth === {{ now()->month }} && currentYear === {{ now()->year }},
+                             'ring-2 ring-orange-400 ring-offset-1': activeDay === day && jobsByDate[day],
+                             'text-slate-600 hover:bg-slate-100': !(day === today && currentMonth === {{ now()->month }} && currentYear === {{ now()->year }}),
+                         }"
+                         @mouseenter="jobsByDate[day] ? hoverDay = day : null"
+                         @mouseleave="hoverDay = null"
+                         @click="jobsByDate[day] ? (activeDay = activeDay === day ? null : day) : null">
                         <span x-text="day"></span>
                         <template x-if="jobsByDate[day]">
                             <div class="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 flex gap-0.5">
-                                <template x-for="job in jobsByDate[day].slice(0, 2)" :key="job.id">
+                                <template x-for="job in jobsByDate[day].slice(0, 3)" :key="job.id">
                                     <div class="w-1.5 h-1.5 rounded-full"
-                                         :class="job.priority === 'urgent' ? 'bg-red-500' : (job.priority === 'high' ? 'bg-orange-500' : 'bg-blue-500')"></div>
+                                         :class="job.priority === 'urgent' ? 'bg-red-500' : (job.priority === 'high' ? 'bg-orange-400' : 'bg-blue-400')"></div>
                                 </template>
+                            </div>
+                        </template>
+
+                        <!-- Hover/Click popup -->
+                        <template x-if="jobsByDate[day] && (hoverDay === day || activeDay === day)">
+                            <div class="absolute z-50 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 text-left w-56"
+                                 style="top: calc(100% + 6px); left: 50%; transform: translateX(-50%);">
+                                <div class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider"
+                                     x-text="currentMonthName + ' ' + day"></div>
+                                <div class="space-y-2 max-h-48 overflow-y-auto">
+                                    <template x-for="job in jobsByDate[day]" :key="job.id">
+                                        <a :href="'/employee/jobs/' + job.id"
+                                           class="flex items-start gap-2 p-2 rounded-xl hover:bg-slate-50 transition-colors block">
+                                            <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                                                 :class="job.priority === 'urgent' ? 'bg-red-500' : (job.priority === 'high' ? 'bg-orange-400' : 'bg-blue-400')"></div>
+                                            <div class="min-w-0">
+                                                <p class="text-xs font-semibold text-slate-800 truncate" x-text="job.name"></p>
+                                                <p class="text-xs text-slate-500 truncate" x-text="job.customer_name"></p>
+                                                <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                                                      :class="job.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : (job.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700')"
+                                                      x-text="job.status === 'in_progress' ? 'In Progress' : (job.status === 'completed' ? 'Completed' : 'Pending')"></span>
+                                            </div>
+                                        </a>
+                                    </template>
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -166,6 +199,8 @@ function calendar() {
         today: {{ now()->day }},
         calendarDays: [],
         jobsByDate: {},
+        hoverDay: null,
+        activeDay: null,
 
         initCalendar(year, month) {
             this.currentYear = year;
@@ -214,9 +249,17 @@ function calendar() {
 
         async fetchJobsForMonth() {
             try {
-                const response = await fetch(`/api/employee/jobs-by-month?year=${this.currentYear}&month=${this.currentMonth}`);
+                const response = await fetch(`/employee/jobs-by-month?year=${this.currentYear}&month=${this.currentMonth}`);
                 const data = await response.json();
-                this.jobsByDate = data.jobs_by_date;
+                // Re-index by day number for calendar lookup
+                const byDay = {};
+                for (const [dateStr, jobs] of Object.entries(data.jobs_by_date)) {
+                    const day = parseInt(dateStr.split('-')[2], 10);
+                    byDay[day] = jobs;
+                }
+                this.jobsByDate = byDay;
+                this.activeDay = null;
+                this.hoverDay = null;
             } catch (error) {
                 console.error('Error fetching jobs:', error);
             }

@@ -244,7 +244,12 @@
                 <div class="max-h-[320px] overflow-y-auto p-2 space-y-1">
                     <template x-for="employee in {{ Js::from($employees->values()->toArray()) }}" :key="employee.id">
                         <button @click="confirmAssign(employee.id)" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#f5ede3] transition text-left">
-                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm" x-text="(employee.first_name?.[0] ?? '') + (employee.last_name?.[0] ?? '')"></div>
+                            <template x-if="employee.profile_photo_path">
+                                <img :src="'/storage/' + employee.profile_photo_path" :alt="employee.first_name + ' ' + employee.last_name" class="w-9 h-9 rounded-xl object-cover">
+                            </template>
+                            <template x-if="!employee.profile_photo_path">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm" x-text="(employee.first_name?.[0] ?? '') + (employee.last_name?.[0] ?? '')"></div>
+                            </template>
                             <div class="flex-1 min-w-0">
                                 <div class="font-semibold text-slate-900 text-sm" x-text="employee.first_name + ' ' + employee.last_name"></div>
                                 <div class="text-xs text-slate-500"><span x-text="'ID: ' + (employee.employee_id || 'N/A')"></span> · <span x-text="(employee.assigned_jobs_count || 0) + ' active jobs'"></span></div>
@@ -283,6 +288,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({ employee_id: employeeId })

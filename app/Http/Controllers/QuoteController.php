@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\QuoteSent;
 use App\Models\Quote;
 use App\Models\QuoteLineItem;
+use App\Models\User;
+use App\Notifications\QuoteAcceptedNotification;
+use App\Notifications\QuoteCancelledNotification;
+use App\Notifications\QuoteNegotiationNotification;
+use App\Notifications\QuoteRejectedNotification;
+use App\Notifications\QuoteSentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class QuoteController extends Controller
 {
@@ -212,6 +216,8 @@ class QuoteController extends Controller
             'approved_at' => now(),
         ]);
 
+        User::role('owner')->first()?->notify(new QuoteAcceptedNotification($quote));
+
         return redirect()->route('customer.quotes.show', $quote)
             ->with('success', 'Quote approved successfully');
     }
@@ -238,6 +244,8 @@ class QuoteController extends Controller
             'rejected_at' => now(),
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+
+        User::role('owner')->first()?->notify(new QuoteRejectedNotification($quote));
 
         return redirect()->route('customer.quotes')
             ->with('success', 'Quote rejected. Owner will be notified.');
@@ -327,80 +335,92 @@ class QuoteController extends Controller
     }
 
     /**
-     * Update the specified quote.
-     */
-    public function ownerUpdate(Request $request, Quote $quote)
-    {
-        $validated = $request->validate([
-            'subtotal' => 'required|numeric',
-            'adjustment' => 'nullable|numeric',
-            'total' => 'required|numeric',
-            'notes' => 'nullable|string',
-            'employee_id' => 'nullable|exists:users,id',
-            'line_items' => 'required|array',
-            'line_items.*.id' => 'nullable|exists:quote_line_items,id',
-            'line_items.*.item_name' => 'required|string',
-            'line_items.*.description' => 'nullable|string',
-            'line_items.*.quantity' => 'required|numeric',
-            'line_items.*.unit_price' => 'required|numeric',
-            'line_items.*.line_total' => 'required|numeric',
-        ]);
-
-        // Validate that employee can only be assigned if quote is approved
-        if (isset($validated['employee_id']) && $validated['employee_id'] && $quote->status !== 'accepted') {
-            return redirect()->back()->with('error', 'Employee can only be assigned to approved quotes');
-        }
-
-        $quote->update([
-            'subtotal' => $validated['subtotal'],
-            'adjustment' => $validated['adjustment'] ?? 0,
-            'total' => $validated['total'],
-            'notes' => $validated['notes'] ?? null,
-            'employee_id' => $validated['employee_id'] ?? null,
-        ]);
-
-        foreach ($validated['line_items'] as $item) {
-            if (isset($item['id'])) {
-                QuoteLineItem::where('id', $item['id'])->update([
-                    'item_name' => $item['item_name'],
-                    'description' => $item['description'] ?? null,
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'line_total' => $item['line_total'],
-                ]);
-            } else {
-                QuoteLineItem::create([
-                    'quote_id' => $quote->id,
-                    'item_name' => $item['item_name'],
-                    'description' => $item['description'] ?? null,
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'line_total' => $item['line_total'],
-                ]);
-            }
-        }
-
-        return redirect()->route('owner.quotes.view', $quote)
-            ->with('success', 'Quote updated successfully');
-    }
-
-    /**
      * Send the quote to customer.
      */
-    public function send(Quote $quote)
+    public function send(Request $request, Quote $quote)
     {
-        if ($quote->status !== 'draft') {
-            return redirect()->back()->with('error', 'Quote can only be sent from draft status');
+        if (! in_array($quote->status, ['draft', 'sent'])) {
+            return redirect()->back()->with('error', 'Quote cannot be sent in its current status');
         }
 
-        $quote->update([
-            'status' => 'sent',
-            'sent_at' => now(),
+        $validated = $request->validate([
+            'adjustment' => 'nullable|numeric',
+            'notes' => 'nullable|string|max:2000',
         ]);
 
-        Mail::to($quote->customer->email)->queue(new QuoteSent($quote));
+        $adjustment = (float) ($validated['adjustment'] ?? 0);
+        $newTotal = (float) $quote->subtotal + $adjustment;
+
+        $quote->update([
+            'adjustment' => $adjustment,
+            'total' => $newTotal,
+            'notes' => $validated['notes'] ?? null,
+            'status' => 'sent',
+            'sent_at' => now(),
+            'negotiation_adjustment' => null,
+            'negotiation_notes' => null,
+            'negotiation_status' => null,
+        ]);
+
+        $quote->customer->notify(new QuoteSentNotification($quote));
 
         return redirect()->route('owner.quotes')
             ->with('success', 'Quote sent to customer successfully');
+    }
+
+    /**
+     * Customer submits a counter-offer (negotiate).
+     */
+    public function negotiate(Request $request, Quote $quote)
+    {
+        if ($quote->customer_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if ($quote->status !== 'sent') {
+            return redirect()->back()->with('error', 'Quote cannot be negotiated in its current status');
+        }
+
+        $validated = $request->validate([
+            'negotiation_adjustment' => 'required|numeric',
+            'negotiation_notes' => 'nullable|string|max:2000',
+        ]);
+
+        $quote->update([
+            'negotiation_adjustment' => $validated['negotiation_adjustment'],
+            'negotiation_notes' => $validated['negotiation_notes'] ?? null,
+            'negotiation_status' => 'pending',
+        ]);
+
+        User::role('owner')->first()?->notify(new QuoteNegotiationNotification($quote));
+
+        return redirect()->route('customer.quotes.show', $quote)
+            ->with('success', 'Your counter-offer has been sent to the owner.');
+    }
+
+    /**
+     * Customer cancels the order.
+     */
+    public function cancelOrder(Quote $quote)
+    {
+        if ($quote->customer_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if ($quote->status !== 'sent') {
+            return redirect()->back()->with('error', 'Quote cannot be cancelled in its current status');
+        }
+
+        $quote->update([
+            'status' => 'rejected',
+            'rejected_at' => now(),
+            'rejection_reason' => 'Cancelled by customer',
+            'negotiation_status' => 'cancelled',
+        ]);
+
+        User::role('owner')->first()?->notify(new QuoteCancelledNotification($quote));
+
+        return redirect()->route('customer.quotes')
+            ->with('success', 'Order cancelled successfully.');
     }
 }

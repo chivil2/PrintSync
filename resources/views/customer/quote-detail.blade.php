@@ -17,6 +17,88 @@
         </a>
     </div>
 
+    @if($quote->status === 'sent')
+    <div class="bg-white rounded-lg border border-zinc-200 shadow-sm" x-data="{ showNegotiateForm: false }">
+        <div class="p-6 border-b border-zinc-200 bg-blue-50">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <h2 class="text-base font-semibold text-blue-900">Quote from PrintSync</h2>
+                    <p class="text-sm text-blue-700">Total: <span class="font-bold">₱{{ number_format($quote->total, 2) }}</span>
+                        @if((float)$quote->adjustment !== 0.0)
+                            <span class="text-xs ml-1">(includes ₱{{ number_format($quote->adjustment, 2) }} adjustment)</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+            @if($quote->notes)
+            <p class="mt-3 text-sm text-blue-800 bg-blue-100 rounded-lg px-4 py-3">{{ $quote->notes }}</p>
+            @endif
+        </div>
+        <div class="p-6">
+            @if($quote->negotiation_status !== 'pending')
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <form action="{{ route('customer.quotes.approve', $quote) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm">
+                        Accept Quote
+                    </button>
+                </form>
+                <button type="button" @click="showNegotiateForm = !showNegotiateForm" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors text-sm">
+                    Negotiate Price
+                </button>
+                <form action="{{ route('customer.quotes.cancel', $quote) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors text-sm" onclick="return confirm('Are you sure you want to cancel this order?')">
+                        Cancel Order
+                    </button>
+                </form>
+            </div>
+            @endif
+            <div x-show="showNegotiateForm" x-transition class="border-t border-zinc-200 pt-4">
+                <h3 class="text-sm font-semibold text-zinc-800 mb-3">Submit Counter-Offer</h3>
+                <form action="{{ route('customer.quotes.negotiate', $quote) }}" method="POST" class="space-y-3">
+                    @csrf
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 mb-1">Your Proposed Adjustment ± (₱)</label>
+                        <input type="number" name="negotiation_adjustment" step="0.01" required
+                            class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm text-zinc-900 bg-white"
+                            placeholder="e.g. -50 to reduce by ₱50">
+                        <p class="text-xs text-zinc-500 mt-1">Enter negative to reduce, positive to add.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-zinc-700 mb-1">Notes (Optional)</label>
+                        <textarea name="negotiation_notes" rows="2"
+                            class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm text-zinc-900 bg-white resize-none"
+                            placeholder="Explain your counter-offer..."></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg transition-colors text-sm">
+                            Send Counter-Offer
+                        </button>
+                        <button type="button" @click="showNegotiateForm = false" class="px-4 py-2 border border-zinc-300 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 transition-colors text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($quote->negotiation_status === 'pending')
+    <div class="bg-amber-50 rounded-lg border border-amber-300 p-5">
+        <div class="flex items-center gap-2 text-amber-800">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-sm font-medium">Your counter-offer of <span class="font-bold">₱{{ number_format($quote->negotiation_adjustment, 2) }}</span> is awaiting the owner's review.</p>
+        </div>
+    </div>
+    @endif
+
     <div class="bg-white rounded-lg border border-zinc-200">
         <div class="p-6 border-b border-zinc-200">
             <div class="flex items-center justify-between">
@@ -130,33 +212,6 @@
             @endif
         </div>
 
-        @if($quote->status === 'sent')
-            <div class="p-6 border-t border-zinc-200 bg-zinc-50">
-                <form action="{{ route('customer.quotes.reject', $quote) }}" method="POST" x-data="{ showRejectForm: false }">
-                    @csrf
-                    <div class="flex items-center gap-3">
-                        <button type="submit" formaction="{{ route('customer.quotes.approve', $quote) }}" class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
-                            Approve Quote
-                        </button>
-                        <button type="button" @click="showRejectForm = !showRejectForm" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
-                            Reject Quote
-                        </button>
-                    </div>
-                    <div x-show="showRejectForm" x-transition class="mt-4">
-                        <label class="block text-sm font-medium text-zinc-700 mb-2">Reason for rejection</label>
-                        <textarea name="rejection_reason" rows="3" class="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Please explain why you're rejecting this quote..." required></textarea>
-                        <div class="mt-3 flex gap-2">
-                            <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
-                                Submit Rejection
-                            </button>
-                            <button type="button" @click="showRejectForm = false" class="px-4 py-2 border border-zinc-300 text-zinc-700 font-medium rounded-lg hover:bg-zinc-50 transition-colors">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        @endif
 
         @if($quote->status === 'accepted')
             <div class="p-6 border-t border-zinc-200 bg-green-50">

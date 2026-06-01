@@ -19,6 +19,77 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
+                <!-- Quote Information -->
+                @if($job->quote)
+                    <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
+                        <div class="p-6 border-b border-zinc-200">
+                            <h2 class="text-lg font-semibold text-zinc-900">Quote / Receipt</h2>
+                        </div>
+                        <div class="p-6">
+                            @if($job->quote->status !== 'accepted')
+                                <div class="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                    <p class="text-sm text-orange-800">
+                                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                        </svg>
+                                        Review and accept quote before assigning employee
+                                    </p>
+                                </div>
+                            @endif
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        @php
+                                            $quoteStatusColors = [
+                                                'draft' => 'bg-zinc-100 text-zinc-800',
+                                                'sent' => 'bg-blue-100 text-blue-800',
+                                                'accepted' => 'bg-green-100 text-green-800',
+                                                'rejected' => 'bg-red-100 text-red-800',
+                                            ];
+                                            $quoteStatusLabels = [
+                                                'draft' => 'Pending Review',
+                                                'sent' => 'Awaiting Approval',
+                                                'accepted' => 'Approved',
+                                                'rejected' => 'Rejected',
+                                            ];
+                                        @endphp
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $quoteStatusColors[$job->quote->status] ?? 'bg-zinc-100 text-zinc-800' }}">
+                                            {{ $quoteStatusLabels[$job->quote->status] ?? ucfirst($job->quote->status) }}
+                                        </span>
+                                        <span class="text-sm text-zinc-600">{{ $job->quote->quote_number }}</span>
+                                    </div>
+                                </div>
+                                <a href="{{ route('owner.quotes.view', $job->quote) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    View Quote
+                                </a>
+                            </div>
+                            @if($job->quote->rejection_reason)
+                                <div class="p-3 bg-red-50 rounded-lg">
+                                    <span class="text-sm text-red-500">Rejection Reason:</span>
+                                    <p class="text-sm text-red-700 mt-1">{{ $job->quote->rejection_reason }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
+                        <div class="p-6 border-b border-zinc-200">
+                            <h2 class="text-lg font-semibold text-zinc-900">Quote / Receipt</h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p class="text-sm text-zinc-600">Quote is being generated.</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Job Information -->
                 <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
                     <div class="p-6 border-b border-zinc-200">
@@ -70,6 +141,12 @@
                                     <p class="text-zinc-900 font-medium">{{ $job->deadline->format('M d, Y') }}</p>
                                 </div>
                             @endif
+                            @if($job->quote)
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Total:</span>
+                                    <p class="text-zinc-900 font-medium">₱{{ number_format($job->quote->total, 2) }}</p>
+                                </div>
+                            @endif
                         </div>
                         @if($job->description)
                             <div class="mt-4">
@@ -86,69 +163,6 @@
                     </div>
                 </div>
 
-                <!-- Quote Information -->
-                @if($job->quote)
-                    <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
-                        <div class="p-6 border-b border-zinc-200">
-                            <h2 class="text-lg font-semibold text-zinc-900">Quote / Receipt</h2>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <div class="flex items-center gap-2 mb-2">
-                                        @php
-                                            $quoteStatusColors = [
-                                                'draft' => 'bg-zinc-100 text-zinc-800',
-                                                'sent' => 'bg-blue-100 text-blue-800',
-                                                'accepted' => 'bg-green-100 text-green-800',
-                                                'rejected' => 'bg-red-100 text-red-800',
-                                            ];
-                                            $quoteStatusLabels = [
-                                                'draft' => 'Pending Review',
-                                                'sent' => 'Awaiting Approval',
-                                                'accepted' => 'Approved',
-                                                'rejected' => 'Rejected',
-                                            ];
-                                        @endphp
-                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $quoteStatusColors[$job->quote->status] ?? 'bg-zinc-100 text-zinc-800' }}">
-                                            {{ $quoteStatusLabels[$job->quote->status] ?? ucfirst($job->quote->status) }}
-                                        </span>
-                                        <span class="text-sm text-zinc-600">{{ $job->quote->quote_number }}</span>
-                                    </div>
-                                    <p class="text-sm text-zinc-700">
-                                        Total: <span class="font-semibold text-zinc-900">₱{{ number_format($job->quote->total, 2) }}</span>
-                                    </p>
-                                </div>
-                                <a href="{{ route('owner.quotes.view', $job->quote) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    View Quote
-                                </a>
-                            </div>
-                            @if($job->quote->rejection_reason)
-                                <div class="p-3 bg-red-50 rounded-lg">
-                                    <span class="text-sm text-red-500">Rejection Reason:</span>
-                                    <p class="text-sm text-red-700 mt-1">{{ $job->quote->rejection_reason }}</p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @else
-                    <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
-                        <div class="p-6 border-b border-zinc-200">
-                            <h2 class="text-lg font-semibold text-zinc-900">Quote / Receipt</h2>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <p class="text-sm text-zinc-600">Quote is being generated.</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
 
                 <!-- Job Timeline -->
                 <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
@@ -243,27 +257,29 @@
                 </div>
 
                 <!-- Employee Assignment -->
-                <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
-                    <div class="p-6 border-b border-zinc-200">
-                        <h2 class="text-lg font-semibold text-zinc-900">Assign Employee</h2>
+                @if($job->quote && $job->quote->status === 'accepted')
+                    <div class="bg-white rounded-xl border border-zinc-200 shadow-sm">
+                        <div class="p-6 border-b border-zinc-200">
+                            <h2 class="text-lg font-semibold text-zinc-900">Assign Employee</h2>
+                        </div>
+                        <div class="p-6">
+                            <form action="{{ route('owner.jobs.assign', $job) }}" method="POST">
+                                @csrf
+                                <select name="employee_id" class="w-full text-sm border border-zinc-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-zinc-700">
+                                    <option value="">Unassigned</option>
+                                    @foreach($employees as $employee)
+                                        <option value="{{ $employee->id }}" {{ $job->employee_id === $employee->id ? 'selected' : '' }}>
+                                            {{ $employee->first_name }} {{ $employee->last_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                    Update Assignment
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <form action="{{ route('owner.jobs.assign', $job) }}" method="POST">
-                            @csrf
-                            <select name="employee_id" class="w-full text-sm border border-zinc-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-zinc-700">
-                                <option value="">Unassigned</option>
-                                @foreach($employees as $employee)
-                                    <option value="{{ $employee->id }}" {{ $job->employee_id === $employee->id ? 'selected' : '' }}>
-                                        {{ $employee->first_name }} {{ $employee->last_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="mt-3 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                                Update Assignment
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                @endif
             </div>
         </div>
     </div>

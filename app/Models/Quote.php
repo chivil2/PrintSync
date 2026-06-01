@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['quote_number', 'customer_id', 'service_job_id', 'date', 'status', 'payment_status', 'currency', 'subtotal', 'adjustment', 'total', 'notes', 'employee_id', 'sent_at', 'approved_at', 'rejected_at', 'rejection_reason'])]
+#[Fillable(['quote_number', 'customer_id', 'service_job_id', 'date', 'status', 'payment_status', 'currency', 'subtotal', 'adjustment', 'total', 'notes', 'employee_id', 'sent_at', 'approved_at', 'rejected_at', 'rejection_reason', 'negotiation_adjustment', 'negotiation_notes', 'negotiation_status'])]
 class Quote extends Model
 {
     /** @use HasFactory<QuoteFactory> */
@@ -21,6 +21,7 @@ class Quote extends Model
             'date' => 'date',
             'subtotal' => 'decimal:2',
             'adjustment' => 'decimal:2',
+            'negotiation_adjustment' => 'decimal:2',
             'total' => 'decimal:2',
             'sent_at' => 'datetime',
             'approved_at' => 'datetime',

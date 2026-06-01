@@ -70,11 +70,7 @@
             </div>
         </div>
 
-        <!-- Form -->
-        <form action="{{ route('owner.quotes.update', $quote) }}" method="POST" x-data="quoteEditor()">
-            @csrf
-            @method('PUT')
-
+        <div x-data="quoteEditor()">
             <div class="max-w-7xl mx-auto px-6 pb-12">
                 <!-- Order Details -->
                 <div class="mb-8">
@@ -128,6 +124,39 @@
                     </div>
                 </div>
 
+                <!-- Customer Negotiation Response -->
+                @if($quote->negotiation_status === 'pending')
+                <div class="mb-8">
+                    <div class="bg-amber-50 rounded-xl border border-amber-300 p-6">
+                        <div class="flex items-start gap-3 mb-4">
+                            <svg class="w-5 h-5 text-amber-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <div>
+                                <h3 class="text-base font-semibold text-amber-900">Customer Counter-Offer Received</h3>
+                                <p class="text-sm text-amber-700">{{ $quote->customer->name }} has proposed a price adjustment.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-xs font-medium text-amber-700 uppercase tracking-wide mb-1">Proposed Adjustment</p>
+                                <p class="text-lg font-bold text-amber-900">₱{{ number_format($quote->negotiation_adjustment, 2) }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-amber-700 uppercase tracking-wide mb-1">Proposed Total</p>
+                                <p class="text-lg font-bold text-amber-900">₱{{ number_format((float)$quote->subtotal + (float)$quote->negotiation_adjustment, 2) }}</p>
+                            </div>
+                        </div>
+                        @if($quote->negotiation_notes)
+                        <div class="mb-4">
+                            <p class="text-xs font-medium text-amber-700 uppercase tracking-wide mb-1">Customer Notes</p>
+                            <p class="text-sm text-amber-900 bg-amber-100 rounded-lg px-4 py-3">{{ $quote->negotiation_notes }}</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 <!-- Adjustment -->
                 <div class="mb-8">
                     <div class="mb-4">
@@ -174,28 +203,61 @@
                         <a href="{{ route('owner.quotes') }}" class="px-6 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-colors duration-200 cursor-pointer">
                             Cancel
                         </a>
-                        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer">
-                            Save Changes
-                        </button>
-                        <button type="submit" formaction="{{ route('owner.quotes.send', $quote) }}" formmethod="POST" class="px-6 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                            Send Quote to Customer
-                        </button>
+                        <form action="{{ route('owner.quotes.approve', $quote) }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Accept
+                            </button>
+                        </form>
+                        <form action="{{ route('owner.quotes.send', $quote) }}" method="POST" class="inline">
+                            @csrf
+                            <input type="hidden" name="adjustment" :value="adjustment">
+                            <input type="hidden" name="notes" x-bind:value="document.querySelector('textarea[name=notes]')?.value ?? ''">
+                            <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                </svg>
+                                Send Quote to Customer
+                            </button>
+                        </form>
                     @elseif($quote->status === 'sent')
                         <a href="{{ route('owner.quotes') }}" class="px-6 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-colors duration-200 cursor-pointer">
                             Back to Quotes
                         </a>
-                        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer" disabled>
-                            <span class="flex items-center gap-2">
-                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Awaiting Customer Approval
-                            </span>
-                        </button>
+                        @if($quote->negotiation_status === 'pending')
+                            <form action="{{ route('owner.quotes.send', $quote) }}" method="POST" class="inline">
+                                @csrf
+                                <input type="hidden" name="adjustment" value="{{ $quote->negotiation_adjustment }}">
+                                <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                    Accept Counter-Offer & Resend
+                                </button>
+                            </form>
+                            <form action="{{ route('owner.quotes.approve', $quote) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Accept Quote as-is
+                                </button>
+                            </form>
+                        @else
+                            <button class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg cursor-not-allowed opacity-75" disabled>
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Awaiting Customer Approval
+                                </span>
+                            </button>
+                        @endif
                     @elseif($quote->status === 'accepted')
                         <a href="{{ route('owner.jobs') }}" class="px-6 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,7 +278,7 @@
                     @endif
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 
     <script>

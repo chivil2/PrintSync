@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
+use App\Notifications\JobAssignedNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -309,6 +310,8 @@ class OwnerController extends Controller
         $employee = $validated['employee_id'] ? User::find($validated['employee_id']) : null;
 
         if ($employee) {
+            $employee->notify(new JobAssignedNotification($job));
+
             return back()->with('success', "{$employee->first_name} {$employee->last_name} assigned to \"{$job->name}\"");
         }
 
@@ -358,6 +361,10 @@ class OwnerController extends Controller
         }
 
         $employee = $validated['employee_id'] ? User::find($validated['employee_id']) : null;
+
+        if ($employee) {
+            $employee->notify(new JobAssignedNotification($job));
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

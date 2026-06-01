@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
+use App\Notifications\JobCompletedNotification;
 use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 
@@ -117,10 +118,14 @@ class EmployeeController extends Controller
             'completed_at' => $validated['status'] === 'completed' ? now() : $job->completed_at,
         ]);
 
-        // Generate invoice if job is completed and customer requested it
-        if ($validated['status'] === 'completed' && $job->request_invoice) {
-            $invoiceService = new InvoiceService;
-            $invoiceService->generateInvoice($job);
+        if ($validated['status'] === 'completed') {
+            User::role('owner')->first()?->notify(new JobCompletedNotification($job, 'owner'));
+            $job->customer->notify(new JobCompletedNotification($job, 'customer'));
+
+            if ($job->request_invoice) {
+                $invoiceService = new InvoiceService;
+                $invoiceService->generateInvoice($job);
+            }
         }
 
         return redirect()->route('employee.jobs')->with('success', 'Job status updated successfully.');
@@ -142,8 +147,10 @@ class EmployeeController extends Controller
                     'id' => $job->id,
                     'name' => $job->name,
                     'priority' => $job->priority,
+                    'status' => $job->status,
+                    'customer_name' => $job->customer->name ?? 'Unknown',
                     'deadline' => $job->deadline->format('Y-m-d'),
-                    'deadline_formatted' => $job->deadline->format('M d'),
+                    'deadline_formatted' => $job->deadline->format('M d, Y'),
                 ];
             })
             ->groupBy('deadline');
