@@ -73,9 +73,10 @@ IMPORTANT RESTRICTIONS:
 AVAILABLE TOOLS:
 {$toolsList}
 
-RESPOND ONLY WITH VALID JSON. Use one of these two formats and nothing else:
+RESPOND ONLY WITH VALID JSON. Use one of these formats and nothing else:
 1. To answer the user: {\"type\":\"response\",\"message\":\"<your reply to the user>\"}
-2. To call a tool: {\"type\":\"tool_call\",\"tool\":\"<tool_name>\",\"args\":{}}
+2. To call ONE tool: {\"type\":\"tool_call\",\"tool\":\"<tool_name>\",\"args\":{}}
+3. To call MULTIPLE tools at once: {\"type\":\"tool_calls\",\"tools\":[{\"tool\":\"<name>\",\"args\":{}},{\"tool\":\"<name>\",\"args\":{}}]}
 
 Do not include any text, markdown, or code fences outside the JSON.";
 
@@ -176,6 +177,31 @@ Do not include any text, markdown, or code fences outside the JSON.";
                     $messages[] = [
                         'role' => 'user',
                         'content' => "Tool '{$toolName}' returned:\n".json_encode($toolResult, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n\nUse this data to answer the user. Respond with {\"type\":\"response\",\"message\":\"...\"}.",
+                    ];
+
+                    continue;
+                }
+
+                if ($type === 'tool_calls') {
+                    $tools = $parsed['tools'] ?? [];
+                    $toolResults = [];
+
+                    foreach ($tools as $toolItem) {
+                        $toolName = (string) ($toolItem['tool'] ?? '');
+                        $toolArgs = is_array($toolItem['args'] ?? null) ? $toolItem['args'] : [];
+
+                        if (! array_key_exists($toolName, $availableTools)) {
+                            $toolResults[] = ['tool' => $toolName, 'error' => "Tool does not exist. Available: ".implode(', ', array_keys($availableTools))];
+                            continue;
+                        }
+
+                        $toolResult = $this->executeTool($toolName, $toolArgs, $printbuddyApiKey);
+                        $toolResults[] = ['tool' => $toolName, 'result' => $toolResult];
+                    }
+
+                    $messages[] = [
+                        'role' => 'user',
+                        'content' => "Tools executed:\n".json_encode($toolResults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."\n\nUse this data to answer the user. Respond with {\"type\":\"response\",\"message\":\"...\"}.",
                     ];
 
                     continue;
@@ -709,7 +735,9 @@ Do not include any text, markdown, or code fences outside the JSON.";
      */
     public function destroyNote(PrintbuddyNote $note)
     {
-        $this->authorize('delete', $note);
+        if ($note->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
         $note->delete();
 
         return redirect()->route('owner.printbuddy')->with('success', 'Note deleted.');
