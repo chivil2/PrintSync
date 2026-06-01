@@ -10,10 +10,30 @@ use App\Http\Controllers\PrintbuddyController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ServiceController;
+use App\Models\PrintingService;
+use App\Models\TechnicalService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('landing');
+    $printing = PrintingService::where('is_active', true)
+        ->latest()
+        ->take(6)
+        ->get()
+        ->map(fn ($s) => array_merge($s->toArray(), ['type' => 'printing']));
+
+    $technical = TechnicalService::where('is_active', true)
+        ->latest()
+        ->take(6)
+        ->get()
+        ->map(fn ($s) => array_merge($s->toArray(), ['type' => 'technical']));
+
+    $featuredServices = $printing
+        ->merge($technical)
+        ->sortByDesc('created_at')
+        ->take(8)
+        ->values();
+
+    return view('landing', compact('featuredServices'));
 })->name('home');
 
 Route::post('/printbuddy/chat', [PrintbuddyController::class, 'chat'])->name('printbuddy.chat.api');
@@ -103,6 +123,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('services/{id}/{serviceType}', [ServiceController::class, 'update'])->name('services.update');
         Route::delete('services/{id}/{serviceType}', [ServiceController::class, 'destroy'])->name('services.destroy');
         Route::get('reports', [ReportsController::class, 'index'])->name('reports');
+        Route::get('printbuddy', [PrintbuddyController::class, 'index'])->name('printbuddy');
+        Route::post('printbuddy/notes', [PrintbuddyController::class, 'storeNote'])->name('printbuddy.notes.store');
+        Route::delete('printbuddy/notes/{note}', [PrintbuddyController::class, 'destroyNote'])->name('printbuddy.notes.destroy');
     });
 });
 

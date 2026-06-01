@@ -290,10 +290,10 @@
         </div>
 
         <!-- Separator -->
-        <div class="border-t border-slate-200 my-6" x-show="!printbuddyExpanded" x-transition></div>
+        <div class="border-t border-slate-200 my-6" x-show="!printbuddyExpanded && !{{ request()->routeIs('owner.printbuddy') ? 'true' : 'false' }}" x-transition></div>
 
         <!-- PrintBuddy Chatbot Section -->
-        <div class="flex flex-col flex-1 min-h-0" @toggle-printbuddy="printbuddyExpanded = !printbuddyExpanded">
+        <div class="flex flex-col flex-1 min-h-0" @toggle-printbuddy="printbuddyExpanded = !printbuddyExpanded" x-show="{{ request()->routeIs('owner.printbuddy') ? 'false' : 'true' }}">
             <x-printbuddy-chat />
         </div>
     </div>

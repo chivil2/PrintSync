@@ -6,236 +6,180 @@
     <title>Welcome - {{ config('app.name', 'PrintSync') }}</title>
     <link rel="icon" href="/favicon.ico" sizes="any">
     <style>
-        .scroll-card, .scroll-fade {
+        .scroll-fade {
             opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            transform: translateY(12px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
         }
-        .scroll-card.visible, .scroll-fade.visible {
+        .scroll-fade.visible {
             opacity: 1;
             transform: translateY(0);
         }
         @media (prefers-reduced-motion: reduce) {
-            .scroll-card, .scroll-fade { opacity: 1; transform: none; transition: none; }
+            .scroll-fade { opacity: 1; transform: none; transition: none; }
         }
+        .hero-bg {
+            background-color: #fafafa;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% 0%, rgba(232, 116, 59, 0.10), transparent 60%),
+                radial-gradient(ellipse 70% 50% at 85% 30%, rgba(25, 167, 206, 0.10), transparent 60%),
+                radial-gradient(circle, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+            background-size: auto, auto, 22px 22px;
+        }
+        @media (min-width: 768px) {
+            .hero-bg { background-size: auto, auto, 26px 26px; }
+        }
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased text-zinc-900 bg-white">
+<body class="font-sans antialiased text-zinc-900 bg-zinc-50">
 
     <x-navbar />
 
     <!-- Hero -->
-    <section class="relative min-h-screen flex items-center justify-center overflow-hidden -mt-20 pt-20">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900"></div>
-        <div class="absolute inset-0 bg-gradient-to-tr from-blue-500/10 via-transparent to-orange-500/10"></div>
-        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-r from-blue-500/5 to-orange-500/5 blur-3xl rounded-full pointer-events-none"></div>
+    <section class="relative overflow-hidden -mt-20 pt-28 sm:pt-32 pb-12 sm:pb-16">
+        <div class="absolute inset-0 hero-bg pointer-events-none"></div>
+        <div class="absolute -top-10 -left-16 w-72 h-72 bg-orange-300/25 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-32 -right-16 w-72 h-72 bg-blue-300/25 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-    
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 text-sm text-zinc-400 mb-8 cursor-default">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"></span>
-                Professional Printing Services
-            </div>
-
-            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] mb-6">
-                Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-orange-400">Premium</span> Printing Partner
+        <div class="relative max-w-6xl mx-auto px-4 sm:px-6">
+            <h1 class="scroll-fade text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 leading-[1.1] max-w-3xl">
+                Print, repair, and ship
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#E8743B] to-[#19A7CE]">with confidence</span>
             </h1>
 
-            <p class="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Business cards, banners, flyers, and more — all crafted with precision. Create an account to explore our professional printing services.
+            <p class="scroll-fade mt-4 text-base sm:text-lg text-zinc-600 max-w-xl leading-relaxed" style="transition-delay: 160ms;">
+                Business cards, banners, flyers, and tech repair — all in one place. Quality finish, fast turnaround.
             </p>
 
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <div class="scroll-fade mt-7 flex flex-wrap items-center gap-3" style="transition-delay: 240ms;">
                 @guest
-                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer">
+                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#E8743B] hover:bg-[#d66532] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm cursor-pointer">
                         Get Started
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                        </svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                     </a>
-                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-8 py-3.5 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-medium rounded-xl transition-all duration-200 cursor-pointer">
+                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-2.5 bg-white border border-zinc-200 hover:border-zinc-300 text-zinc-700 hover:text-zinc-900 text-sm font-medium rounded-xl transition-colors cursor-pointer">
                         Sign In
                     </a>
                 @else
                     @if(auth()->user()->hasRole('employee'))
-                        <a href="{{ route('employee.dashboard') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer">
+                        <a href="{{ route('employee.dashboard') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#E8743B] hover:bg-[#d66532] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm cursor-pointer">
                             Go to Dashboard
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                            </svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                         </a>
                     @else
-                        <a href="{{ route('customer.store') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 cursor-pointer">
+                        <a href="{{ route('customer.store') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#E8743B] hover:bg-[#d66532] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm cursor-pointer">
                             Go to Store
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                            </svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                         </a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="inline-flex items-center justify-center px-8 py-3.5 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white font-medium rounded-xl transition-all duration-200 cursor-pointer">
+                        <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 bg-white border border-zinc-200 hover:border-zinc-300 text-zinc-700 hover:text-zinc-900 text-sm font-medium rounded-xl transition-colors cursor-pointer">
                             Logout
                         </button>
                     </form>
                 @endguest
             </div>
-
-            <div class="mt-16 grid grid-cols-3 gap-8 md:gap-16 max-w-lg mx-auto">
-                <div class="scroll-fade text-center" style="transition-delay: 0ms;">
-                    <div class="text-2xl sm:text-3xl font-bold text-white">10K+</div>
-                    <div class="text-sm text-zinc-500 mt-1">Prints Delivered</div>
-                </div>
-                <div class="scroll-fade text-center" style="transition-delay: 100ms;">
-                    <div class="text-2xl sm:text-3xl font-bold text-white">500+</div>
-                    <div class="text-sm text-zinc-500 mt-1">Happy Clients</div>
-                </div>
-                <div class="scroll-fade text-center" style="transition-delay: 200ms;">
-                    <div class="text-2xl sm:text-3xl font-bold text-white">24h</div>
-                    <div class="text-sm text-zinc-500 mt-1">Fast Turnaround</div>
-                </div>
-            </div>
         </div>
     </section>
 
-    <!-- Services -->
-    <section class="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-zinc-50">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl sm:text-4xl font-bold text-zinc-900 mb-4">Our Printing Services</h2>
-                <p class="text-zinc-500 max-w-2xl mx-auto">Everything you need to bring your ideas to life — from business cards to large format printing.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="scroll-card p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
-                    <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-4 ring-1 ring-blue-100">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-zinc-900 mb-2">Business Cards</h3>
-                    <p class="text-sm text-zinc-500 leading-relaxed">Premium quality business cards with various finishes. Make a lasting impression with professional cards.</p>
+    <!-- Products -->
+    <section class="relative py-12 sm:py-16 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-7 sm:mb-9">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-[#E8743B] mb-1.5">Our Services</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-zinc-900">What we offer</h2>
+                    <p class="text-sm text-zinc-500 mt-1">A quick look at some of our most-requested services.</p>
                 </div>
-
-                <div class="scroll-card p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer" style="transition-delay: 100ms;">
-                    <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center mb-4 ring-1 ring-orange-100">
-                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-zinc-900 mb-2">Banners & Signage</h3>
-                    <p class="text-sm text-zinc-500 leading-relaxed">Eye-catching banners and signage for events, promotions, and storefronts. Durable materials for indoor and outdoor use.</p>
-                </div>
-
-                <div class="scroll-card p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer" style="transition-delay: 200ms;">
-                    <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-4 ring-1 ring-blue-100">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-zinc-900 mb-2">Flyers & Brochures</h3>
-                    <p class="text-sm text-zinc-500 leading-relaxed">Marketing materials that get results. High-quality flyers and brochures to promote your business effectively.</p>
-                </div>
-
-                <div class="scroll-card p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer" style="transition-delay: 100ms;">
-                    <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center mb-4 ring-1 ring-orange-100">
-                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-zinc-900 mb-2">Large Format Printing</h3>
-                    <p class="text-sm text-zinc-500 leading-relaxed">Posters, posters, and large format prints. Perfect for trade shows, exhibitions, and retail displays.</p>
-                </div>
-
-                <div class="scroll-card p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer" style="transition-delay: 200ms;">
-                    <div class="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mb-4 ring-1 ring-blue-100">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-zinc-900 mb-2">Custom Apparel</h3>
-                    <p class="text-sm text-zinc-500 leading-relaxed">Custom printed t-shirts, hoodies, and apparel. Perfect for corporate branding, events, and merchandise.</p>
-                </div>
-
-                <div class="scroll-card p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer" style="transition-delay: 300ms;">
-                    <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center mb-4 ring-1 ring-orange-100">
-                        <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-zinc-900 mb-2">Fast Turnaround</h3>
-                    <p class="text-sm text-zinc-500 leading-relaxed">Quick delivery without compromising quality. Same-day and next-day options available for urgent orders.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-orange-600"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_60%)] pointer-events-none"></div>
-        <div class="relative max-w-3xl mx-auto text-center">
-            <h2 class="scroll-fade text-3xl sm:text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
-            <p class="scroll-fade text-lg text-white/70 mb-10 max-w-xl mx-auto" style="transition-delay: 100ms;">Create an account to start exploring our professional printing services today.</p>
-            @guest
-                <a href="{{ route('register') }}" class="scroll-fade inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-xl hover:bg-zinc-50 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer" style="transition-delay: 200ms;">
-                    Create Account
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                    </svg>
+                <a href="{{ auth()->check() && !auth()->user()->hasRole('employee') ? route('customer.store') : route('register') }}" class="inline-flex items-center gap-1 text-sm font-medium text-[#E8743B] hover:text-[#d66532] transition-colors cursor-pointer">
+                    View all
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                 </a>
-            @else
-                @if(auth()->user()->hasRole('employee'))
-                    <a href="{{ route('employee.dashboard') }}" class="scroll-fade inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-xl hover:bg-zinc-50 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer" style="transition-delay: 200ms;">
-                        Go to Dashboard
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                        </svg>
-                    </a>
-                @else
-                    <a href="{{ route('customer.store') }}" class="scroll-fade inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-xl hover:bg-zinc-50 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer" style="transition-delay: 200ms;">
-                        Explore Services
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                        </svg>
-                    </a>
-                @endif
-            @endguest
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+                @forelse($featuredServices as $i => $service)
+                    @php
+                        $isPrinting = $service['type'] === 'printing';
+                        $accent = $isPrinting ? '#E8743B' : '#19A7CE';
+                        $accentText = $isPrinting ? 'text-[#E8743B]' : 'text-[#19A7CE]';
+                        $accentBg = $isPrinting ? 'bg-orange-50' : 'bg-blue-50';
+                        $accentBorder = $isPrinting ? 'border-orange-100' : 'border-blue-100';
+                        $badgeBg = $isPrinting ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700';
+                        $delay = ($i % 4) * 60;
+                        $canOrder = auth()->check() && !auth()->user()->hasRole('employee');
+                    @endphp
+                    <div class="scroll-fade group bg-white rounded-2xl border border-zinc-200 overflow-hidden hover:border-zinc-300 hover:shadow-md transition-all duration-300"
+                         style="transition-delay: {{ $delay }}ms;"
+                         @if($canOrder)
+                             data-service='@json($service)'
+                             data-type="{{ $service['type'] }}"
+                             onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: { service: JSON.parse(this.dataset.service), type: this.dataset.type } }))"
+                         @endif>
+
+                        <div class="relative h-40 sm:h-44 flex items-center justify-center overflow-hidden {{ $accentBg }}">
+                            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ $badgeBg }}">
+                                {{ $isPrinting ? 'Printing' : 'Technical' }}
+                            </span>
+                            @if(!empty($service['image']))
+                                <img src="{{ asset('storage/' . $service['image']) }}" alt="{{ $service['name'] }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
+                            @else
+                                @if($isPrinting)
+                                    <svg class="w-12 h-12 sm:w-14 sm:h-14 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                    </svg>
+                                @else
+                                    <svg class="w-12 h-12 sm:w-14 sm:h-14 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                @endif
+                            @endif
+                        </div>
+
+                        <div class="p-4">
+                            <h3 class="font-semibold text-zinc-900 mb-1 line-clamp-1 text-sm sm:text-base">{{ $service['name'] }}</h3>
+                            <p class="text-xs text-zinc-500 mb-3 line-clamp-2 min-h-[2rem]">{{ $service['description'] ?: 'Quality service, fast turnaround.' }}</p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold {{ $accentText }}">₱{{ number_format((float) $service['price'], 2) }}</p>
+                                @guest
+                                    <a href="{{ route('login') }}" class="text-xs font-semibold text-zinc-500 hover:text-[#E8743B] transition-colors">Sign in →</a>
+                                @else
+                                    @if($canOrder)
+                                        <span class="text-xs font-semibold text-zinc-700 group-hover:{{ $accentText }} transition-colors">Order →</span>
+                                    @else
+                                        <span class="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">View only</span>
+                                    @endif
+                                @endguest
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full text-center py-12">
+                        <p class="text-zinc-500 text-sm">No services available right now. Check back soon!</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-zinc-900 border-t border-zinc-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
-                <div class="scroll-fade lg:col-span-2" style="transition-delay: 0ms;">
-                    <div class="flex items-center gap-2.5 mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="w-12 h-12 object-cover">
-                    </div>
-                    <p class="text-sm text-zinc-400 max-w-md leading-relaxed">
-                        Your premium printing partner for business cards, banners, flyers, and more. Quality printing with fast turnaround.
-                    </p>
+    <footer class="border-t border-zinc-200 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2.5">
+                    <img src="{{ asset('images/logo.png') }}" alt="PrintSync" class="h-5 sm:h-6 object-contain">
+                    <p class="text-xs text-zinc-500">© {{ date('Y') }} PrintSync. All rights reserved.</p>
                 </div>
-                <div class="scroll-fade" style="transition-delay: 100ms;">
-                    <h4 class="text-sm font-semibold text-white mb-4">Services</h4>
-                    <ul class="space-y-3">
-                        <li><a href="#" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 cursor-pointer">Business Cards</a></li>
-                        <li><a href="#" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 cursor-pointer">Banners & Signage</a></li>
-                        <li><a href="#" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 cursor-pointer">Flyers & Brochures</a></li>
-                        <li><a href="#" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 cursor-pointer">Custom Apparel</a></li>
-                    </ul>
+                <div class="flex items-center gap-5 text-xs text-zinc-500">
+                    <a href="#" class="hover:text-zinc-900 transition-colors">Services</a>
+                    <a href="{{ route('register') }}" class="hover:text-zinc-900 transition-colors">Sign up</a>
+                    <a href="{{ route('login') }}" class="hover:text-zinc-900 transition-colors">Sign in</a>
                 </div>
-                <div class="scroll-fade" style="transition-delay: 200ms;">
-                    <h4 class="text-sm font-semibold text-white mb-4">Company</h4>
-                    <ul class="space-y-3">
-                        <li><a href="{{ route('register') }}" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 cursor-pointer">Create Account</a></li>
-                        <li><a href="{{ route('login') }}" class="text-sm text-zinc-400 hover:text-white transition-colors duration-200 cursor-pointer">Sign In</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="scroll-fade mt-12 pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4" style="transition-delay: 300ms;">
-                <p class="text-sm text-zinc-500">&copy; {{ date('Y') }} PrintSync. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -248,10 +192,16 @@
                         entry.target.classList.add('visible');
                     }
                 });
-            }, { threshold: 0.1 });
+            }, { threshold: 0.08 });
 
-            document.querySelectorAll('.scroll-card, .scroll-fade').forEach(card => observer.observe(card));
+            document.querySelectorAll('.scroll-fade').forEach(el => observer.observe(el));
         });
     </script>
+
+    @auth
+        @if(!auth()->user()->hasRole('employee'))
+            <x-service-modal />
+        @endif
+    @endauth
 </body>
 </html>

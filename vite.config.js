@@ -21,7 +21,7 @@ export default defineConfig({
         port: 5173,
         cors: true,
         hmr: {
-            host: '192.168.254.109', // ← your PC's LAN IP (run ipconfig to find it)
+            host: 'localhost',
         },
         watch: {
             ignored: ['**/storage/framework/views/**'],

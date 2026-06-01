@@ -59,6 +59,13 @@
                 <span class="font-medium text-sm whitespace-nowrap">Reports</span>
             </a>
 
+            <a href="{{ route('owner.printbuddy') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.printbuddy') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                </svg>
+                <span class="font-medium text-sm whitespace-nowrap">PrintBuddy</span>
+            </a>
+
             <!-- Employee Management Section -->
             <div x-data="{ employeesExpanded: localStorage.getItem('ownerSidebarEmployeesExpanded') === 'true' }" x-init="$watch('employeesExpanded', value => localStorage.setItem('ownerSidebarEmployeesExpanded', value))">
                 <button @click="employeesExpanded = !employeesExpanded" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg text-slate-900 hover:bg-slate-100 transition-all">
