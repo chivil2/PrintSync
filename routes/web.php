@@ -126,6 +126,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('printbuddy', [PrintbuddyController::class, 'index'])->name('printbuddy');
         Route::post('printbuddy/notes', [PrintbuddyController::class, 'storeNote'])->name('printbuddy.notes.store');
         Route::delete('printbuddy/notes/{note}', [PrintbuddyController::class, 'destroyNote'])->name('printbuddy.notes.destroy');
+        Route::post('printbuddy/api-key', [PrintbuddyController::class, 'saveApiKey'])->name('printbuddy.api-key');
     });
 });
 

@@ -25,16 +25,19 @@ class PrintbuddyController extends Controller
         $validated = $request->validate([
             'message' => ['required', 'string', 'max:1000'],
             'conversation_id' => ['nullable', 'string'],
+            'history' => ['nullable', 'array'],
         ]);
 
-        $apiKey = config('services.groq.api_key');
+        // Use user's custom API key if set, otherwise fall back to config
+        $userApiKey = auth()->user()->groq_api_key ?? null;
+        $apiKey = $userApiKey ?: config('services.groq.api_key');
         $model = config('services.groq.model');
         $printbuddyApiKey = config('services.printbuddy.api_key');
 
         if (empty($apiKey)) {
             return response()->json([
                 'error' => 'AI service not configured',
-                'message' => 'GROQ_API_KEY is not set. Please configure it in your .env file.',
+                'message' => 'GROQ API key not set. Please add your API key in Settings.',
             ], 500);
         }
 
@@ -44,13 +47,28 @@ class PrintbuddyController extends Controller
             'get_employees' => 'Get all employees with status and details (id, name, email, position, status, hire_date).',
             'get_jobs' => 'Get all jobs with current status and details (id, name, description, type, status, priority, customer, assigned_to, started_at, completed_at, deadline).',
             'get_quotes' => 'Get all quotes with status and details (id, customer_name, total_amount, status).',
+            'add_note' => 'Add a new note. Parameters: content (required, string), title (optional, string).',
+            'get_notes' => 'Get all notes saved by the owner. Returns id, title, content, created_at.',
+            'add_service' => 'Add a new printing or technical service. Parameters: name (required), description (required), price (required, number), service_type (required: printing or technical), production_time (optional).',
+            'edit_service' => 'Edit an existing service. Parameters: id (required), name (optional), description (optional), price (optional), production_time (optional), is_active (optional).',
+            'remove_service' => 'Remove a service. Parameters: id (required).',
+            'add_inventory' => 'Add a new inventory item. Parameters: name (required), sku (required), description (optional), quantity (required, number), min_stock_level (optional), unit_price (optional), unit (optional), supplier (optional), location (optional).',
+            'edit_inventory' => 'Edit an inventory item. Parameters: id (required), name (optional), sku (optional), description (optional), quantity (optional), min_stock_level (optional), unit_price (optional), unit (optional), supplier (optional), location (optional), status (optional).',
+            'remove_inventory' => 'Remove an inventory item. Parameters: id (required).',
         ];
 
         $toolsList = collect($availableTools)
             ->map(fn ($desc, $name) => "- {$name}: {$desc}")
             ->implode("\n");
 
-        $systemPrompt = "You are PrintBuddy, a helpful AI assistant for a printing business. You help the business owner with services, pricing, inventory, employees, jobs, and quotes. Be friendly, professional, and concise. Use Philippine Peso (₱) for prices. When showing lists, show 5 items by default and note if more are available.
+        $systemPrompt = "You are PrintBuddy, an AI assistant for a printing business management web app. You help the business owner manage services, pricing, inventory, employees, jobs, quotes, and their personal notes.
+
+IMPORTANT RESTRICTIONS:
+- Only answer questions related to this web app (services, pricing, inventory, employees, jobs, quotes, notes)
+- If asked about anything else (general knowledge, math, coding, personal matters, etc.), politely decline and redirect to the web app
+- Use Philippine Peso (₱) for prices
+- When showing lists, show 5 items by default and note if more are available
+- When adding/editing services or inventory, ALWAYS ask for the required details first before calling the tool. Do not assume values. Ask the user to provide: name, description, price, etc.
 
 AVAILABLE TOOLS:
 {$toolsList}
@@ -71,8 +89,24 @@ Do not include any text, markdown, or code fences outside the JSON.";
 
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => $validated['message']],
         ];
+
+        // Add compact history (last 10 messages to avoid token limits)
+        $history = $validated['history'] ?? [];
+        if (is_array($history)) {
+            $compactHistory = array_slice($history, -10);
+            foreach ($compactHistory as $msg) {
+                if (isset($msg['role']) && isset($msg['content'])) {
+                    $messages[] = [
+                        'role' => in_array($msg['role'], ['user', 'assistant']) ? $msg['role'] : 'user',
+                        'content' => substr($msg['content'], 0, 500),
+                    ];
+                }
+            }
+        }
+
+        // Add current message
+        $messages[] = ['role' => 'user', 'content' => $validated['message']];
 
         try {
             $maxIterations = 5;
@@ -198,6 +232,14 @@ Do not include any text, markdown, or code fences outside the JSON.";
                 'get_employees' => $this->getEmployees()->getData(true),
                 'get_jobs' => $this->getJobs()->getData(true),
                 'get_quotes' => $this->getQuotes()->getData(true),
+                'add_note' => $this->addNote($functionArgs),
+                'get_notes' => $this->getNotes()->getData(true),
+                'add_service' => $this->addService($functionArgs),
+                'edit_service' => $this->editService($functionArgs),
+                'remove_service' => $this->removeService($functionArgs),
+                'add_inventory' => $this->addInventory($functionArgs),
+                'edit_inventory' => $this->editInventory($functionArgs),
+                'remove_inventory' => $this->removeInventory($functionArgs),
                 default => ['error' => 'Unknown function'],
             };
 
@@ -331,6 +373,26 @@ Do not include any text, markdown, or code fences outside the JSON.";
                     'properties' => (object) [],
                 ],
             ],
+            [
+                'name' => 'add_note',
+                'description' => 'Add a new note for the owner. Parameters: content (required), title (optional)',
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'content' => ['type' => 'string', 'description' => 'The note content'],
+                        'title' => ['type' => 'string', 'description' => 'Optional title for the note'],
+                    ],
+                    'required' => ['content'],
+                ],
+            ],
+            [
+                'name' => 'get_notes',
+                'description' => 'Get all notes saved by the owner',
+                'parameters' => [
+                    'type' => 'object',
+                    'properties' => (object) [],
+                ],
+            ],
         ];
 
         return response()->json([
@@ -394,6 +456,207 @@ Do not include any text, markdown, or code fences outside the JSON.";
     }
 
     /**
+     * Add a note via AI tool.
+     */
+    private function addNote(array $args): array
+    {
+        $content = $args['content'] ?? null;
+        $title = $args['title'] ?? null;
+
+        if (empty($content)) {
+            return ['success' => false, 'error' => 'Content is required'];
+        }
+
+        PrintbuddyNote::create([
+            'user_id' => auth()->id(),
+            'content' => $content,
+            'title' => $title ?? null,
+        ]);
+
+        return ['success' => true, 'message' => 'Note saved successfully'];
+    }
+
+    /**
+     * Get all notes.
+     */
+    public function getNotes(): JsonResponse
+    {
+        $notes = PrintbuddyNote::where('user_id', auth()->id())
+            ->select('id', 'title', 'content', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'notes' => $notes,
+        ]);
+    }
+
+    /**
+     * Add a new service.
+     */
+    private function addService(array $args): array
+    {
+        $name = $args['name'] ?? null;
+        $description = $args['description'] ?? null;
+        $price = $args['price'] ?? null;
+        $serviceType = $args['service_type'] ?? null;
+        $productionTime = $args['production_time'] ?? null;
+
+        if (empty($name) || empty($description) || empty($price) || empty($serviceType)) {
+            return ['success' => false, 'error' => 'Missing required fields: name, description, price, service_type'];
+        }
+
+        $model = $serviceType === 'technical' ? \App\Models\TechnicalService::class : \App\Models\PrintingService::class;
+
+        $id = $model::create([
+            'name' => $name,
+            'description' => $description,
+            'price' => $price,
+            'production_time' => $productionTime,
+            'is_active' => true,
+        ])->id;
+
+        return ['success' => true, 'message' => "Service '{$name}' added successfully", 'id' => $id];
+    }
+
+    /**
+     * Edit an existing service.
+     */
+    private function editService(array $args): array
+    {
+        $id = $args['id'] ?? null;
+        if (empty($id)) {
+            return ['success' => false, 'error' => 'Service ID is required'];
+        }
+
+        $updateData = [];
+        if (isset($args['name'])) $updateData['name'] = $args['name'];
+        if (isset($args['description'])) $updateData['description'] = $args['description'];
+        if (isset($args['price'])) $updateData['price'] = $args['price'];
+        if (isset($args['production_time'])) $updateData['production_time'] = $args['production_time'];
+        if (isset($args['is_active'])) $updateData['is_active'] = $args['is_active'];
+
+        if (empty($updateData)) {
+            return ['success' => false, 'error' => 'No fields to update'];
+        }
+
+        // Try printing_services first, then technical_services
+        $service = \App\Models\PrintingService::find($id);
+        if (! $service) {
+            $service = \App\Models\TechnicalService::find($id);
+        }
+
+        if (! $service) {
+            return ['success' => false, 'error' => 'Service not found'];
+        }
+
+        $service->update($updateData);
+
+        return ['success' => true, 'message' => 'Service updated successfully'];
+    }
+
+    /**
+     * Remove a service.
+     */
+    private function removeService(array $args): array
+    {
+        $id = $args['id'] ?? null;
+        if (empty($id)) {
+            return ['success' => false, 'error' => 'Service ID is required'];
+        }
+
+        $deleted = \App\Models\PrintingService::destroy($id);
+        if (! $deleted) {
+            $deleted = \App\Models\TechnicalService::destroy($id);
+        }
+
+        if ($deleted) {
+            return ['success' => true, 'message' => 'Service removed successfully'];
+        }
+
+        return ['success' => false, 'error' => 'Service not found'];
+    }
+
+    /**
+     * Add a new inventory item.
+     */
+    private function addInventory(array $args): array
+    {
+        $name = $args['name'] ?? null;
+        $sku = $args['sku'] ?? null;
+        $quantity = $args['quantity'] ?? 0;
+
+        if (empty($name) || empty($sku)) {
+            return ['success' => false, 'error' => 'Missing required fields: name, sku'];
+        }
+
+        $id = Inventory::create([
+            'name' => $name,
+            'sku' => $sku,
+            'description' => $args['description'] ?? null,
+            'quantity' => $quantity,
+            'min_stock_level' => $args['min_stock_level'] ?? 10,
+            'unit_price' => $args['unit_price'] ?? 0,
+            'unit' => $args['unit'] ?? null,
+            'supplier' => $args['supplier'] ?? null,
+            'location' => $args['location'] ?? null,
+            'status' => 'in_stock',
+        ])->id;
+
+        return ['success' => true, 'message' => "Inventory item '{$name}' added successfully", 'id' => $id];
+    }
+
+    /**
+     * Edit an inventory item.
+     */
+    private function editInventory(array $args): array
+    {
+        $id = $args['id'] ?? null;
+        if (empty($id)) {
+            return ['success' => false, 'error' => 'Inventory ID is required'];
+        }
+
+        $inventory = Inventory::find($id);
+        if (! $inventory) {
+            return ['success' => false, 'error' => 'Inventory item not found'];
+        }
+
+        if (isset($args['name'])) $inventory->name = $args['name'];
+        if (isset($args['sku'])) $inventory->sku = $args['sku'];
+        if (isset($args['description'])) $inventory->description = $args['description'];
+        if (isset($args['quantity'])) $inventory->quantity = $args['quantity'];
+        if (isset($args['min_stock_level'])) $inventory->min_stock_level = $args['min_stock_level'];
+        if (isset($args['unit_price'])) $inventory->unit_price = $args['unit_price'];
+        if (isset($args['unit'])) $inventory->unit = $args['unit'];
+        if (isset($args['supplier'])) $inventory->supplier = $args['supplier'];
+        if (isset($args['location'])) $inventory->location = $args['location'];
+        if (isset($args['status'])) $inventory->status = $args['status'];
+
+        $inventory->save();
+
+        return ['success' => true, 'message' => 'Inventory item updated successfully'];
+    }
+
+    /**
+     * Remove an inventory item.
+     */
+    private function removeInventory(array $args): array
+    {
+        $id = $args['id'] ?? null;
+        if (empty($id)) {
+            return ['success' => false, 'error' => 'Inventory ID is required'];
+        }
+
+        $deleted = Inventory::destroy($id);
+
+        if ($deleted) {
+            return ['success' => true, 'message' => 'Inventory item removed successfully'];
+        }
+
+        return ['success' => false, 'error' => 'Inventory item not found'];
+    }
+
+    /**
      * MCP: Get all quotes.
      */
     public function getQuotes(): JsonResponse
@@ -450,5 +713,21 @@ Do not include any text, markdown, or code fences outside the JSON.";
         $note->delete();
 
         return redirect()->route('owner.printbuddy')->with('success', 'Note deleted.');
+    }
+
+    /**
+     * Save user's API key.
+     */
+    public function saveApiKey(Request $request)
+    {
+        $validated = $request->validate([
+            'groq_api_key' => ['required', 'string'],
+        ]);
+
+        $user = auth()->user();
+        $user->groq_api_key = $validated['groq_api_key'];
+        $user->save();
+
+        return redirect()->route('owner.printbuddy')->with('success', 'API key saved.');
     }
 }

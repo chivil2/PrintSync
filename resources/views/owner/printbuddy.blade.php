@@ -20,6 +20,13 @@
                     </svg>
                     Notes
                 </button>
+                <button @click="activeTab = 'settings'" :class="activeTab === 'settings' ? 'bg-purple-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'" class="px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 border border-slate-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Settings
+                </button>
             </div>
         </div>
 
@@ -99,40 +106,67 @@
                     </div>
 
                     <!-- Sidebar - Quick Actions -->
-                    <div class="w-64 border-l border-slate-200 p-4 bg-white overflow-y-auto">
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick Actions</h3>
-                        <div class="space-y-1.5">
-                            <button @click="quickAsk('Show me all printing services')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors text-sm text-slate-600 cursor-pointer flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                    <div class="w-64 border-l border-slate-200 p-4 bg-white flex flex-col">
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Quick Actions</h3>
+                        <div class="space-y-1">
+                            <button @click="quickAsk('Show me all printing services')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
                                 View Services
                             </button>
-                            <button @click="quickAsk('Show me current inventory levels')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors text-sm text-slate-600 cursor-pointer flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                </svg>
+                            <button @click="quickAsk('Show me current inventory levels')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
                                 Check Inventory
                             </button>
-                            <button @click="quickAsk('Show me all employees and their status')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors text-sm text-slate-600 cursor-pointer flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
+                            <button @click="quickAsk('Show me all employees and their status')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
                                 View Employees
                             </button>
-                            <button @click="quickAsk('Show me recent jobs and their status')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors text-sm text-slate-600 cursor-pointer flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
+                            <button @click="quickAsk('Show me recent jobs and their status')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
                                 View Jobs
                             </button>
-                            <button @click="quickAsk('Show me recent quotes')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors text-sm text-slate-600 cursor-pointer flex items-center gap-2">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
+                            <button @click="quickAsk('Show me recent quotes')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
                                 View Quotes
                             </button>
                         </div>
+
+                        <!-- Manage Section -->
+                        <div class="mt-3 pt-3 border-t border-slate-200">
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Manage</h3>
+                            <div class="space-y-1">
+                                <button @click="quickAsk('Add a new service')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
+                                    Add Service
+                                </button>
+                                <button @click="quickAsk('Edit a service')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
+                                    Edit Service
+                                </button>
+                                <button @click="quickAsk('Remove a service')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
+                                    Remove Service
+                                </button>
+                                <button @click="quickAsk('Add new inventory item')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
+                                    Add Inventory
+                                </button>
+                                <button @click="quickAsk('Edit an inventory item')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
+                                    Edit Inventory
+                                </button>
+                                <button @click="quickAsk('Remove inventory item')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs text-slate-600 cursor-pointer">
+                                    Remove Inventory
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Notes -->
+                        @if($notes->count() > 0)
+                        <div class="mt-3 pt-3 border-t border-slate-200">
+                            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Recent Notes</h3>
+                            <div class="space-y-1">
+                                @foreach($notes->take(3) as $note)
+                                    <button @click="quickAsk('Show me my notes')" class="w-full text-left px-2 py-1.5 rounded hover:bg-slate-100 transition-colors text-xs cursor-pointer">
+                                        @if($note->title)
+                                            <div class="font-medium text-slate-700 truncate">{{ $note->title }}</div>
+                                        @endif
+                                        <div class="text-slate-500 truncate">{{ Str::limit($note->content, 30) }}</div>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
                     </div>
                 </div>
@@ -196,6 +230,32 @@
             </div>
         </div>
 
+        <!-- Settings Tab -->
+        <div x-show="activeTab === 'settings'" x-transition>
+            <div class="max-w-xl">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <h3 class="font-semibold text-slate-900 mb-4 text-sm">API Settings</h3>
+                    <form action="{{ route('owner.printbuddy.api-key') }}" method="POST">
+                        @csrf
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">GROQ API Key</label>
+                            <input 
+                                type="password" 
+                                name="groq_api_key" 
+                                value="{{ auth()->user()->groq_api_key ?? '' }}"
+                                placeholder="Enter your GROQ API key"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            >
+                            <p class="text-xs text-slate-500 mt-1">Get your free API key at <a href="https://console.groq.com" target="_blank" class="text-purple-600 hover:underline">console.groq.com</a></p>
+                        </div>
+                        <button type="submit" class="px-4 py-2.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors cursor-pointer">
+                            Save API Key
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 </x-layouts::app.owner>
 
@@ -209,9 +269,45 @@ function printbuddyPage() {
         isLoading: false,
         conversationId: null,
         messageId: 0,
+        STORAGE_KEY: 'printbuddy_chat',
+        MAX_MESSAGES: 10,
+        MAX_CONTENT_LENGTH: 500,
 
         init() {
-            // No chat history - fresh conversation each time
+            // Clear storage on each page load for fresh session
+            this.clearStorage();
+        },
+
+        loadFromStorage() {
+            const stored = localStorage.getItem(this.STORAGE_KEY);
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    this.messages = data.messages || [];
+                    this.conversationId = data.conversationId || null;
+                    this.messageId = this.messages.length > 0 ? Math.max(...this.messages.map(m => m.id)) + 1 : 0;
+                } catch (e) {
+                    this.messages = [];
+                }
+            }
+        },
+
+        saveToStorage() {
+            const compactMessages = this.messages.slice(-this.MAX_MESSAGES).map(m => ({
+                id: m.id,
+                role: m.role,
+                content: m.content.length > this.MAX_CONTENT_LENGTH 
+                    ? m.content.substring(0, this.MAX_CONTENT_LENGTH) + '...'
+                    : m.content
+            }));
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
+                messages: compactMessages,
+                conversationId: this.conversationId
+            }));
+        },
+
+        clearStorage() {
+            localStorage.removeItem(this.STORAGE_KEY);
         },
 
         parseMarkdown(text) {
@@ -246,7 +342,8 @@ function printbuddyPage() {
                     },
                     body: JSON.stringify({
                         message: userMessage,
-                        conversation_id: this.conversationId
+                        conversation_id: this.conversationId,
+                        history: this.messages.slice(0, -1).map(m => ({ role: m.role, content: m.content }))
                     })
                 });
 
@@ -277,6 +374,7 @@ function printbuddyPage() {
                 });
             } finally {
                 this.isLoading = false;
+                this.saveToStorage();
                 this.scrollToBottom();
             }
         },
