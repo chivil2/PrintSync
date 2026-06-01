@@ -77,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['owner'])->prefix('owner')->name('owner.')->group(function () {
         Route::get('dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
         Route::get('dashboard/earnings', [OwnerController::class, 'earningsByPeriod'])->name('dashboard.earnings');
+        Route::post('notifications/{id}/read', [OwnerController::class, 'markNotificationRead'])->name('notifications.read');
         Route::get('quotes', [QuoteController::class, 'ownerIndex'])->name('quotes');
         Route::get('quotes/{quote}/view', [QuoteController::class, 'ownerView'])->name('quotes.view');
         Route::post('quotes/{quote}/send', [QuoteController::class, 'send'])->name('quotes.send');
@@ -90,6 +91,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('jobs/{job}/assign', [OwnerController::class, 'assignEmployeeApi'])->name('jobs.assign');
         Route::patch('employees/{employee}/toggle-status', [OwnerController::class, 'toggleEmployeeStatus'])->name('employees.toggle-status');
         Route::delete('employees/{employee}', [OwnerController::class, 'destroyEmployee'])->name('employees.destroy');
+        Route::get('jobs-by-month', [OwnerController::class, 'getJobsByMonth'])->name('jobs.by-month');
         Route::get('jobs', [OwnerController::class, 'jobs'])->name('jobs');
         Route::get('jobs/{job}', [OwnerController::class, 'showJob'])->name('jobs.show');
         Route::delete('jobs/{job}', [OwnerController::class, 'destroyJob'])->name('jobs.destroy');

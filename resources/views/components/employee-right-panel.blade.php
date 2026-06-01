@@ -30,7 +30,7 @@
 
 <div x-data="calendar()" x-init="initCalendar({{ now()->year }}, {{ now()->month }})">
 
-<aside class="w-[380px] p-4 flex-shrink-0 sticky top-4 self-start fixed xl:static inset-y-0 right-0 z-30 transform transition-transform duration-200 xl:transform-none {{-- hidden on < xl unless toggled --}}" :class="rightPanelOpen ? 'translate-x-0' : 'translate-x-full xl:translate-x-0'" x-cloak>
+<aside class="w-[380px] p-4 flex-shrink-0 sticky top-4 self-start">
     <div class="bg-white rounded-lg h-[calc(100vh-2rem)] p-6 shadow-sm border border-slate-200 flex flex-col overflow-hidden">
 
         <div class="flex items-center gap-3 mb-8">
@@ -45,11 +45,6 @@
                 <div class="font-bold text-slate-900 text-lg">{{ $user->first_name }} {{ $user->last_name }}</div>
                 <div class="text-sm text-slate-500">Employee</div>
             </div>
-            <button @click="rightPanelOpen = false" class="p-2 -mr-2 rounded-lg hover:bg-slate-100 transition-colors xl:hidden">
-                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
         </div>
 
         <div class="mb-8">

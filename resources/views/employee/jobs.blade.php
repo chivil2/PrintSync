@@ -89,9 +89,76 @@
                     <p class="text-sm sm:text-base text-slate-500">Jobs assigned to you will appear here</p>
                 </div>
             @else
-                <div class="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl overflow-hidden card-shadow">
+                {{-- Mobile card layout --}}
+                <div class="sm:hidden space-y-3">
+                    @foreach ($jobs as $job)
+                        @php
+                            $priorityColors = [
+                                'low' => 'bg-slate-100 text-slate-600',
+                                'medium' => 'bg-blue-100 text-blue-700',
+                                'high' => 'bg-orange-100 text-orange-700',
+                                'urgent' => 'bg-red-100 text-red-700',
+                            ];
+                            $statusBadgeColors = [
+                                'pending' => 'bg-amber-100 text-amber-700',
+                                'in_progress' => 'bg-blue-100 text-blue-700',
+                                'completed' => 'bg-emerald-100 text-emerald-700',
+                                'cancelled' => 'bg-red-100 text-red-700',
+                            ];
+                            $statusDotColors = [
+                                'pending' => 'bg-amber-400',
+                                'in_progress' => 'bg-blue-400',
+                                'completed' => 'bg-emerald-400',
+                                'cancelled' => 'bg-red-400',
+                            ];
+                            $daysLeft = $job->deadline ? now()->diffInDays($job->deadline, false) : null;
+                        @endphp
+                        <a href="{{ route('employee.jobs.show', $job) }}" class="block bg-white border border-slate-100 rounded-2xl p-4 card-shadow hover:shadow-lg transition-all cursor-pointer">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <div class="w-2 h-2 rounded-full flex-shrink-0 {{ $statusDotColors[$job->status] ?? 'bg-slate-400' }}"></div>
+                                        <h3 class="font-semibold text-slate-900 text-sm truncate">{{ $job->name }}</h3>
+                                    </div>
+                                    <p class="text-xs text-slate-500 truncate">{{ $job->customer->name ?? 'N/A' }}</p>
+                                    <div class="flex items-center gap-2 mt-2 flex-wrap">
+                                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold {{ $statusBadgeColors[$job->status] ?? 'bg-slate-100 text-slate-700' }}">
+                                            {{ str_replace('_', ' ', ucfirst($job->status)) }}
+                                        </span>
+                                        @if ($job->priority)
+                                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium {{ $priorityColors[$job->priority] ?? 'bg-slate-100 text-slate-600' }}">
+                                                {{ ucfirst($job->priority) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <svg class="w-5 h-5 text-slate-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                            @if ($job->deadline)
+                                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <span class="text-xs text-slate-400">Due {{ $job->deadline->format('M d, Y') }}</span>
+                                    @if ($daysLeft >= 0 && $daysLeft <= 3 && $job->status !== 'completed')
+                                        <span class="text-xs {{ $daysLeft <= 1 ? 'text-red-500 font-semibold' : 'text-orange-500' }}">
+                                            @if ($daysLeft == 0) Due today
+                                            @elseif ($daysLeft == 1) 1 day left
+                                            @else {{ $daysLeft }} days left
+                                            @endif
+                                        </span>
+                                    @elseif ($daysLeft < 0 && $job->status !== 'completed')
+                                        <span class="text-xs text-red-500 font-semibold">{{ abs($daysLeft) }} days overdue</span>
+                                    @endif
+                                </div>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+
+                {{-- Desktop table --}}
+                <div class="hidden sm:block bg-white border border-slate-100 rounded-2xl sm:rounded-3xl overflow-hidden card-shadow">
                     <div class="overflow-x-auto">
-                        <table class="w-full min-w-[700px]">
+                        <table class="w-full">
                             <thead>
                                 <tr class="border-b border-slate-100 bg-slate-50/50">
                                     <th class="text-left py-3 sm:py-4 px-4 sm:px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider">Job</th>

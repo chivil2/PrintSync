@@ -7,6 +7,7 @@ use App\Models\ServiceJob;
 use App\Models\User;
 use App\Notifications\JobAssignedNotification;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,15 @@ class OwnerController extends Controller
         $data['employees'] = User::role('employee')->where('employee_status', 'active')->latest()->take(5)->get();
         $data['jobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->take(10)->get();
         $data['allJobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->get();
+
+        $data['jobsWithDeadlines'] = ServiceJob::whereNotNull('deadline')
+            ->whereYear('deadline', now()->year)
+            ->whereMonth('deadline', now()->month)
+            ->with(['customer', 'service'])
+            ->get()
+            ->groupBy(function ($job) {
+                return $job->deadline->format('Y-m-d');
+            });
 
         // Stat card data - compute from completed service jobs
         $completedJobIds = ServiceJob::where('status', 'completed')->pluck('id');
@@ -393,6 +403,44 @@ class OwnerController extends Controller
 
         return redirect()->route('owner.jobs')
             ->with('success', 'Job deleted successfully.');
+    }
+
+    public function markNotificationRead(string $id): RedirectResponse
+    {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+
+        $url = $notification->data['url'] ?? route('owner.dashboard');
+
+        return redirect($url);
+    }
+
+    public function getJobsByMonth(Request $request): JsonResponse
+    {
+        $year = $request->query('year', now()->year);
+        $month = $request->query('month', now()->month);
+
+        $jobs = ServiceJob::whereNotNull('deadline')
+            ->whereYear('deadline', $year)
+            ->whereMonth('deadline', $month)
+            ->with(['customer', 'service'])
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'id' => $job->id,
+                    'name' => $job->name,
+                    'priority' => $job->priority,
+                    'status' => $job->status,
+                    'customer_name' => $job->customer->name ?? 'Unknown',
+                    'deadline' => $job->deadline->format('Y-m-d'),
+                    'deadline_formatted' => $job->deadline->format('M d, Y'),
+                ];
+            })
+            ->groupBy('deadline');
+
+        return response()->json([
+            'jobs_by_date' => $jobs,
+        ]);
     }
 
     public function earningsByPeriod(Request $request): JsonResponse

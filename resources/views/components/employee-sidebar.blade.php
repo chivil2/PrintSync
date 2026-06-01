@@ -1,7 +1,7 @@
-<aside class="sticky top-0 w-[280px] bg-white border-r border-slate-200 flex flex-col h-screen shadow-lg overflow-y-auto flex-shrink-0 fixed lg:sticky inset-y-0 left-0 z-40 transform transition-transform duration-200 lg:translate-x-0 {{-- lg:block — handled by translate --}}" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" id="sidebar">
+<aside class="sticky top-0 w-[280px] bg-white border-r border-slate-200 flex flex-col h-screen shadow-lg overflow-y-auto flex-shrink-0">
     <div class="flex flex-col h-full">
         <!-- Header -->
-        <div class="flex items-center justify-start px-4 py-1 mt-5">
+        <div class="flex items-center justify-between px-4 py-1 mt-5">
             <a href="{{ route('employee.dashboard') }}" id="employee-sidebar-logo" class="block overflow-hidden w-[270px] h-[100px]" style="background-image: url('{{ asset('images/logo.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;" aria-label="PrintSync">
             </a>
         </div>
