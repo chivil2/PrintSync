@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        <!-- Grid Cards -->
+        <!-- Grid Cards Here -->
         <div class="grid grid-cols-4 gap-4">
             <a href="{{ route('owner.quotes') }}" class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow transition-all cursor-pointer hover:shadow-lg">
                 <div class="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-emerald-600">
