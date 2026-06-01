@@ -1,4 +1,4 @@
-<aside class="sticky top-0 w-[280px] bg-white border-r border-slate-200 flex flex-col h-screen shadow-lg overflow-y-auto hidden lg:block" id="sidebar">
+<aside class="sticky top-0 w-[280px] bg-white border-r border-slate-200 flex flex-col h-screen shadow-lg overflow-y-auto flex-shrink-0 fixed lg:sticky inset-y-0 left-0 z-40 transform transition-transform duration-200 lg:translate-x-0 {{-- lg:block — handled by translate --}}" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" id="sidebar">
     <div class="flex flex-col h-full">
         <!-- Header -->
         <div class="flex items-center justify-start px-4 py-1 mt-5">

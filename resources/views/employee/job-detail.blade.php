@@ -1,23 +1,23 @@
 @extends('layouts.app.employee')
 
 @section('content')
-<div class="p-4 flex-1 flex flex-col">
-    <div class="bg-white rounded-[3rem] shadow-xl shadow-slate-200/70 border border-slate-100 flex-1 flex flex-col overflow-hidden">
-        <div class="px-8 pt-8 pb-4 flex-1 overflow-y-auto">
-            <div class="flex items-center justify-between mb-6">
+<div class="p-2 sm:p-4 flex-1 flex flex-col">
+    <div class="bg-white rounded-2xl sm:rounded-[3rem] shadow-xl shadow-slate-200/70 border border-slate-100 flex-1 flex flex-col overflow-hidden">
+        <div class="px-3 sm:px-6 lg:px-8 pt-14 lg:pt-8 pb-4 flex-1 overflow-y-auto">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-6">
                 <div>
-                    <h1 class="text-3xl font-bold text-slate-900">Job Details</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Job Details</h1>
                     <p class="mt-1 text-slate-500 text-sm">{{ $job->name }}</p>
                 </div>
-                <a href="{{ route('employee.jobs') }}" class="flex items-center gap-2 px-5 py-2.5 border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">
+                <a href="{{ route('employee.jobs') }}" class="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 border border-slate-200 rounded-xl sm:rounded-2xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer">
                     <i class="fa-solid fa-arrow-left text-xs"></i>
                     Back to Jobs
                 </a>
             </div>
 
-            <div class="bg-white border border-slate-100 rounded-3xl overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100">
-                    <div class="flex items-center gap-3">
+            <div class="bg-white border border-slate-100 rounded-2xl sm:rounded-3xl overflow-hidden">
+                <div class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-slate-100">
+                    <div class="flex items-center gap-2 sm:gap-3">
                         @php
                             $statusColors = [
                                 'pending' => 'bg-amber-100 text-amber-700',
@@ -26,28 +26,28 @@
                                 'cancelled' => 'bg-red-100 text-red-700',
                             ];
                         @endphp
-                        <span class="inline-block px-4 py-1.5 rounded-full text-sm font-bold {{ $statusColors[$job->status] ?? 'bg-slate-100 text-slate-700' }}">
+                        <span class="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold {{ $statusColors[$job->status] ?? 'bg-slate-100 text-slate-700' }}">
                             {{ str_replace('_', ' ', ucfirst($job->status)) }}
                         </span>
-                        <span class="text-sm text-slate-400 font-medium">Job #{{ $job->id }}</span>
+                        <span class="text-xs sm:text-sm text-slate-400 font-medium">Job #{{ $job->id }}</span>
                     </div>
                 </div>
 
-                <div class="px-8 py-6">
-                    <h2 class="text-lg font-bold text-slate-900 mb-4">Service Information</h2>
-                    <div class="bg-slate-50 rounded-3xl p-6 mb-6 border border-slate-100">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            <div>
+                <div class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">Service Information</h2>
+                    <div class="bg-slate-50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-6 border border-slate-100">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                            <div class="col-span-2 sm:col-span-1">
                                 <span class="text-slate-400 text-xs font-medium">Service</span>
-                                <p class="text-slate-900 font-bold mt-1">{{ $job->name }}</p>
+                                <p class="text-slate-900 font-bold mt-1 text-sm sm:text-base">{{ $job->name }}</p>
                             </div>
                             <div>
                                 <span class="text-slate-400 text-xs font-medium">Type</span>
-                                <p class="text-slate-900 font-bold mt-1">{{ ucfirst($job->type) }}</p>
+                                <p class="text-slate-900 font-bold mt-1 text-sm sm:text-base">{{ ucfirst($job->type) }}</p>
                             </div>
                             <div>
                                 <span class="text-slate-400 text-xs font-medium">Priority</span>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium mt-1
+                                <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium mt-1
                                     {{ match($job->priority) {
                                         'low' => 'bg-slate-100 text-slate-700',
                                         'medium' => 'bg-blue-100 text-blue-700',
@@ -60,48 +60,48 @@
                             </div>
                             <div>
                                 <span class="text-slate-400 text-xs font-medium">Requested</span>
-                                <p class="text-slate-900 font-bold mt-1">{{ $job->created_at->format('M d, Y') }}</p>
+                                <p class="text-slate-900 font-bold mt-1 text-sm sm:text-base">{{ $job->created_at->format('M d, Y') }}</p>
                             </div>
                             @if ($job->deadline)
                                 <div>
                                     <span class="text-slate-400 text-xs font-medium">Deadline</span>
-                                    <p class="text-slate-900 font-bold mt-1">{{ $job->deadline->format('M d, Y') }}</p>
+                                    <p class="text-slate-900 font-bold mt-1 text-sm sm:text-base">{{ $job->deadline->format('M d, Y') }}</p>
                                 </div>
                             @endif
                         </div>
                         @if ($job->description)
-                            <div class="mt-5 pt-5 border-t border-slate-200">
+                            <div class="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-slate-200">
                                 <span class="text-slate-400 text-xs font-medium">Description</span>
-                                <p class="text-slate-700 mt-1">{{ $job->description }}</p>
+                                <p class="text-slate-700 mt-1 text-sm sm:text-base">{{ $job->description }}</p>
                             </div>
                         @endif
                         @if ($job->notes)
-                            <div class="mt-5 pt-5 border-t border-slate-200">
+                            <div class="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-slate-200">
                                 <span class="text-slate-400 text-xs font-medium">Notes</span>
-                                <p class="text-slate-700 mt-1">{{ $job->notes }}</p>
+                                <p class="text-slate-700 mt-1 text-sm sm:text-base">{{ $job->notes }}</p>
                             </div>
                         @endif
-                        <div class="mt-5 pt-5 border-t border-slate-200">
+                        <div class="mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-slate-200">
                             <span class="text-slate-400 text-xs font-medium">Customer</span>
-                            <p class="text-slate-900 font-bold mt-1">{{ $job->customer->name ?? 'N/A' }}</p>
+                            <p class="text-slate-900 font-bold mt-1 text-sm sm:text-base">{{ $job->customer->name ?? 'N/A' }}</p>
                             @if ($job->customer->email)
-                                <p class="text-sm text-slate-500 mt-0.5">{{ $job->customer->email }}</p>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">{{ $job->customer->email }}</p>
                             @endif
                         </div>
                     </div>
 
                     <div class="mb-6">
-                        <h2 class="text-lg font-bold text-slate-900 mb-4">Update Status</h2>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">Update Status</h2>
                         <form method="POST" action="{{ route('employee.jobs.update', $job) }}">
                             @csrf
                             @method('PATCH')
-                            <div class="flex items-center gap-4">
-                                <select name="status" class="block w-64 text-sm font-medium rounded-2xl p-3 border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900">
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                                <select name="status" class="block w-full sm:w-64 text-sm font-medium rounded-xl sm:rounded-2xl p-3 border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-900">
                                     <option value="pending" {{ $job->status === 'pending' ? 'selected' : '' }}>Pending</option>
                                     <option value="in_progress" {{ $job->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
                                     <option value="completed" {{ $job->status === 'completed' ? 'selected' : '' }}>Completed</option>
                                 </select>
-                                <button type="submit" class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-2xl transition-colors cursor-pointer shadow-sm">
+                                <button type="submit" class="w-full sm:w-auto px-5 sm:px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl sm:rounded-2xl transition-colors cursor-pointer shadow-sm">
                                     Update Status
                                 </button>
                             </div>
@@ -109,11 +109,11 @@
                     </div>
 
                     <div class="mt-6">
-                        <h2 class="text-lg font-bold text-slate-900 mb-4">Job Timeline</h2>
-                        <div class="bg-slate-50 rounded-3xl p-6 border border-slate-100">
-                            <div class="space-y-4">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">Job Timeline</h2>
+                        <div class="bg-slate-50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-100">
+                            <div class="space-y-3 sm:space-y-4">
+                                <div class="flex items-start gap-2 sm:gap-3">
+                                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                                         <i class="fa-solid fa-check text-emerald-600 text-xs"></i>
                                     </div>
                                     <div>
@@ -122,8 +122,8 @@
                                     </div>
                                 </div>
                                 @if ($job->started_at)
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                    <div class="flex items-start gap-2 sm:gap-3">
+                                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                                             <i class="fa-solid fa-play text-blue-600 text-xs"></i>
                                         </div>
                                         <div>
@@ -133,8 +133,8 @@
                                     </div>
                                 @endif
                                 @if ($job->completed_at)
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <div class="flex items-start gap-2 sm:gap-3">
+                                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                                             <i class="fa-solid fa-flag-checkered text-emerald-600 text-xs"></i>
                                         </div>
                                         <div>
@@ -144,8 +144,8 @@
                                     </div>
                                 @endif
                                 @if ($job->deadline)
-                                    <div class="flex items-start gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                    <div class="flex items-start gap-2 sm:gap-3">
+                                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
                                             <i class="fa-solid fa-clock text-amber-600 text-xs"></i>
                                         </div>
                                         <div>
