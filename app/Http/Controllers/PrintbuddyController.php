@@ -47,8 +47,8 @@ class PrintbuddyController extends Controller
             'get_services' => 'Get all available printing and technical services (id, name, description, price, image, production_time, service_type).',
             'get_inventory' => 'Get all inventory items with current stock levels (id, name, sku, description, quantity, min_stock_level, unit_price, unit, supplier, location, status).',
             'get_employees' => 'Get all employees with status and details (id, name, email, position, status, hire_date).',
-            'get_jobs' => 'Get all jobs with current status and details (id, name, description, type, status, priority, customer, assigned_to, started_at, completed_at, deadline).',
-            'get_quotes' => 'Get all quotes with status and details (id, customer_name, total_amount, status).',
+            'get_jobs' => 'Get all jobs with current status and details (id, name, description, type, status, priority, customer, assigned_to, started_at, completed_at, deadline, payment_status from the linked quote). Optional arg: payment_status (e.g. "unpaid", "partially_paid", "paid") to filter to only jobs whose linked quote matches.',
+            'get_quotes' => 'Get all quotes with status and details (id, customer_name, total_amount, status, payment_status). Optional arg: payment_status (e.g. "unpaid", "partially_paid", "paid") to filter.',
             'add_note' => 'Add a new note. Parameters: content (required, string), title (optional, string).',
             'get_notes' => 'Get all notes saved by the owner. Returns id, title, content, created_at.',
             'add_service' => 'Add a new printing or technical service. Parameters: name (required), description (required), price (required, number), service_type (required: printing or technical), production_time (optional).',
@@ -259,8 +259,8 @@ Do not include any text, markdown, or code fences outside the JSON.";
                 'get_services' => $this->getServices()->getData(true),
                 'get_inventory' => $this->getInventory()->getData(true),
                 'get_employees' => $this->getEmployees()->getData(true),
-                'get_jobs' => $this->getJobs()->getData(true),
-                'get_quotes' => $this->getQuotes()->getData(true),
+                'get_jobs' => $this->getJobs($functionArgs)->getData(true),
+                'get_quotes' => $this->getQuotes($functionArgs)->getData(true),
                 'add_note' => $this->addNote($functionArgs),
                 'get_notes' => $this->getNotes()->getData(true),
                 'add_service' => $this->addService($functionArgs),
@@ -388,18 +388,28 @@ Do not include any text, markdown, or code fences outside the JSON.";
             ],
             [
                 'name' => 'get_jobs',
-                'description' => 'Get all jobs with their current status and details',
+                'description' => 'Get all jobs with their current status and details, including the payment_status from the linked quote',
                 'parameters' => [
                     'type' => 'object',
-                    'properties' => (object) [],
+                    'properties' => [
+                        'payment_status' => [
+                            'type' => 'string',
+                            'description' => 'Optional filter. One of: unpaid, partially_paid, paid. Only returns jobs whose linked quote matches.',
+                        ],
+                    ],
                 ],
             ],
             [
                 'name' => 'get_quotes',
-                'description' => 'Get all quotes with their status and details',
+                'description' => 'Get all quotes with their status, payment_status, and details',
                 'parameters' => [
                     'type' => 'object',
-                    'properties' => (object) [],
+                    'properties' => [
+                        'payment_status' => [
+                            'type' => 'string',
+                            'description' => 'Optional filter. One of: unpaid, partially_paid, paid.',
+                        ],
+                    ],
                 ],
             ],
             [
@@ -446,8 +456,10 @@ Do not include any text, markdown, or code fences outside the JSON.";
 
     /**
      * MCP: Get all jobs.
+     *
+     * @param  array{payment_status?: string}  $args
      */
-    public function getJobs(): JsonResponse
+    public function getJobs(array $args = []): JsonResponse
     {
         $jobs = DB::table('service_jobs')
             ->leftJoin('users as customers', 'service_jobs.customer_id', '=', 'customers.id')
@@ -460,6 +472,7 @@ Do not include any text, markdown, or code fences outside the JSON.";
                 $join->on('service_jobs.service_id', '=', 'technical_services.id')
                     ->where('service_jobs.service_type', '=', 'technical_service');
             })
+            ->leftJoin('quotes', 'service_jobs.id', '=', 'quotes.service_job_id')
             ->select(
                 'service_jobs.id',
                 'service_jobs.name',
@@ -472,12 +485,31 @@ Do not include any text, markdown, or code fences outside the JSON.";
                 'service_jobs.deadline',
                 'service_jobs.created_at',
                 'service_jobs.updated_at',
-                'customers.name as customer_name',
-                'employees.name as assigned_to',
-                DB::raw('COALESCE(printing_services.name, technical_services.name) as service_name')
+                'customers.first_name as customer_first_name',
+                'customers.last_name as customer_last_name',
+                'employees.first_name as employee_first_name',
+                'employees.last_name as employee_last_name',
+                DB::raw('COALESCE(printing_services.name, technical_services.name) as service_name'),
+                'quotes.payment_status as payment_status'
+            )
+            ->when(
+                ! empty($args['payment_status']),
+                fn ($q) => $q->where('quotes.payment_status', $args['payment_status'])
             )
             ->orderBy('service_jobs.created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($job) {
+                $job->customer_name = trim(($job->customer_first_name ?? '').' '.($job->customer_last_name ?? '')) ?: null;
+                $job->assigned_to = trim(($job->employee_first_name ?? '').' '.($job->employee_last_name ?? '')) ?: null;
+                unset(
+                    $job->customer_first_name,
+                    $job->customer_last_name,
+                    $job->employee_first_name,
+                    $job->employee_last_name,
+                );
+
+                return $job;
+            });
 
         return response()->json([
             'jobs' => $jobs,
@@ -717,11 +749,17 @@ Do not include any text, markdown, or code fences outside the JSON.";
 
     /**
      * MCP: Get all quotes.
+     *
+     * @param  array{payment_status?: string}  $args
      */
-    public function getQuotes(): JsonResponse
+    public function getQuotes(array $args = []): JsonResponse
     {
         $quotes = DB::table('quotes')
-            ->select('id', 'customer_name', 'total_amount', 'status', 'created_at', 'updated_at')
+            ->select('id', 'customer_name', 'total_amount', 'status', 'payment_status', 'created_at', 'updated_at')
+            ->when(
+                ! empty($args['payment_status']),
+                fn ($q) => $q->where('payment_status', $args['payment_status'])
+            )
             ->orderBy('created_at', 'desc')
             ->get();
 

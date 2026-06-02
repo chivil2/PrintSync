@@ -33,6 +33,12 @@ return [
             'icon' => 'fa-solid fa-clipboard-list',
             'permission' => 'place_orders',
         ],
+        [
+            'label' => 'Messages',
+            'route' => 'customer.chat.index',
+            'icon' => 'fa-solid fa-comments',
+            'permission' => 'place_orders',
+        ],
     ],
 
     'cart' => [

@@ -417,6 +417,49 @@ class OwnerController extends Controller
         return redirect($url);
     }
 
+    public function unreadNotifications(): JsonResponse
+    {
+        $user = auth()->user();
+
+        $acceptedQuotes = Quote::where('status', 'accepted')
+            ->whereHas('serviceJob', function ($q) {
+                $q->whereNull('employee_id');
+            })
+            ->with(['serviceJob', 'customer'])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn ($quote) => [
+                'id' => $quote->id,
+                'job_name' => $quote->serviceJob->name ?? 'Service Job',
+                'customer_first' => $quote->customer->first_name ?? 'Unknown',
+                'customer_last' => $quote->customer->last_name ?? '',
+                'url' => route('owner.jobs'),
+            ])
+            ->values();
+
+        $unreadDbNotifications = $user->unreadNotifications
+            ->whereIn('data.event_type', ['quote_negotiation', 'job_completed', 'service_order_created', 'payment_submitted'])
+            ->take(5);
+
+        $mapNotif = fn ($notif) => [
+            'id' => $notif->id,
+            'title' => $notif->data['title'] ?? '',
+            'message' => $notif->data['message'] ?? '',
+            'event_type' => $notif->data['event_type'] ?? '',
+            'read_url' => route('owner.notifications.read', $notif->id),
+        ];
+
+        return response()->json([
+            'count' => $acceptedQuotes->count() + $unreadDbNotifications->count(),
+            'accepted_quotes' => $acceptedQuotes,
+            'payments' => $unreadDbNotifications->where('data.event_type', 'payment_submitted')->map($mapNotif)->values(),
+            'new_orders' => $unreadDbNotifications->where('data.event_type', 'service_order_created')->map($mapNotif)->values(),
+            'negotiations' => $unreadDbNotifications->where('data.event_type', 'quote_negotiation')->map($mapNotif)->values(),
+            'completed_jobs' => $unreadDbNotifications->where('data.event_type', 'job_completed')->map($mapNotif)->values(),
+        ]);
+    }
+
     public function getJobsByMonth(Request $request): JsonResponse
     {
         $year = $request->query('year', now()->year);

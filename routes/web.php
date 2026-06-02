@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CustomerChatController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\OwnerChatController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PrintbuddyController;
@@ -88,6 +90,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('quotes/{quote}/pay', [PaymentController::class, 'show'])->name('quotes.pay');
         Route::post('quotes/{quote}/payments', [PaymentController::class, 'store'])->name('quotes.payments.store');
         Route::get('payments/{payment}', [PaymentController::class, 'showPayment'])->name('payments.show');
+
+        Route::get('chat', [CustomerChatController::class, 'index'])->name('chat.index');
+        Route::get('chat/{conversation}', [CustomerChatController::class, 'show'])->name('chat.show');
+        Route::post('chat/{conversation}/messages', [CustomerChatController::class, 'sendMessage'])->name('chat.send');
+        Route::post('chat/{conversation}/read', [CustomerChatController::class, 'markRead'])->name('chat.read');
+        Route::get('chat/{conversation}/poll', [CustomerChatController::class, 'poll'])->name('chat.poll');
+        Route::get('quotes/{quote}/chat', [CustomerChatController::class, 'openForQuote'])->name('chat.open-for-quote');
     });
 
     Route::middleware(['employee'])->prefix('employee')->name('employee.')->group(function () {
@@ -103,6 +112,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('dashboard', [OwnerController::class, 'dashboard'])->name('dashboard');
         Route::get('dashboard/earnings', [OwnerController::class, 'earningsByPeriod'])->name('dashboard.earnings');
         Route::post('notifications/{id}/read', [OwnerController::class, 'markNotificationRead'])->name('notifications.read');
+        Route::get('notifications/unread', [OwnerController::class, 'unreadNotifications'])->name('notifications.unread');
         Route::get('quotes', [QuoteController::class, 'ownerIndex'])->name('quotes');
         Route::get('quotes/{quote}/view', [QuoteController::class, 'ownerView'])->name('quotes.view');
         Route::post('quotes/{quote}/send', [QuoteController::class, 'send'])->name('quotes.send');
@@ -135,6 +145,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('printbuddy/notes', [PrintbuddyController::class, 'storeNote'])->name('printbuddy.notes.store');
         Route::delete('printbuddy/notes/{note}', [PrintbuddyController::class, 'destroyNote'])->name('printbuddy.notes.destroy');
         Route::post('printbuddy/api-key', [PrintbuddyController::class, 'saveApiKey'])->name('printbuddy.api-key');
+
+        Route::get('chat', [OwnerChatController::class, 'index'])->name('chat.index');
+        Route::get('chat/{conversation}', [OwnerChatController::class, 'show'])->name('chat.show');
+        Route::post('chat/{conversation}/messages', [OwnerChatController::class, 'sendMessage'])->name('chat.send');
+        Route::post('chat/{conversation}/read', [OwnerChatController::class, 'markRead'])->name('chat.read');
+        Route::get('chat/{conversation}/poll', [OwnerChatController::class, 'poll'])->name('chat.poll');
     });
 });
 

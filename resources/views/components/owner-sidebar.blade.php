@@ -1,6 +1,10 @@
 @php
     $employees = \App\Models\User::role('employee')->where('employee_status', 'active')->latest()->take(5)->get();
     $pendingPaymentCount = \App\Models\Payment::where('status', \App\Models\Payment::STATUS_PENDING)->count();
+    $unreadChatCount = \App\Models\Conversation::where('owner_id', auth()->id())
+        ->whereColumn('owner_last_read_at', '<', 'last_message_at')
+        ->whereHas('messages', fn ($q) => $q->where('sender_id', '!=', auth()->id()))
+        ->count();
 @endphp
 
 <aside class="sticky top-0 w-[280px] bg-white border-r border-slate-200 flex flex-col h-screen shadow-lg overflow-y-auto" id="sidebar">
@@ -77,6 +81,18 @@
                     <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
                 </svg>
                 <span class="font-medium text-sm whitespace-nowrap">PrintBuddy</span>
+            </a>
+
+            <a href="{{ route('owner.chat.index') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.chat.*') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                </svg>
+                <span class="font-medium text-sm whitespace-nowrap">Messages</span>
+                @if($unreadChatCount > 0)
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full {{ request()->routeIs('owner.chat.*') ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700' }}">
+                        {{ $unreadChatCount }}
+                    </span>
+                @endif
             </a>
 
             <!-- Employee Management Section -->

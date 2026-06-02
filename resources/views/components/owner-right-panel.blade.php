@@ -20,6 +20,43 @@
 
     $notificationCount = $acceptedQuotesNeedingAssignment->count() + $unreadDbNotifications->count();
 
+    // Initial shape for the Alpine notification panel (matches unreadNotifications JSON)
+    $mapNotif = fn ($notif) => [
+        'id' => $notif->id,
+        'title' => $notif->data['title'] ?? '',
+        'message' => $notif->data['message'] ?? '',
+        'event_type' => $notif->data['event_type'] ?? '',
+        'read_url' => route('owner.notifications.read', $notif->id),
+    ];
+
+    $initialNotifications = [
+        'count' => $notificationCount,
+        'accepted_quotes' => $acceptedQuotesNeedingAssignment->map(fn ($q) => [
+            'id' => $q->id,
+            'job_name' => $q->serviceJob->name ?? 'Service Job',
+            'customer_first' => $q->customer->first_name ?? 'Unknown',
+            'customer_last' => $q->customer->last_name ?? '',
+            'url' => route('owner.jobs'),
+        ])->values(),
+        'payments' => $unreadDbNotifications->where('data.event_type', 'payment_submitted')->map($mapNotif)->values(),
+        'new_orders' => $unreadDbNotifications->where('data.event_type', 'service_order_created')->map($mapNotif)->values(),
+        'negotiations' => $unreadDbNotifications->where('data.event_type', 'quote_negotiation')->map($mapNotif)->values(),
+        'completed_jobs' => $unreadDbNotifications->where('data.event_type', 'job_completed')->map($mapNotif)->values(),
+    ];
+
+    $unreadChatCount = \App\Models\Conversation::where('owner_id', auth()->id())
+        ->whereColumn('owner_last_read_at', '<', 'last_message_at')
+        ->whereHas('messages', fn ($q) => $q->where('sender_id', '!=', auth()->id()))
+        ->count();
+
+    $recentChatConversations = \App\Models\Conversation::with(['customer', 'messages' => fn ($q) => $q->latest()->limit(1)])
+        ->where('owner_id', auth()->id())
+        ->whereColumn('owner_last_read_at', '<', 'last_message_at')
+        ->whereHas('messages', fn ($q) => $q->where('sender_id', '!=', auth()->id()))
+        ->orderByDesc('last_message_at')
+        ->take(3)
+        ->get();
+
     $currentMonth = now()->format('F');
     $currentYear = now()->format('Y');
     $today = now()->day;
@@ -73,44 +110,52 @@
         </div>
 
         <!-- Notifications Section -->
-        <div class="mb-8" x-show="!printbuddyExpanded" x-transition>
+        <div class="mb-8" x-show="!printbuddyExpanded" x-transition x-data="notificationPanel(@js($initialNotifications))">
             <div class="flex items-center justify-between mb-4 px-1">
                 <div
                     role="button"
                     tabindex="0"
-                    @click="notificationsOpen = !notificationsOpen"
-                    @keydown.enter.prevent="notificationsOpen = !notificationsOpen"
-                    @keydown.space.prevent="notificationsOpen = !notificationsOpen"
+                    @click="open = !open"
+                    @keydown.enter.prevent="open = !open"
+                    @keydown.space.prevent="open = !open"
                     class="font-bold text-slate-900 text-lg flex items-center gap-2 cursor-pointer select-none"
                 >
                     <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     Notifications
-                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': notificationsOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
-                @if($notificationCount > 0)
-                    <a href="{{ route('owner.jobs') }}" class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full hover:bg-orange-600 transition-colors cursor-pointer">
-                        {{ $notificationCount }}
-                    </a>
-                @else
-                    <span class="bg-slate-300 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
-                @endif
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="refresh()" :disabled="loading" title="Refresh notifications"
+                            class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-4 h-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                    <template x-if="data.count > 0">
+                        <a href="{{ route('owner.jobs') }}" class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full hover:bg-orange-600 transition-colors cursor-pointer" x-text="data.count"></a>
+                    </template>
+                    <template x-if="data.count === 0">
+                        <span class="bg-slate-300 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+                    </template>
+                </div>
             </div>
 
-            <div class="space-y-3 max-h-96 overflow-y-auto pr-1" x-show="notificationsOpen" x-transition.opacity.duration.150ms>
-                @if($notificationCount === 0)
+            <div class="space-y-3 max-h-96 overflow-y-auto pr-1" x-show="open" x-transition.opacity.duration.150ms>
+                <template x-if="data.count === 0">
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
                         <p class="text-sm text-slate-500">No pending notifications</p>
                     </div>
-                @else
-                    {{-- Accepted quotes needing assignment --}}
-                    @if($acceptedQuotesNeedingAssignment->count() > 0)
+                </template>
+
+                <template x-if="data.accepted_quotes.length > 0">
+                    <div>
                         <div class="text-xs font-medium text-slate-500 mb-1">Ready to assign</div>
-                        @foreach($acceptedQuotesNeedingAssignment as $quote)
-                            <a href="{{ route('owner.jobs') }}" class="block p-3 rounded-xl bg-emerald-50 border border-emerald-100 cursor-pointer hover:opacity-80 transition-colors">
+                        <template x-for="quote in data.accepted_quotes" :key="quote.id">
+                            <a :href="quote.url" class="block p-3 rounded-xl bg-emerald-50 border border-emerald-100 cursor-pointer hover:opacity-80 transition-colors mb-2">
                                 <div class="flex items-start gap-3">
                                     <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,30 +163,24 @@
                                         </svg>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-slate-900">{{ $quote->serviceJob->name ?? 'Service Job' }}</p>
-                                        <p class="text-xs text-slate-500 mt-1">{{ $quote->customer->first_name ?? 'Unknown' }} {{ $quote->customer->last_name ?? '' }}</p>
+                                        <p class="text-sm font-medium text-slate-900" x-text="quote.job_name"></p>
+                                        <p class="text-xs text-slate-500 mt-1"><span x-text="quote.customer_first"></span> <span x-text="quote.customer_last"></span></p>
                                         <p class="text-xs text-emerald-600 mt-1 font-medium">Quote accepted — ready to assign</p>
                                     </div>
                                 </div>
                             </a>
-                        @endforeach
-                    @endif
+                        </template>
+                    </div>
+                </template>
 
-                    {{-- Negotiation requests from customers --}}
-                    @php
-                        $negotiationNotifs = $unreadDbNotifications->where('data.event_type', 'quote_negotiation');
-                        $jobCompletedNotifs = $unreadDbNotifications->where('data.event_type', 'job_completed');
-                        $newOrderNotifs = $unreadDbNotifications->where('data.event_type', 'service_order_created');
-                        $paymentNotifs = $unreadDbNotifications->where('data.event_type', 'payment_submitted');
-                    @endphp
-
-                    {{-- Payment submitted by customer --}}
-                    @if($paymentNotifs->count() > 0)
-                        <div class="text-xs font-medium text-slate-500 mb-1 {{ $acceptedQuotesNeedingAssignment->count() > 0 ? 'mt-3' : '' }}">Payments received</div>
-                        @foreach($paymentNotifs as $notif)
-                            <form method="POST" action="{{ route('owner.notifications.read', $notif->id) }}"
+                <template x-if="data.payments.length > 0">
+                    <div :class="data.accepted_quotes.length > 0 ? 'mt-3' : ''">
+                        <div class="text-xs font-medium text-slate-500 mb-1">Payments received</div>
+                        <template x-for="notif in data.payments" :key="notif.id">
+                            <form method="POST" :action="notif.read_url"
                                   x-data="{ seen: false }"
-                                  @submit.prevent="seen = true; $el.submit()">
+                                  @submit.prevent="seen = true; $el.submit()"
+                                  class="mb-2">
                                 @csrf
                                 <button type="submit" class="w-full text-left p-3 rounded-xl border transition-all"
                                         :class="seen ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-emerald-50 border-emerald-100 hover:opacity-80'">
@@ -154,25 +193,27 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2">
-                                                <p class="text-sm font-medium text-slate-900">{{ $notif->data['title'] ?? 'Payment Received' }}</p>
+                                                <p class="text-sm font-medium text-slate-900" x-text="notif.title || 'Payment Received'"></p>
                                                 <span x-show="seen" class="text-xs text-slate-400 font-medium">Seen</span>
                                             </div>
-                                            <p class="text-xs text-slate-500 mt-1">{{ $notif->data['message'] ?? '' }}</p>
+                                            <p class="text-xs text-slate-500 mt-1" x-text="notif.message"></p>
                                             <p class="text-xs mt-1 font-medium transition-colors" :class="seen ? 'text-slate-400' : 'text-emerald-600'">Customer has sent a payment</p>
                                         </div>
                                     </div>
                                 </button>
                             </form>
-                        @endforeach
-                    @endif
+                        </template>
+                    </div>
+                </template>
 
-                    {{-- New service orders from customers --}}
-                    @if($newOrderNotifs->count() > 0)
-                        <div class="text-xs font-medium text-slate-500 mb-1 {{ $acceptedQuotesNeedingAssignment->count() > 0 ? 'mt-3' : '' }}">New orders</div>
-                        @foreach($newOrderNotifs as $notif)
-                            <form method="POST" action="{{ route('owner.notifications.read', $notif->id) }}"
+                <template x-if="data.new_orders.length > 0">
+                    <div :class="data.accepted_quotes.length > 0 ? 'mt-3' : ''">
+                        <div class="text-xs font-medium text-slate-500 mb-1">New orders</div>
+                        <template x-for="notif in data.new_orders" :key="notif.id">
+                            <form method="POST" :action="notif.read_url"
                                   x-data="{ seen: false }"
-                                  @submit.prevent="seen = true; $el.submit()">
+                                  @submit.prevent="seen = true; $el.submit()"
+                                  class="mb-2">
                                 @csrf
                                 <button type="submit" class="w-full text-left p-3 rounded-xl border transition-all"
                                         :class="seen ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-indigo-50 border-indigo-100 hover:opacity-80'">
@@ -185,24 +226,27 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2">
-                                                <p class="text-sm font-medium text-slate-900">{{ $notif->data['title'] ?? 'New Service Order' }}</p>
+                                                <p class="text-sm font-medium text-slate-900" x-text="notif.title || 'New Service Order'"></p>
                                                 <span x-show="seen" class="text-xs text-slate-400 font-medium">Seen</span>
                                             </div>
-                                            <p class="text-xs text-slate-500 mt-1">{{ $notif->data['message'] ?? '' }}</p>
+                                            <p class="text-xs text-slate-500 mt-1" x-text="notif.message"></p>
                                             <p class="text-xs mt-1 font-medium transition-colors" :class="seen ? 'text-slate-400' : 'text-indigo-600'">Customer submitted a new order</p>
                                         </div>
                                     </div>
                                 </button>
                             </form>
-                        @endforeach
-                    @endif
+                        </template>
+                    </div>
+                </template>
 
-                    @if($negotiationNotifs->count() > 0)
-                        <div class="text-xs font-medium text-slate-500 mb-1 {{ $acceptedQuotesNeedingAssignment->count() > 0 ? 'mt-3' : '' }}">Counter-offers</div>
-                        @foreach($negotiationNotifs as $notif)
-                            <form method="POST" action="{{ route('owner.notifications.read', $notif->id) }}"
+                <template x-if="data.negotiations.length > 0">
+                    <div :class="data.accepted_quotes.length > 0 ? 'mt-3' : ''">
+                        <div class="text-xs font-medium text-slate-500 mb-1">Counter-offers</div>
+                        <template x-for="notif in data.negotiations" :key="notif.id">
+                            <form method="POST" :action="notif.read_url"
                                   x-data="{ seen: false }"
-                                  @submit.prevent="seen = true; $el.submit()">
+                                  @submit.prevent="seen = true; $el.submit()"
+                                  class="mb-2">
                                 @csrf
                                 <button type="submit" class="w-full text-left p-3 rounded-xl border transition-all"
                                         :class="seen ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-amber-50 border-amber-100 hover:opacity-80'">
@@ -215,25 +259,27 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2">
-                                                <p class="text-sm font-medium text-slate-900">{{ $notif->data['title'] ?? 'Counter-offer' }}</p>
+                                                <p class="text-sm font-medium text-slate-900" x-text="notif.title || 'Counter-offer'"></p>
                                                 <span x-show="seen" class="text-xs text-slate-400 font-medium">Seen</span>
                                             </div>
-                                            <p class="text-xs text-slate-500 mt-1">{{ $notif->data['message'] ?? '' }}</p>
+                                            <p class="text-xs text-slate-500 mt-1" x-text="notif.message"></p>
                                             <p class="text-xs mt-1 font-medium transition-colors" :class="seen ? 'text-slate-400' : 'text-amber-600'">Customer negotiated price</p>
                                         </div>
                                     </div>
                                 </button>
                             </form>
-                        @endforeach
-                    @endif
+                        </template>
+                    </div>
+                </template>
 
-                    {{-- Job completed by employee --}}
-                    @if($jobCompletedNotifs->count() > 0)
-                        <div class="text-xs font-medium text-slate-500 mb-1 {{ ($acceptedQuotesNeedingAssignment->count() > 0 || $negotiationNotifs->count() > 0) ? 'mt-3' : '' }}">Completed jobs</div>
-                        @foreach($jobCompletedNotifs as $notif)
-                            <form method="POST" action="{{ route('owner.notifications.read', $notif->id) }}"
+                <template x-if="data.completed_jobs.length > 0">
+                    <div :class="(data.accepted_quotes.length > 0 || data.negotiations.length > 0) ? 'mt-3' : ''">
+                        <div class="text-xs font-medium text-slate-500 mb-1">Completed jobs</div>
+                        <template x-for="notif in data.completed_jobs" :key="notif.id">
+                            <form method="POST" :action="notif.read_url"
                                   x-data="{ seen: false }"
-                                  @submit.prevent="seen = true; $el.submit()">
+                                  @submit.prevent="seen = true; $el.submit()"
+                                  class="mb-2">
                                 @csrf
                                 <button type="submit" class="w-full text-left p-3 rounded-xl border transition-all"
                                         :class="seen ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-blue-50 border-blue-100 hover:opacity-80'">
@@ -246,17 +292,52 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2">
-                                                <p class="text-sm font-medium text-slate-900">{{ $notif->data['title'] ?? 'Job Completed' }}</p>
+                                                <p class="text-sm font-medium text-slate-900" x-text="notif.title || 'Job Completed'"></p>
                                                 <span x-show="seen" class="text-xs text-slate-400 font-medium">Seen</span>
                                             </div>
-                                            <p class="text-xs text-slate-500 mt-1">{{ $notif->data['message'] ?? '' }}</p>
+                                            <p class="text-xs text-slate-500 mt-1" x-text="notif.message"></p>
                                             <p class="text-xs mt-1 font-medium transition-colors" :class="seen ? 'text-slate-400' : 'text-blue-600'">Employee marked as complete</p>
                                         </div>
                                     </div>
                                 </button>
                             </form>
-                        @endforeach
-                    @endif
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="mb-8" x-show="!printbuddyExpanded" x-transition>
+            <div class="flex items-center justify-between mb-4 px-1">
+                <a href="{{ route('owner.chat.index') }}" class="font-bold text-slate-900 text-lg flex items-center gap-2 hover:text-slate-700">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Messages
+                </a>
+                @if($unreadChatCount > 0)
+                    <span class="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ $unreadChatCount }}</span>
+                @else
+                    <span class="bg-slate-300 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
+                @endif
+            </div>
+
+            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                @if($recentChatConversations->isEmpty())
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                        <p class="text-sm text-slate-500">No unread messages</p>
+                    </div>
+                @else
+                    @foreach($recentChatConversations as $conv)
+                        <a href="{{ route('owner.chat.show', $conv) }}" class="block p-3 rounded-xl bg-blue-50 border border-blue-100 hover:opacity-80 transition-colors">
+                            <p class="text-sm font-medium text-slate-900 truncate">{{ $conv->customer->name ?? 'Customer' }}</p>
+                            <p class="text-xs text-slate-500 truncate mt-0.5">
+                                @php $last = $conv->messages->first(); @endphp
+                                {{ $last ? $last->body : 'New conversation' }}
+                            </p>
+                        </a>
+                    @endforeach
                 @endif
             </div>
         </div>
@@ -374,6 +455,30 @@
 </aside>
 
 <script>
+function notificationPanel(initial) {
+    return {
+        open: true,
+        data: initial,
+        loading: false,
+        async refresh() {
+            if (this.loading) return;
+            this.loading = true;
+            try {
+                const res = await fetch('{{ route('owner.notifications.unread') }}', {
+                    headers: { 'Accept': 'application/json' },
+                });
+                if (res.ok) {
+                    this.data = await res.json();
+                }
+            } catch (e) {
+                console.error('Failed to refresh notifications:', e);
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+}
+
 function calendar() {
     return {
         currentYear: null,
