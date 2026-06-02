@@ -221,9 +221,54 @@
                     </svg>
                     <div>
                         <h3 class="font-medium text-green-900">Quote Approved</h3>
-                        <p class="text-sm text-green-700">This quote has been approved and is now your receipt. Your order is being processed.</p>
+                        <p class="text-sm text-green-700">This quote has been approved and is now your receipt.</p>
                     </div>
                 </div>
+            </div>
+
+            <div class="p-6 border-t border-zinc-200">
+                @php
+                    $latestPayment = $quote->payments()->latest()->first();
+                    $hasPending = $latestPayment && $latestPayment->status === \App\Models\Payment::STATUS_PENDING;
+                    $latestVerified = $quote->payments()->where('status', \App\Models\Payment::STATUS_VERIFIED)->latest()->first();
+                @endphp
+
+                @if($quote->isFullyPaid() && $latestVerified)
+                    <div class="flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                        <svg class="w-6 h-6 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <h3 class="font-medium text-emerald-900">Paid in Full</h3>
+                            <p class="text-sm text-emerald-700">Payment of ₱{{ number_format($latestVerified->amount, 2) }} verified on {{ $latestVerified->verified_at->format('M d, Y') }}. Work on your order will begin shortly.</p>
+                        </div>
+                    </div>
+                @elseif($hasPending)
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-6 h-6 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h3 class="font-medium text-amber-900">Payment Submitted</h3>
+                                <p class="text-sm text-amber-700">Awaiting owner verification.</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('customer.payments.show', $latestPayment) }}" class="px-4 py-2 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition">
+                            View Payment Status
+                        </a>
+                    </div>
+                @else
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-medium text-zinc-900">Ready to Pay</h3>
+                            <p class="text-sm text-zinc-600">Pay ₱{{ number_format($quote->total, 2) }} via GCash to confirm your order.</p>
+                        </div>
+                        <a href="{{ route('customer.quotes.pay', $quote) }}" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-sm">
+                            Pay the Quote
+                        </a>
+                    </div>
+                @endif
             </div>
         @endif
     </div>

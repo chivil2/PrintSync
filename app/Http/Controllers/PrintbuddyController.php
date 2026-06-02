@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Inventory;
 use App\Models\PrintbuddyNote;
+use App\Models\PrintingService;
+use App\Models\TechnicalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -191,7 +193,8 @@ Do not include any text, markdown, or code fences outside the JSON.";
                         $toolArgs = is_array($toolItem['args'] ?? null) ? $toolItem['args'] : [];
 
                         if (! array_key_exists($toolName, $availableTools)) {
-                            $toolResults[] = ['tool' => $toolName, 'error' => "Tool does not exist. Available: ".implode(', ', array_keys($availableTools))];
+                            $toolResults[] = ['tool' => $toolName, 'error' => 'Tool does not exist. Available: '.implode(', ', array_keys($availableTools))];
+
                             continue;
                         }
 
@@ -532,7 +535,7 @@ Do not include any text, markdown, or code fences outside the JSON.";
             return ['success' => false, 'error' => 'Missing required fields: name, description, price, service_type'];
         }
 
-        $model = $serviceType === 'technical' ? \App\Models\TechnicalService::class : \App\Models\PrintingService::class;
+        $model = $serviceType === 'technical' ? TechnicalService::class : PrintingService::class;
 
         $id = $model::create([
             'name' => $name,
@@ -556,20 +559,30 @@ Do not include any text, markdown, or code fences outside the JSON.";
         }
 
         $updateData = [];
-        if (isset($args['name'])) $updateData['name'] = $args['name'];
-        if (isset($args['description'])) $updateData['description'] = $args['description'];
-        if (isset($args['price'])) $updateData['price'] = $args['price'];
-        if (isset($args['production_time'])) $updateData['production_time'] = $args['production_time'];
-        if (isset($args['is_active'])) $updateData['is_active'] = $args['is_active'];
+        if (isset($args['name'])) {
+            $updateData['name'] = $args['name'];
+        }
+        if (isset($args['description'])) {
+            $updateData['description'] = $args['description'];
+        }
+        if (isset($args['price'])) {
+            $updateData['price'] = $args['price'];
+        }
+        if (isset($args['production_time'])) {
+            $updateData['production_time'] = $args['production_time'];
+        }
+        if (isset($args['is_active'])) {
+            $updateData['is_active'] = $args['is_active'];
+        }
 
         if (empty($updateData)) {
             return ['success' => false, 'error' => 'No fields to update'];
         }
 
         // Try printing_services first, then technical_services
-        $service = \App\Models\PrintingService::find($id);
+        $service = PrintingService::find($id);
         if (! $service) {
-            $service = \App\Models\TechnicalService::find($id);
+            $service = TechnicalService::find($id);
         }
 
         if (! $service) {
@@ -591,9 +604,9 @@ Do not include any text, markdown, or code fences outside the JSON.";
             return ['success' => false, 'error' => 'Service ID is required'];
         }
 
-        $deleted = \App\Models\PrintingService::destroy($id);
+        $deleted = PrintingService::destroy($id);
         if (! $deleted) {
-            $deleted = \App\Models\TechnicalService::destroy($id);
+            $deleted = TechnicalService::destroy($id);
         }
 
         if ($deleted) {
@@ -647,16 +660,36 @@ Do not include any text, markdown, or code fences outside the JSON.";
             return ['success' => false, 'error' => 'Inventory item not found'];
         }
 
-        if (isset($args['name'])) $inventory->name = $args['name'];
-        if (isset($args['sku'])) $inventory->sku = $args['sku'];
-        if (isset($args['description'])) $inventory->description = $args['description'];
-        if (isset($args['quantity'])) $inventory->quantity = $args['quantity'];
-        if (isset($args['min_stock_level'])) $inventory->min_stock_level = $args['min_stock_level'];
-        if (isset($args['unit_price'])) $inventory->unit_price = $args['unit_price'];
-        if (isset($args['unit'])) $inventory->unit = $args['unit'];
-        if (isset($args['supplier'])) $inventory->supplier = $args['supplier'];
-        if (isset($args['location'])) $inventory->location = $args['location'];
-        if (isset($args['status'])) $inventory->status = $args['status'];
+        if (isset($args['name'])) {
+            $inventory->name = $args['name'];
+        }
+        if (isset($args['sku'])) {
+            $inventory->sku = $args['sku'];
+        }
+        if (isset($args['description'])) {
+            $inventory->description = $args['description'];
+        }
+        if (isset($args['quantity'])) {
+            $inventory->quantity = $args['quantity'];
+        }
+        if (isset($args['min_stock_level'])) {
+            $inventory->min_stock_level = $args['min_stock_level'];
+        }
+        if (isset($args['unit_price'])) {
+            $inventory->unit_price = $args['unit_price'];
+        }
+        if (isset($args['unit'])) {
+            $inventory->unit = $args['unit'];
+        }
+        if (isset($args['supplier'])) {
+            $inventory->supplier = $args['supplier'];
+        }
+        if (isset($args['location'])) {
+            $inventory->location = $args['location'];
+        }
+        if (isset($args['status'])) {
+            $inventory->status = $args['status'];
+        }
 
         $inventory->save();
 

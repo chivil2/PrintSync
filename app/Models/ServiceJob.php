@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(['name', 'description', 'type', 'customer_id', 'employee_id', 'service_id', 'service_type', 'status', 'priority', 'started_at', 'completed_at', 'deadline', 'notes', 'request_invoice', 'invoice_path'])]
+#[Fillable(['name', 'description', 'type', 'customer_id', 'employee_id', 'service_id', 'service_type', 'status', 'priority', 'started_at', 'completed_at', 'deadline', 'notes', 'technical_details', 'request_invoice', 'invoice_path'])]
 class ServiceJob extends Model
 {
     /** @use HasFactory<ServiceJobFactory> */
@@ -22,6 +22,7 @@ class ServiceJob extends Model
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
             'deadline' => 'datetime',
+            'technical_details' => 'array',
         ];
     }
 

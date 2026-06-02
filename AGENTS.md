@@ -1,3 +1,16 @@
+# Project Context
+
+This is a mockup site for a school project. Keep implementations simple and not overly complex:
+- Prefer straightforward, easy-to-understand code over clever or over-engineered solutions.
+- Avoid introducing complex infrastructure (queues, events, complex service layers, etc.) unless absolutely necessary.
+- Focus on the visible/UI behavior; backend logic can be minimal or stubbed where appropriate.
+- Do not over-build. A working simple solution is better than an elaborate one.
+
+## UI Color Guidelines
+- For **notifications, highlights, stats, banners, status pills, and accent text**, use only **light, pastel colors** (Tailwind `*-50`, `*-100`, and at most `*-200`/`*-300` for backgrounds, with `*-300`/`*-400` for icons or short accent text).
+- Do **not** use dark Tailwind color shades (`*-500` through `*-900`) for these elements — they read as heavy and overdone against the white UI.
+- Dark shades are still fine for body copy (`text-slate-700`/`text-slate-900`) and for primary action buttons where strong contrast is needed.
+
 <laravel-boost-guidelines>
 === foundation rules ===
 

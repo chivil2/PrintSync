@@ -24,6 +24,18 @@
                                         <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$quote->status] ?? 'bg-slate-200 text-slate-700' }}">
                                             {{ str_replace('_', ' ', ucfirst($quote->status)) }}
                                         </span>
+                                        @if(in_array($quote->status, ['accepted', 'sent']))
+                                            @php
+                                                $paymentBadge = match (true) {
+                                                    $quote->payment_status === 'paid' => ['bg-emerald-100 text-emerald-700', 'Paid'],
+                                                    $quote->hasPendingPayment() => ['bg-amber-100 text-amber-700', 'Pending Verification'],
+                                                    default => ['bg-rose-100 text-rose-700', 'Unpaid'],
+                                                };
+                                            @endphp
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ $paymentBadge[0] }}">
+                                                {{ $paymentBadge[1] }}
+                                            </span>
+                                        @endif
                                     </div>
                                     <p class="text-sm text-slate-600">
                                         Customer: {{ $quote->customer->first_name ?? 'N/A' }} {{ $quote->customer->last_name ?? '' }}

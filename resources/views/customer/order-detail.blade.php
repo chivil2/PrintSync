@@ -156,6 +156,55 @@
                 </div>
             @endif
 
+            @if($order->type === 'technical' && $order->technical_details)
+                @php
+                    $tech = $order->technical_details;
+                    $priorityLabels = [
+                        'standard' => ['Standard', 'bg-sky-100 text-sky-700'],
+                        'urgent' => ['Urgent', 'bg-amber-100 text-amber-700'],
+                        'emergency' => ['Emergency', 'bg-rose-100 text-rose-700'],
+                    ];
+                    $contactLabels = [
+                        'phone' => 'Phone call',
+                        'email' => 'Email',
+                        'sms' => 'SMS / Text',
+                    ];
+                    $priorityInfo = $priorityLabels[$tech['priority'] ?? ''] ?? ['N/A', 'bg-gray-100 text-gray-700'];
+                @endphp
+                <div class="mb-6 pb-6 border-b border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Technical Support Details</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $priorityInfo[1] }}">
+                            {{ $priorityInfo[0] }}
+                        </span>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Problem</span>
+                            <p class="text-gray-700 mt-1 leading-relaxed whitespace-pre-line">{{ $tech['problem_description'] ?? '—' }}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Preferred Date &amp; Time</span>
+                                <p class="text-gray-700 font-medium mt-1">
+                                    @if(!empty($tech['preferred_at']))
+                                        {{ \Carbon\Carbon::parse($tech['preferred_at'])->format('M d, Y g:i A') }}
+                                    @else
+                                        —
+                                    @endif
+                                </p>
+                            </div>
+                            <div>
+                                <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Contact Preference</span>
+                                <p class="text-gray-700 font-medium mt-1">
+                                    {{ $contactLabels[$tech['contact_preference'] ?? ''] ?? '—' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             @if($order->notes)
                 <div class="mb-6 pb-6 border-b border-gray-100">
                     <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Notes</span>

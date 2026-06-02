@@ -48,4 +48,19 @@ class Quote extends Model
     {
         return $this->belongsTo(ServiceJob::class);
     }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function isFullyPaid(): bool
+    {
+        return $this->payment_status === 'paid';
+    }
+
+    public function hasPendingPayment(): bool
+    {
+        return $this->payments()->where('status', Payment::STATUS_PENDING)->exists();
+    }
 }

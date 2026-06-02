@@ -13,9 +13,9 @@
         ->take(5)
         ->get();
 
-    // Unread DB notifications: negotiation requests & job completions
+    // Unread DB notifications: negotiation requests, job completions, payment submissions
     $unreadDbNotifications = $user->unreadNotifications
-        ->whereIn('data.event_type', ['quote_negotiation', 'job_completed'])
+        ->whereIn('data.event_type', ['quote_negotiation', 'job_completed', 'service_order_created', 'payment_submitted'])
         ->take(5);
 
     $notificationCount = $acceptedQuotesNeedingAssignment->count() + $unreadDbNotifications->count();
@@ -53,10 +53,10 @@
     ];
 @endphp
 
-<div x-data="{ printbuddyExpanded: false, jobsByDate: @js(collect($jobsByDate)->map(fn($jobs) => $jobs->map(fn($j) => ['id' => $j->id, 'name' => $j->name, 'priority' => $j->priority, 'status' => $j->status, 'customer_name' => $j->customer->name ?? 'Unknown', 'deadline_formatted' => $j->deadline->format('M d, Y')])->values())->toArray()), hoverDay: null, activeDay: null, ...calendar() }" x-init="initCalendar({{ now()->year }}, {{ now()->month }})">
+<div x-data="{ printbuddyExpanded: false, notificationsOpen: true, jobsByDate: @js(collect($jobsByDate)->map(fn($jobs) => $jobs->map(fn($j) => ['id' => $j->id, 'name' => $j->name, 'priority' => $j->priority, 'status' => $j->status, 'customer_name' => $j->customer->name ?? 'Unknown', 'deadline_formatted' => $j->deadline->format('M d, Y')])->values())->toArray()), hoverDay: null, activeDay: null, ...calendar() }" x-init="initCalendar({{ now()->year }}, {{ now()->month }})">
 
 <aside class="w-[380px] p-4 flex-shrink-0 hidden xl:block sticky top-4 self-start">
-    <div class="bg-white rounded-lg h-[calc(100vh-2rem)] p-6 shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+    <div class="bg-white rounded-lg h-[calc(100vh-2rem)] p-6 shadow-sm border border-slate-200 flex flex-col overflow-y-auto">
 
         <div class="flex items-center gap-3 mb-8" x-show="!printbuddyExpanded" x-transition>
             @if($user->profile_photo_path)
@@ -75,11 +75,21 @@
         <!-- Notifications Section -->
         <div class="mb-8" x-show="!printbuddyExpanded" x-transition>
             <div class="flex items-center justify-between mb-4 px-1">
-                <div class="font-bold text-slate-900 text-lg flex items-center gap-2">
+                <div
+                    role="button"
+                    tabindex="0"
+                    @click="notificationsOpen = !notificationsOpen"
+                    @keydown.enter.prevent="notificationsOpen = !notificationsOpen"
+                    @keydown.space.prevent="notificationsOpen = !notificationsOpen"
+                    class="font-bold text-slate-900 text-lg flex items-center gap-2 cursor-pointer select-none"
+                >
                     <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     Notifications
+                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': notificationsOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
                 </div>
                 @if($notificationCount > 0)
                     <a href="{{ route('owner.jobs') }}" class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full hover:bg-orange-600 transition-colors cursor-pointer">
@@ -90,7 +100,7 @@
                 @endif
             </div>
 
-            <div class="space-y-3">
+            <div class="space-y-3 max-h-96 overflow-y-auto pr-1" x-show="notificationsOpen" x-transition.opacity.duration.150ms>
                 @if($notificationCount === 0)
                     <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 text-center">
                         <p class="text-sm text-slate-500">No pending notifications</p>
@@ -121,7 +131,71 @@
                     @php
                         $negotiationNotifs = $unreadDbNotifications->where('data.event_type', 'quote_negotiation');
                         $jobCompletedNotifs = $unreadDbNotifications->where('data.event_type', 'job_completed');
+                        $newOrderNotifs = $unreadDbNotifications->where('data.event_type', 'service_order_created');
+                        $paymentNotifs = $unreadDbNotifications->where('data.event_type', 'payment_submitted');
                     @endphp
+
+                    {{-- Payment submitted by customer --}}
+                    @if($paymentNotifs->count() > 0)
+                        <div class="text-xs font-medium text-slate-500 mb-1 {{ $acceptedQuotesNeedingAssignment->count() > 0 ? 'mt-3' : '' }}">Payments received</div>
+                        @foreach($paymentNotifs as $notif)
+                            <form method="POST" action="{{ route('owner.notifications.read', $notif->id) }}"
+                                  x-data="{ seen: false }"
+                                  @submit.prevent="seen = true; $el.submit()">
+                                @csrf
+                                <button type="submit" class="w-full text-left p-3 rounded-xl border transition-all"
+                                        :class="seen ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-emerald-50 border-emerald-100 hover:opacity-80'">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors"
+                                             :class="seen ? 'bg-slate-400' : 'bg-emerald-500'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <p class="text-sm font-medium text-slate-900">{{ $notif->data['title'] ?? 'Payment Received' }}</p>
+                                                <span x-show="seen" class="text-xs text-slate-400 font-medium">Seen</span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 mt-1">{{ $notif->data['message'] ?? '' }}</p>
+                                            <p class="text-xs mt-1 font-medium transition-colors" :class="seen ? 'text-slate-400' : 'text-emerald-600'">Customer has sent a payment</p>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        @endforeach
+                    @endif
+
+                    {{-- New service orders from customers --}}
+                    @if($newOrderNotifs->count() > 0)
+                        <div class="text-xs font-medium text-slate-500 mb-1 {{ $acceptedQuotesNeedingAssignment->count() > 0 ? 'mt-3' : '' }}">New orders</div>
+                        @foreach($newOrderNotifs as $notif)
+                            <form method="POST" action="{{ route('owner.notifications.read', $notif->id) }}"
+                                  x-data="{ seen: false }"
+                                  @submit.prevent="seen = true; $el.submit()">
+                                @csrf
+                                <button type="submit" class="w-full text-left p-3 rounded-xl border transition-all"
+                                        :class="seen ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-indigo-50 border-indigo-100 hover:opacity-80'">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors"
+                                             :class="seen ? 'bg-slate-400' : 'bg-indigo-500'">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <p class="text-sm font-medium text-slate-900">{{ $notif->data['title'] ?? 'New Service Order' }}</p>
+                                                <span x-show="seen" class="text-xs text-slate-400 font-medium">Seen</span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 mt-1">{{ $notif->data['message'] ?? '' }}</p>
+                                            <p class="text-xs mt-1 font-medium transition-colors" :class="seen ? 'text-slate-400' : 'text-indigo-600'">Customer submitted a new order</p>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        @endforeach
+                    @endif
 
                     @if($negotiationNotifs->count() > 0)
                         <div class="text-xs font-medium text-slate-500 mb-1 {{ $acceptedQuotesNeedingAssignment->count() > 0 ? 'mt-3' : '' }}">Counter-offers</div>

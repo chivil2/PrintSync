@@ -1,5 +1,6 @@
 @php
     $employees = \App\Models\User::role('employee')->where('employee_status', 'active')->latest()->take(5)->get();
+    $pendingPaymentCount = \App\Models\Payment::where('status', \App\Models\Payment::STATUS_PENDING)->count();
 @endphp
 
 <aside class="sticky top-0 w-[280px] bg-white border-r border-slate-200 flex flex-col h-screen shadow-lg overflow-y-auto" id="sidebar">
@@ -50,6 +51,18 @@
                     <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
                 <span class="font-medium text-sm whitespace-nowrap">Orders</span>
+            </a>
+
+            <a href="{{ route('owner.payments') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.payments*') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                <span class="font-medium text-sm whitespace-nowrap">Payments</span>
+                @if($pendingPaymentCount > 0)
+                    <span class="ml-auto px-2 py-0.5 text-xs font-semibold rounded-full {{ request()->routeIs('owner.payments*') ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700' }}">
+                        {{ $pendingPaymentCount }}
+                    </span>
+                @endif
             </a>
 
             <a href="{{ route('owner.reports') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.reports') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">

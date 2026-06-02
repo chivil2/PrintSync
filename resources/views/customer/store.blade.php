@@ -196,7 +196,7 @@
                     <template x-for="service in paginatedServices" :key="service.id">
                         <div
                             class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all duration-300 cursor-pointer"
-                            @click="$dispatch('open-modal', { service: service, type: service.type })"
+                            @click="service.type === 'technical' ? $dispatch('open-tech-modal', { service: service, type: service.type }) : $dispatch('open-modal', { service: service, type: service.type })"
                         >
                             <!-- Image Area -->
                             <div class="relative h-52 flex items-center justify-center bg-gray-100">
@@ -231,7 +231,7 @@
                                 <div class="flex gap-2 mt-4">
 
                                     <button
-                                        @click.stop="$dispatch('open-modal', { service: service, type: service.type })"
+                                        @click.stop="service.type === 'technical' ? $dispatch('open-tech-modal', { service: service, type: service.type }) : $dispatch('open-modal', { service: service, type: service.type })"
                                         class="px-4 py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-700 hover:border-[#E8743B] hover:text-[#E8743B] transition-all"
                                         x-text="service.type === 'printing' ? 'Order' : 'Book'"
                                     ></button>
@@ -299,6 +299,7 @@
     </div>
 </div>
 
-<!-- Service Modal Component -->
+<!-- Service Modal Components -->
 <x-service-modal />
+<x-technical-service-modal />
 @endsection

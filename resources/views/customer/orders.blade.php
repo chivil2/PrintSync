@@ -20,6 +20,9 @@
             'invoice_path' => $order->invoice_path,
             'line_items_count' => $order->quote ? $order->quote->lineItems->count() : 0,
             'quote_total' => $order->quote?->total,
+            'tech_priority' => $order->technical_details['priority'] ?? null,
+            'tech_preferred_at' => isset($order->technical_details['preferred_at']) ? \Carbon\Carbon::parse($order->technical_details['preferred_at'])->format('M d, Y g:i A') : null,
+            'tech_contact' => $order->technical_details['contact_preference'] ?? null,
         ];
     })->toJson() }},
     get filteredOrders() {
@@ -66,6 +69,30 @@
         const year = new Date().getFullYear();
         const paddedId = String(id).padStart(3, '0');
         return `ORD-${year}-${paddedId}`;
+    },
+    getPriorityLabel(priority) {
+        const labels = {
+            'standard': 'Standard',
+            'urgent': 'Urgent',
+            'emergency': 'Emergency',
+        };
+        return labels[priority] || priority;
+    },
+    getPriorityColor(priority) {
+        const colors = {
+            'standard': 'bg-sky-100 text-sky-700',
+            'urgent': 'bg-amber-100 text-amber-700',
+            'emergency': 'bg-rose-100 text-rose-700',
+        };
+        return colors[priority] || 'bg-gray-100 text-gray-700';
+    },
+    getContactLabel(contact) {
+        const labels = {
+            'phone': 'Phone',
+            'email': 'Email',
+            'sms': 'SMS',
+        };
+        return labels[contact] || contact;
     }
 }">
     <!-- Header -->
@@ -216,6 +243,9 @@
                             <span class="px-2.5 py-1 rounded-md text-xs font-bold"
                                 :class="getStatusColor(order.status)"
                                 x-text="getStatusLabel(order.status)"></span>
+                            <span x-show="order.type === 'technical' && order.tech_priority" class="px-2.5 py-1 rounded-md text-xs font-bold"
+                                :class="getPriorityColor(order.tech_priority)"
+                                x-text="'Priority: ' + getPriorityLabel(order.tech_priority)"></span>
                             <span class="text-gray-300 text-sm">•</span>
                             <span class="text-gray-500 text-sm font-semibold" x-text="getOrderId(order.id)"></span>
                             <span x-show="order.payment_status" class="px-2.5 py-1 rounded-md text-xs font-bold"
@@ -227,6 +257,8 @@
                             <span>Service: <span class="font-bold text-gray-700 text-base" x-text="order.type"></span></span>
                             <span>Requested: <span class="font-semibold text-gray-600" x-text="order.created_at"></span></span>
                             <span x-show="order.deadline">Deadline: <span class="font-semibold text-gray-600" x-text="order.deadline"></span></span>
+                            <span x-show="order.type === 'technical' && order.tech_preferred_at">Preferred: <span class="font-semibold text-gray-600" x-text="order.tech_preferred_at"></span></span>
+                            <span x-show="order.type === 'technical' && order.tech_contact">Contact: <span class="font-semibold text-gray-600" x-text="getContactLabel(order.tech_contact)"></span></span>
                             <span x-show="order.employee">Assigned to: <span class="font-semibold text-gray-600" x-text="order.employee"></span></span>
                         </div>
                     </div>

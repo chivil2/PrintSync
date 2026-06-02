@@ -285,13 +285,15 @@ class OwnerController extends Controller
      */
     public function showJob(ServiceJob $job)
     {
-        $job->load(['customer', 'employee', 'service', 'quote', 'quote.lineItems']);
+        $job->load(['customer', 'employee', 'service', 'quote', 'quote.lineItems', 'quote.payments']);
 
         $employees = User::role('employee')
             ->where('employee_status', 'active')
             ->get();
 
-        return view('owner.job-detail', compact('job', 'employees'));
+        $payment = $job->quote?->payments()->latest()->first();
+
+        return view('owner.job-detail', compact('job', 'employees', 'payment'));
     }
 
     /**

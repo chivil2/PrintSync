@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Concerns\ProfileValidationRules;
+use App\Models\Payment;
 use App\Models\PrintingService;
 use App\Models\Quote;
 use App\Models\QuoteLineItem;
 use App\Models\ServiceJob;
 use App\Models\TechnicalService;
+use App\Models\User;
+use App\Notifications\ServiceOrderCreatedNotification;
 use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +35,15 @@ class CustomerController extends Controller
 
         $recentOrders = $orders->take(5);
 
+        $toPayQuotes = Quote::where('customer_id', auth()->id())
+            ->where('status', 'accepted')
+            ->where('payment_status', '!=', 'paid')
+            ->whereDoesntHave('payments', fn ($p) => $p->where('status', Payment::STATUS_PENDING))
+            ->latest()
+            ->get();
+        $toPayCount = $toPayQuotes->count();
+        $toPayTotal = $toPayQuotes->sum('total');
+
         $customer = auth()->user();
 
         return view('customer.dashboard', [
@@ -41,6 +53,9 @@ class CustomerController extends Controller
             'totalSpent' => $totalSpent,
             'recentOrders' => $recentOrders,
             'customer' => $customer,
+            'toPayCount' => $toPayCount,
+            'toPayTotal' => $toPayTotal,
+            'toPayQuotes' => $toPayQuotes,
         ]);
     }
 
@@ -67,20 +82,32 @@ class CustomerController extends Controller
 
     public function requestService(Request $request)
     {
-        $validated = $request->validate([
+        $baseRules = [
             'service_id' => 'required|integer',
             'service_type' => 'required|in:printing,technical',
-            'quantity' => 'required|integer|min:1',
-            'deadline' => 'required|date|after_or_equal:today',
             'notes' => 'nullable|string|max:1000',
             'request_invoice' => 'nullable|boolean',
-        ]);
+        ];
+
+        if ($request->input('service_type') === 'technical') {
+            $validated = $request->validate(array_merge($baseRules, [
+                'problem_description' => 'required|string|min:20|max:1000',
+                'priority' => 'required|in:standard,urgent,emergency',
+                'preferred_at' => 'required|date|after:today',
+                'contact_preference' => 'required|in:phone,email,sms',
+            ]));
+        } else {
+            $validated = $request->validate(array_merge($baseRules, [
+                'quantity' => 'required|integer|min:1',
+                'deadline' => 'required|date|after_or_equal:today',
+            ]));
+        }
 
         $service = $validated['service_type'] === 'printing'
             ? PrintingService::findOrFail($validated['service_id'])
             : TechnicalService::findOrFail($validated['service_id']);
 
-        $serviceJob = ServiceJob::create([
+        $jobPayload = [
             'name' => $service->name,
             'description' => $service->description,
             'type' => $validated['service_type'],
@@ -88,13 +115,27 @@ class CustomerController extends Controller
             'service_id' => $service->id,
             'service_type' => $validated['service_type'] === 'printing' ? 'printing_service' : 'technical_service',
             'status' => 'pending',
-            'deadline' => $validated['deadline'],
             'notes' => $validated['notes'] ?? null,
             'request_invoice' => isset($validated['request_invoice']),
-        ]);
+        ];
 
-        $quantity = $validated['quantity'];
-        $subtotal = $service->price * $quantity;
+        if ($validated['service_type'] === 'printing') {
+            $jobPayload['deadline'] = $validated['deadline'];
+            $jobPayload['quantity'] = $validated['quantity'];
+            $subtotal = $service->price * $validated['quantity'];
+        } else {
+            $jobPayload['technical_details'] = [
+                'problem_description' => $validated['problem_description'],
+                'priority' => $validated['priority'],
+                'preferred_at' => $validated['preferred_at'],
+                'contact_preference' => $validated['contact_preference'],
+            ];
+            $subtotal = $service->price;
+        }
+
+        $serviceJob = ServiceJob::create($jobPayload);
+
+        User::role('owner')->first()?->notify(new ServiceOrderCreatedNotification($serviceJob));
 
         // Auto-generate quote
         $quoteNumber = 'QT-'.date('Ymd').'-'.str_pad((Quote::count() + 1), 4, '0', STR_PAD_LEFT);
@@ -113,8 +154,8 @@ class CustomerController extends Controller
             'quote_id' => $quote->id,
             'item_name' => $service->name,
             'description' => $service->description,
-            'quantity' => $quantity,
-            'unit_price' => $service->price,
+            'quantity' => 1,
+            'unit_price' => $subtotal,
             'line_total' => $subtotal,
         ]);
 

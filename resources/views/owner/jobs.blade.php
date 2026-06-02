@@ -20,27 +20,27 @@
         </div>
 
         <!-- Section 1: Pending Quote Approval -->
-        <div class="bg-amber-50 rounded-lg p-5 sm:p-6 shadow-sm border border-amber-200 mb-6">
+        <div class="bg-yellow-50 rounded-lg p-5 sm:p-6 shadow-sm border border-yellow-200 mb-6">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div>
-                        <h3 class="text-xs font-semibold text-amber-800 uppercase tracking-wider">Pending Quote Approval</h3>
-                        <p class="text-sm text-amber-600">These orders are waiting for customer approval</p>
+                        <h3 class="text-xs font-semibold text-yellow-500 uppercase tracking-wider">Pending Quote Approval</h3>
+                        <p class="text-sm text-yellow-400">These orders are waiting for customer approval</p>
                     </div>
                 </div>
-                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">{{ $pendingQuoteJobs->count() }} orders awaiting approval</span>
+                <span class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-500">{{ $pendingQuoteJobs->count() }} orders awaiting approval</span>
             </div>
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 @foreach($pendingQuoteJobs as $job)
-                    <div class="rounded-lg border border-amber-200 bg-white p-4">
+                    <div class="rounded-lg border border-yellow-200 bg-white p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <p class="font-semibold text-slate-900 truncate">{{ $job->customer->first_name ?? 'N/A' }} {{ $job->customer->last_name ?? '' }}</p>
                                 <p class="text-xs text-slate-500 truncate">{{ ucfirst(str_replace('_', ' ', $job->service_type)) }} · {{ $job->name }}</p>
-                                <p class="text-xs text-amber-600 mt-1">Due {{ $job->deadline ? $job->deadline->format('M d, Y') : 'N/A' }}</p>
+                                <p class="text-xs text-yellow-500 mt-1">Due {{ $job->deadline ? $job->deadline->format('M d, Y') : 'N/A' }}</p>
                             </div>
                             @php
                                 $quoteStatusColors = [
@@ -56,12 +56,12 @@
                         <div class="mt-3 flex items-center justify-between gap-3">
                             <div class="text-xs text-slate-600">
                                 @if($job->quote && $job->quote->status === 'draft')
-                                    <span class="block text-amber-600">Review quote & send to customer</span>
+                                    <span class="block text-yellow-500">Review quote & send to customer</span>
                                 @elseif($job->quote && $job->quote->status === 'sent')
                                     <span class="block text-blue-600">Waiting for customer approval</span>
                                 @endif
                             </div>
-                            <a href="{{ route('owner.quotes.view', $job->quote) }}" class="flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-amber-600">
+                            <a href="{{ route('owner.quotes.view', $job->quote) }}" class="flex items-center gap-1 rounded-lg bg-yellow-300 px-3 py-2 text-xs font-medium text-yellow-900 shadow-sm hover:bg-yellow-400">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -72,7 +72,7 @@
                     </div>
                 @endforeach
                 @if($pendingQuoteJobs->isEmpty())
-                    <div class="col-span-full text-center py-8 text-amber-700 text-sm">No orders pending quote approval</div>
+                    <div class="col-span-full text-center py-8 text-yellow-400 text-sm">No orders pending quote approval</div>
                 @endif
             </div>
         </div>
@@ -100,7 +100,16 @@
                                 <p class="text-xs text-slate-500 truncate">{{ ucfirst(str_replace('_', ' ', $job->service_type)) }} · {{ $job->name }}</p>
                                 <p class="text-xs text-emerald-600 mt-1">Due {{ $job->deadline ? $job->deadline->format('M d, Y') : 'N/A' }}</p>
                             </div>
-                            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium bg-emerald-100 text-emerald-700">Accepted</span>
+                            <div class="flex flex-col items-end gap-1 shrink-0">
+                                <span class="rounded-full px-2 py-0.5 text-[11px] font-medium bg-emerald-100 text-emerald-700">Accepted</span>
+                                @if($job->quote)
+                                    @if($job->quote->payment_status === 'paid')
+                                        <span class="rounded-full px-2 py-0.5 text-[11px] font-medium bg-emerald-100 text-emerald-700">💰 Paid</span>
+                                    @else
+                                        <span class="rounded-full px-2 py-0.5 text-[11px] font-medium bg-zinc-100 text-zinc-600">⏳ Unpaid</span>
+                                    @endif
+                                @endif
+                            </div>
                         </div>
                         <div class="mt-3 flex items-center justify-between gap-3">
                             <div class="text-xs text-slate-600">
@@ -173,7 +182,7 @@
                     @foreach($employees as $employee)
                         <?php
                             $empJobs = $jobs->filter(function($job) use ($employee) {
-                                return $job->employee_id === $employee->id;
+                                return $job->employee_id === $employee->id && $job->status !== 'completed';
                             });
                         ?>
                         <div class="border border-slate-200 rounded-lg p-4"

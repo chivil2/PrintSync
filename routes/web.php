@@ -6,6 +6,7 @@ use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PrintbuddyController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ReportsController;
@@ -83,6 +84,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('quotes/{quote}/reject', [QuoteController::class, 'reject'])->name('quotes.reject');
         Route::post('quotes/{quote}/negotiate', [QuoteController::class, 'negotiate'])->name('quotes.negotiate');
         Route::post('quotes/{quote}/cancel', [QuoteController::class, 'cancelOrder'])->name('quotes.cancel');
+
+        Route::get('quotes/{quote}/pay', [PaymentController::class, 'show'])->name('quotes.pay');
+        Route::post('quotes/{quote}/payments', [PaymentController::class, 'store'])->name('quotes.payments.store');
+        Route::get('payments/{payment}', [PaymentController::class, 'showPayment'])->name('payments.show');
     });
 
     Route::middleware(['employee'])->prefix('employee')->name('employee.')->group(function () {
@@ -123,6 +128,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('services/{id}/{serviceType}', [ServiceController::class, 'update'])->name('services.update');
         Route::delete('services/{id}/{serviceType}', [ServiceController::class, 'destroy'])->name('services.destroy');
         Route::get('reports', [ReportsController::class, 'index'])->name('reports');
+        Route::get('payments', [PaymentController::class, 'ownerIndex'])->name('payments');
+        Route::post('payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
+        Route::post('payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
         Route::get('printbuddy', [PrintbuddyController::class, 'index'])->name('printbuddy');
         Route::post('printbuddy/notes', [PrintbuddyController::class, 'storeNote'])->name('printbuddy.notes.store');
         Route::delete('printbuddy/notes/{note}', [PrintbuddyController::class, 'destroyNote'])->name('printbuddy.notes.destroy');

@@ -329,9 +329,11 @@ class QuoteController extends Controller
      */
     public function ownerView(Quote $quote)
     {
-        $quote->load(['customer', 'serviceJob', 'lineItems']);
+        $quote->load(['customer', 'serviceJob', 'lineItems', 'payments']);
 
-        return view('owner.quote-view', compact('quote'));
+        $payment = $quote->payments()->latest()->first();
+
+        return view('owner.quote-view', compact('quote', 'payment'));
     }
 
     /**

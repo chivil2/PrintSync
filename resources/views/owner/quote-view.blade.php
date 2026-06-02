@@ -64,6 +64,18 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $statusColors[$quote->status] ?? 'bg-slate-100 text-slate-700' }}">
                                 {{ str_replace('_', ' ', ucfirst($quote->status)) }}
                             </span>
+                            @if(in_array($quote->status, ['accepted', 'sent']))
+                                @php
+                                    $paymentBadge = match (true) {
+                                        $quote->payment_status === 'paid' => ['bg-emerald-100 text-emerald-700', 'Paid'],
+                                        $quote->hasPendingPayment() => ['bg-amber-100 text-amber-700', 'Pending Verification'],
+                                        default => ['bg-rose-100 text-rose-700', 'Unpaid'],
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $paymentBadge[0] }}">
+                                    {{ $paymentBadge[1] }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -203,7 +215,7 @@
                         <a href="{{ route('owner.quotes') }}" class="px-6 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-colors duration-200 cursor-pointer">
                             Cancel
                         </a>
-                        <form action="{{ route('owner.quotes.approve', $quote) }}" method="POST" class="inline">
+                        <form action="{{ route('owner.quotes.approve', $quote) }}" method="POST" class="inline" x-show="!parseFloat(adjustment)">
                             @csrf
                             <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +250,7 @@
                                     Accept Counter-Offer & Resend
                                 </button>
                             </form>
-                            <form action="{{ route('owner.quotes.approve', $quote) }}" method="POST" class="inline">
+                            <form action="{{ route('owner.quotes.approve', $quote) }}" method="POST" class="inline" x-show="!parseFloat(adjustment)">
                                 @csrf
                                 <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 cursor-pointer flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,6 +290,146 @@
                     @endif
                 </div>
             </div>
+
+            @if($payment)
+                <div class="mb-8">
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-slate-900">Payment Details</h2>
+                                <p class="text-sm text-slate-500 mt-1">GCash payment submitted for this quote</p>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                {{ match($payment->status) {
+                                    'pending_verification' => 'bg-amber-100 text-amber-700',
+                                    'verified' => 'bg-emerald-100 text-emerald-700',
+                                    'rejected' => 'bg-rose-100 text-rose-700',
+                                    default => 'bg-slate-100 text-slate-600',
+                                } }}">
+                                {{ match($payment->status) {
+                                    'pending_verification' => 'Pending Verification',
+                                    'verified' => 'Paid',
+                                    'rejected' => 'Rejected',
+                                    default => ucfirst(str_replace('_', ' ', $payment->status)),
+                                } }}
+                            </span>
+                        </div>
+                        <div class="p-6">
+                            @if($payment->status === 'pending_verification')
+                                <div class="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-amber-900">Customer has sent a payment</p>
+                                        <p class="text-xs text-amber-700 mt-1">Verify the GCash reference before assigning the job to an employee.</p>
+                                    </div>
+                                </div>
+                            @elseif($payment->status === 'verified')
+                                <div class="mb-5 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-emerald-900">Payment verified</p>
+                                        <p class="text-xs text-emerald-700 mt-1">This quote is fully paid and ready for production.</p>
+                                    </div>
+                                </div>
+                            @elseif($payment->status === 'rejected')
+                                <div class="mb-5 p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-rose-900">Payment rejected</p>
+                                        @if($payment->rejection_reason)
+                                            <p class="text-xs text-rose-700 mt-1">Reason: {{ $payment->rejection_reason }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Method</p>
+                                    <p class="text-base font-semibold text-slate-900 mt-1">{{ strtoupper($payment->method) }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Amount</p>
+                                    <p class="text-base font-semibold text-slate-900 mt-1">₱{{ number_format($payment->amount, 2) }}</p>
+                                </div>
+                                @if($payment->reference_no)
+                                    <div class="sm:col-span-2">
+                                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">GCash Reference No.</p>
+                                        <p class="text-base font-mono font-semibold text-slate-900 mt-1">{{ $payment->reference_no }}</p>
+                                    </div>
+                                @endif
+                                <div>
+                                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Submitted</p>
+                                    <p class="text-base font-medium text-slate-900 mt-1">{{ $payment->created_at->format('M d, Y H:i') }}</p>
+                                </div>
+                                @if($payment->verified_at)
+                                    <div>
+                                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">{{ $payment->status === 'rejected' ? 'Decided' : 'Verified' }}</p>
+                                        <p class="text-base font-medium text-slate-900 mt-1">{{ $payment->verified_at->format('M d, Y H:i') }}</p>
+                                    </div>
+                                @endif
+                                @if($payment->customer)
+                                    <div>
+                                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Customer</p>
+                                        <p class="text-base font-medium text-slate-900 mt-1">{{ $payment->customer->first_name }} {{ $payment->customer->last_name }}</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            @if($payment->proof_path)
+                                <div class="mt-5 pt-5 border-t border-slate-100">
+                                    <a href="{{ asset('storage/' . $payment->proof_path) }}" target="_blank"
+                                       class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        View payment screenshot
+                                    </a>
+                                </div>
+                            @endif
+
+                            @if($payment->notes)
+                                <div class="mt-5 p-3 bg-slate-50 rounded-lg">
+                                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Customer notes</span>
+                                    <p class="text-sm text-slate-700 mt-1">{{ $payment->notes }}</p>
+                                </div>
+                            @endif
+
+                            @if($payment->status === 'pending_verification')
+                                <div class="mt-5 pt-5 border-t border-slate-100 flex flex-wrap gap-2">
+                                    <form action="{{ route('owner.payments.verify', $payment) }}" method="POST" class="flex-1 min-w-[160px]">
+                                        @csrf
+                                        <button type="submit" class="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Verify Payment
+                                        </button>
+                                    </form>
+                                    <button type="button" onclick="document.getElementById('reject-payment-quote-{{ $payment->id }}').classList.toggle('hidden')"
+                                            class="flex-1 min-w-[160px] px-4 py-2.5 bg-white border border-rose-300 text-rose-700 hover:bg-rose-50 text-sm font-medium rounded-lg transition-colors">
+                                        Reject Payment
+                                    </button>
+                                </div>
+                                <form id="reject-payment-quote-{{ $payment->id }}" action="{{ route('owner.payments.reject', $payment) }}" method="POST" class="hidden mt-3 space-y-2">
+                                    @csrf
+                                    <textarea name="reason" rows="2" required placeholder="Reason for rejection (visible to customer)"
+                                              class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"></textarea>
+                                    <button type="submit" class="w-full px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                        Confirm Rejection
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
