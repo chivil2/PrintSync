@@ -238,15 +238,15 @@
                     <form action="{{ route('owner.printbuddy.api-key') }}" method="POST">
                         @csrf
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">GROQ API Key</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">AI API Key</label>
                             <input 
                                 type="password" 
                                 name="groq_api_key" 
                                 value="{{ auth()->user()->groq_api_key ?? '' }}"
-                                placeholder="Enter your GROQ API key"
+                                placeholder="Enter your AI API key"
                                 class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
-                            <p class="text-xs text-slate-500 mt-1">Get your free API key at <a href="https://console.groq.com" target="_blank" class="text-purple-600 hover:underline">console.groq.com</a></p>
+                            <p class="text-xs text-slate-500 mt-1">Set in <code>.env</code> via <code>AI_PROVIDER</code> — currently using <strong>{{ config('services.ai.provider') }}</strong>.</p>
                         </div>
                         <button type="submit" class="px-4 py-2.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors cursor-pointer">
                             Save API Key

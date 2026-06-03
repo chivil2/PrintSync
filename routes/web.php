@@ -160,7 +160,6 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['api.key'])->prefix('api/printbuddy')->name('printbuddy.')->group(function () {
     Route::get('/services', [PrintbuddyController::class, 'getServices'])->name('services');
     Route::get('/inventory', [PrintbuddyController::class, 'getInventory'])->name('inventory');
-    Route::get('/tools', [PrintbuddyController::class, 'getTools'])->name('tools');
     Route::get('/employees', [PrintbuddyController::class, 'getEmployees'])->name('employees');
     Route::get('/jobs', [PrintbuddyController::class, 'getJobs'])->name('jobs');
     Route::get('/quotes', [PrintbuddyController::class, 'getQuotes'])->name('quotes');

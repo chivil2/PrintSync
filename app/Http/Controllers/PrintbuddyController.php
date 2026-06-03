@@ -16,8 +16,8 @@ class PrintbuddyController extends Controller
     /**
      * Handle incoming chat messages from PrintBuddy.
      *
-     * Uses a JSON-based tool-calling protocol so it works with any Groq model
-     * (not only those that support OpenAI-style function calling). The AI is
+     * Uses a JSON-based tool-calling protocol so it works with any OpenAI-compatible API
+     * (gemini, groq, deepseek, etc.). The AI is
      * instructed to respond with one of:
      *   {"type":"response","message":"..."}
      *   {"type":"tool_call","tool":"<name>","args":{}}
@@ -30,16 +30,18 @@ class PrintbuddyController extends Controller
             'history' => ['nullable', 'array'],
         ]);
 
-        // Use user's custom API key if set, otherwise fall back to config
+        // Resolve provider and API key
+        $provider = config('services.ai.provider', 'groq');
+        $endpoint = config('services.ai.endpoints.'.$provider);
         $userApiKey = auth()->user()->groq_api_key ?? null;
-        $apiKey = $userApiKey ?: config('services.groq.api_key');
-        $model = config('services.groq.model');
+        $apiKey = $userApiKey ?: config("services.{$provider}.api_key");
+        $model = config("services.{$provider}.model");
         $printbuddyApiKey = config('services.printbuddy.api_key');
 
         if (empty($apiKey)) {
             return response()->json([
                 'error' => 'AI service not configured',
-                'message' => 'GROQ API key not set. Please add your API key in Settings.',
+                'message' => 'AI API key not set. Please add your API key in Settings.',
             ], 500);
         }
 
@@ -118,7 +120,7 @@ Do not include any text, markdown, or code fences outside the JSON.";
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer '.$apiKey,
                     'Content-Type' => 'application/json',
-                ])->withoutVerifying()->post('https://api.groq.com/openai/v1/chat/completions', [
+                ])->withoutVerifying()->post($endpoint, [
                     'model' => $model,
                     'messages' => $messages,
                     'temperature' => 0.7,
@@ -126,7 +128,7 @@ Do not include any text, markdown, or code fences outside the JSON.";
                 ]);
 
                 if (! $response->successful()) {
-                    \Log::error('Groq API Error', [
+                    \Log::error('AI API Error', [
                         'status' => $response->status(),
                         'body' => $response->body(),
                     ]);
@@ -353,89 +355,6 @@ Do not include any text, markdown, or code fences outside the JSON.";
 
         return response()->json([
             'inventory' => $inventory,
-        ]);
-    }
-
-    /**
-     * MCP: Get available tools/functions for PrintBuddy.
-     */
-    public function getTools(): JsonResponse
-    {
-        $tools = [
-            [
-                'name' => 'get_services',
-                'description' => 'Get all available printing and technical services with their details',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => (object) [],
-                ],
-            ],
-            [
-                'name' => 'get_inventory',
-                'description' => 'Get all inventory items with their current stock levels and details',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => (object) [],
-                ],
-            ],
-            [
-                'name' => 'get_employees',
-                'description' => 'Get all employees with their status and details',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => (object) [],
-                ],
-            ],
-            [
-                'name' => 'get_jobs',
-                'description' => 'Get all jobs with their current status and details, including the payment_status from the linked quote',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'payment_status' => [
-                            'type' => 'string',
-                            'description' => 'Optional filter. One of: unpaid, partially_paid, paid. Only returns jobs whose linked quote matches.',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'name' => 'get_quotes',
-                'description' => 'Get all quotes with their status, payment_status, and details',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'payment_status' => [
-                            'type' => 'string',
-                            'description' => 'Optional filter. One of: unpaid, partially_paid, paid.',
-                        ],
-                    ],
-                ],
-            ],
-            [
-                'name' => 'add_note',
-                'description' => 'Add a new note for the owner. Parameters: content (required), title (optional)',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'content' => ['type' => 'string', 'description' => 'The note content'],
-                        'title' => ['type' => 'string', 'description' => 'Optional title for the note'],
-                    ],
-                    'required' => ['content'],
-                ],
-            ],
-            [
-                'name' => 'get_notes',
-                'description' => 'Get all notes saved by the owner',
-                'parameters' => [
-                    'type' => 'object',
-                    'properties' => (object) [],
-                ],
-            ],
-        ];
-
-        return response()->json([
-            'tools' => $tools,
         ]);
     }
 

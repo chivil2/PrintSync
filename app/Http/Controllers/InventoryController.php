@@ -11,7 +11,6 @@ class InventoryController extends Controller
     {
         $inventory = Inventory::all();
 
-
         return view('owner.inventory', [
             'inventory' => $inventory,
         ]);

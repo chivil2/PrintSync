@@ -39,9 +39,22 @@ return [
         'api_key' => env('PRINTBUDDY_API_KEY'),
     ],
 
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'groq'),
+        'endpoints' => [
+            'groq' => 'https://api.groq.com/openai/v1/chat/completions',
+            'deepseek' => 'https://api.deepseek.com/v1/chat/completions',
+        ],
+    ],
+
     'groq' => [
         'api_key' => env('GROQ_API_KEY'),
         'model' => env('GROQ_MODEL', 'llama-3.1-8b-instant'),
+    ],
+
+    'deepseek' => [
+        'api_key' => env('DEEPSEEK_API_KEY'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
     ],
 
 ];
