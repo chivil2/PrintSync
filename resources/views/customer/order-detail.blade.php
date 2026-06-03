@@ -279,7 +279,7 @@
 
                     <div class="mt-6 flex gap-3 no-print">
                         @if($order->quote->status === 'sent')
-                            <form method="POST" action="{{ route('customer.quotes.accept', $order->quote) }}" class="flex-1">
+                            <form method="POST" action="{{ route('customer.quotes.approve', $order->quote) }}" class="flex-1">
                                 @csrf
                                 <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
