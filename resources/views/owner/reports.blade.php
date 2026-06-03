@@ -337,6 +337,37 @@
                 </div>
             </div>
 
+            <!-- Extra Stat Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div class="bg-gradient-to-br from-teal-400 to-teal-500 p-5 rounded-3xl card-shadow text-white">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" x-text="salesData.topServices[0] ? formatCurrency(salesData.topServices[0].revenue) : '₱0.00'"></div>
+                            <div class="text-xs text-white/80" x-text="'Top: ' + (salesData.topServices[0]?.service || 'N/A')"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-pink-400 to-pink-500 p-5 rounded-3xl card-shadow text-white">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" x-text="salesData.monthlyTrend.length ? formatCurrency(salesData.monthlyTrend[salesData.monthlyTrend.length - 1].revenue) : '₱0.00'"></div>
+                            <div class="text-xs text-white/80" x-text="salesData.monthlyTrend.length ? salesData.monthlyTrend[salesData.monthlyTrend.length - 1].label : 'This Month'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Charts Row 1 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                 <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
@@ -657,6 +688,37 @@
 
                     // Sales Revenue Charts
                     if (this.$refs.monthlyTrendChart) {
+                        const peakGradient = {
+                            id: 'peakGradient',
+                            beforeDraw(chart) {
+                                const { ctx, chartArea } = chart;
+                                if (!chartArea) return;
+                                const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                                grad.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+                                grad.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
+                                chart.data.datasets[0].backgroundColor = grad;
+                            },
+                            afterDraw(chart) {
+                                const { ctx } = chart;
+                                const meta = chart.getDatasetMeta(0);
+                                if (!meta?.data?.length) return;
+                                const dataset = chart.data.datasets[0].data;
+                                let maxVal = -Infinity, maxIdx = 0;
+                                dataset.forEach((v, i) => { if (v > maxVal) { maxVal = v; maxIdx = i; } });
+                                const point = meta.data[maxIdx];
+                                if (!point) return;
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#10b981';
+                                ctx.fill();
+                                ctx.strokeStyle = '#fff';
+                                ctx.lineWidth = 2;
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                        };
+
                         this.charts.monthlyTrend = new Chart(this.$refs.monthlyTrendChart, {
                             type: 'line',
                             data: {
@@ -665,19 +727,19 @@
                                     {
                                         label: 'Revenue',
                                         data: this.salesData.monthlyTrend.map(d => d.revenue),
-                                        borderColor: '#10b981',
-                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                        borderWidth: 0,
                                         fill: true,
                                         tension: 0.4,
+                                        pointRadius: 0,
+                                        pointHoverRadius: 4,
                                         yAxisID: 'y',
                                     },
                                     {
                                         label: 'Orders',
                                         data: this.salesData.monthlyTrend.map(d => d.orders),
-                                        borderColor: '#3b82f6',
-                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                        fill: true,
-                                        tension: 0.4,
+                                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                        borderRadius: 3,
+                                        type: 'bar',
                                         yAxisID: 'y1',
                                     }
                                 ]
@@ -701,7 +763,8 @@
                                     y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Orders' }, grid: { display: false } },
                                     x: { ticks: { font: { size: 10 } }, grid: { display: false } }
                                 }
-                            }
+                            },
+                            plugins: [peakGradient]
                         });
                     }
 
@@ -714,14 +777,14 @@
                                     {
                                         label: 'Revenue',
                                         data: this.salesData.yearlyTrend.map(d => d.revenue),
-                                        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                        backgroundColor: 'rgba(20, 184, 166, 0.85)',
                                         borderRadius: 6,
                                         yAxisID: 'y',
                                     },
                                     {
                                         label: 'Orders',
                                         data: this.salesData.yearlyTrend.map(d => d.orders),
-                                        backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                                        backgroundColor: 'rgba(139, 92, 246, 0.85)',
                                         borderRadius: 6,
                                         yAxisID: 'y1',
                                     }
@@ -751,31 +814,47 @@
                     }
 
                     if (this.$refs.topServicesChart) {
+                        const centerTotal = {
+                            id: 'centerTotal',
+                            afterDraw(chart) {
+                                const { ctx, chartArea } = chart;
+                                const cx = (chartArea.left + chartArea.right) / 2;
+                                const cy = (chartArea.top + chartArea.bottom) / 2;
+                                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                ctx.save();
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.font = 'bold 16px sans-serif';
+                                ctx.fillStyle = '#0f172a';
+                                ctx.fillText('₱' + new Intl.NumberFormat('en-PH').format(total), cx, cy - 6);
+                                ctx.font = '11px sans-serif';
+                                ctx.fillStyle = '#94a3b8';
+                                ctx.fillText('Total Revenue', cx, cy + 14);
+                                ctx.restore();
+                            }
+                        };
+
                         this.charts.topServices = new Chart(this.$refs.topServicesChart, {
-                            type: 'bar',
+                            type: 'doughnut',
                             data: {
                                 labels: this.salesData.topServices.map(s => s.service),
                                 datasets: [{
-                                    label: 'Revenue',
                                     data: this.salesData.topServices.map(s => s.revenue),
-                                    backgroundColor: 'rgba(99, 102, 241, 0.85)',
-                                    borderRadius: 6,
-                                    maxBarThickness: 30,
+                                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'],
+                                    borderWidth: 0,
+                                    hoverOffset: 8,
                                 }]
                             },
                             options: {
-                                indexAxis: 'y',
                                 responsive: true,
                                 maintainAspectRatio: false,
+                                cutout: '70%',
                                 plugins: {
-                                    legend: { display: false },
-                                    tooltip: { callbacks: { label: (ctx) => this.formatCurrency(ctx.parsed.x) } }
-                                },
-                                scales: {
-                                    x: { beginAtZero: true, ticks: { callback: (v) => '₱' + this.formatNumber(v) }, grid: { color: '#f1f5f9' } },
-                                    y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+                                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
+                                    tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + this.formatCurrency(ctx.parsed) } }
                                 }
-                            }
+                            },
+                            plugins: [centerTotal]
                         });
                     }
 
@@ -787,7 +866,7 @@
                                 datasets: [{
                                     label: 'Revenue',
                                     data: this.salesData.topCustomers.map(c => c.revenue),
-                                    backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                                    backgroundColor: 'rgba(244, 114, 182, 0.85)',
                                     borderRadius: 6,
                                     maxBarThickness: 30,
                                 }]
