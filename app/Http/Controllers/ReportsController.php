@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventory;
+use App\Models\Quote;
+use App\Models\ServiceJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -72,6 +74,13 @@ class ReportsController extends Controller
             ->sortByDesc('value')
             ->values();
 
+        // Sales Revenue Data
+        $period = $request->query('period', 'all');
+        $month = $request->query('month');
+        $year = $request->query('year');
+
+        $salesData = $this->getSalesRevenue($period, $month, $year);
+
         return view('owner.reports', [
             'totals' => $totals,
             'statusBreakdown' => $statusBreakdown,
@@ -81,6 +90,10 @@ class ReportsController extends Controller
             'stockLevelDistribution' => $stockLevelDistribution,
             'lowStockItems' => $lowStockItems,
             'supplierBreakdown' => $supplierBreakdown,
+            'salesData' => $salesData,
+            'period' => $period,
+            'month' => $month,
+            'year' => $year,
         ]);
     }
 
@@ -107,5 +120,102 @@ class ReportsController extends Controller
                 'count' => $count,
             ];
         }, $buckets);
+    }
+
+    private function getSalesRevenue(string $period, ?string $month, ?string $year): array
+    {
+        $query = Quote::whereIn('service_job_id', ServiceJob::where('status', 'completed')->pluck('id'));
+
+        // Apply filters
+        if ($period === 'month' && $month && $year) {
+            $query->whereMonth('created_at', $month)->whereYear('created_at', $year);
+        } elseif ($period === 'year' && $year) {
+            $query->whereYear('created_at', $year);
+        }
+        // 'all' period - no filter
+
+        $quotes = $query->with(['serviceJob', 'customer'])->get();
+
+        $totalRevenue = (float) $quotes->sum('total');
+        $totalOrders = $quotes->count();
+        $avgOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
+        $totalCustomers = $quotes->pluck('customer_id')->unique()->count();
+
+        // Monthly trend (last 12 months)
+        $monthlyTrend = Quote::whereIn('service_job_id', ServiceJob::where('status', 'completed')->pluck('id'))
+            ->selectRaw("strftime('%Y', created_at) as year, strftime('%m', created_at) as month, SUM(total) as revenue, COUNT(*) as orders")
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($item) => [
+                'label' => date('M Y', mktime(0, 0, 0, (int) $item->month, 1, (int) $item->year)),
+                'revenue' => (float) $item->revenue,
+                'orders' => $item->orders,
+            ])
+            ->values();
+
+        // Yearly trend
+        $yearlyTrend = Quote::whereIn('service_job_id', ServiceJob::where('status', 'completed')->pluck('id'))
+            ->selectRaw("strftime('%Y', created_at) as year, SUM(total) as revenue, COUNT(*) as orders")
+            ->groupBy('year')
+            ->orderBy('year')
+            ->get()
+            ->map(fn ($item) => [
+                'label' => (string) $item->year,
+                'revenue' => (float) $item->revenue,
+                'orders' => $item->orders,
+            ])
+            ->values();
+
+        // Top services by revenue
+        $topServices = $quotes
+            ->load('serviceJob.service')
+            ->groupBy(fn ($quote) => $quote->serviceJob?->service?->name ?? 'Unknown')
+            ->map(fn ($group, $service) => [
+                'service' => $service,
+                'revenue' => (float) $group->sum('total'),
+                'orders' => $group->count(),
+            ])
+            ->sortByDesc('revenue')
+            ->take(10)
+            ->values();
+
+        // Top customers by revenue
+        $topCustomers = $quotes
+            ->groupBy('customer_id')
+            ->map(fn ($group) => [
+                'customer' => $group->first()->customer?->first_name.' '.$group->first()->customer?->last_name ?? 'Unknown',
+                'revenue' => (float) $group->sum('total'),
+                'orders' => $group->count(),
+            ])
+            ->sortByDesc('revenue')
+            ->take(10)
+            ->values();
+
+        // Top orders by value
+        $topOrders = $quotes
+            ->sortByDesc('total')
+            ->take(10)
+            ->map(fn ($quote) => [
+                'id' => $quote->id,
+                'customer' => $quote->customer?->first_name.' '.$quote->customer?->last_name ?? 'Unknown',
+                'total' => (float) $quote->total,
+                'created_at' => $quote->created_at->format('M d, Y'),
+            ])
+            ->values();
+
+        return [
+            'totalRevenue' => $totalRevenue,
+            'totalOrders' => $totalOrders,
+            'avgOrderValue' => $avgOrderValue,
+            'totalCustomers' => $totalCustomers,
+            'monthlyTrend' => $monthlyTrend,
+            'yearlyTrend' => $yearlyTrend,
+            'topServices' => $topServices,
+            'topCustomers' => $topCustomers,
+            'topOrders' => $topOrders,
+        ];
     }
 }

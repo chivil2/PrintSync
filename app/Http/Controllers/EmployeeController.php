@@ -41,7 +41,7 @@ class EmployeeController extends Controller
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'employee');
             })
-            ->where('is_active', true)
+            ->where('employee_status', 'active')
             ->take(2)
             ->get();
 

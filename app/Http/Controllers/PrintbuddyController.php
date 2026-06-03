@@ -755,12 +755,22 @@ Do not include any text, markdown, or code fences outside the JSON.";
     public function getQuotes(array $args = []): JsonResponse
     {
         $quotes = DB::table('quotes')
-            ->select('id', 'customer_name', 'total_amount', 'status', 'payment_status', 'created_at', 'updated_at')
+            ->join('users', 'quotes.customer_id', '=', 'users.id')
+            ->select(
+                'quotes.id',
+                'quotes.customer_id',
+                DB::raw("COALESCE(users.first_name || ' ' || users.last_name, users.email) as customer_name"),
+                'quotes.total',
+                'quotes.status',
+                'quotes.payment_status',
+                'quotes.created_at',
+                'quotes.updated_at'
+            )
             ->when(
                 ! empty($args['payment_status']),
-                fn ($q) => $q->where('payment_status', $args['payment_status'])
+                fn ($q) => $q->where('quotes.payment_status', $args['payment_status'])
             )
-            ->orderBy('created_at', 'desc')
+            ->orderBy('quotes.created_at', 'desc')
             ->get();
 
         return response()->json([

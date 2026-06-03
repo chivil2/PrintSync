@@ -8,17 +8,30 @@
     @endphp
 
     <div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto"
-        x-data="inventoryReport(@js($statusData), @js($topByQuantity), @js($topByValue), @js($topByUnitPrice), @js($stockLevelDistribution), @js($supplierBreakdown))"
+        x-data="reportsPage(@js($statusData), @js($topByQuantity), @js($topByValue), @js($topByUnitPrice), @js($stockLevelDistribution), @js($supplierBreakdown), @js($salesData), '{{ $period }}', '{{ $month ?? '' }}', '{{ $year ?? '' }}')"
         x-init="initCharts()">
 
         <!-- Banner -->
         <div class="bg-gradient-to-r from-orange-500 to-blue-600 rounded-3xl p-8 text-white relative overflow-hidden mb-8">
             <div class="welcome-dots"></div>
             <div class="relative z-10">
-                <h1 class="text-4xl font-bold mb-2">Inventory Reports</h1>
-                <p class="text-orange-100">Stock levels, valuation, and supplier insights for your inventory.</p>
+                <h1 class="text-4xl font-bold mb-2">Reports</h1>
+                <p class="text-orange-100">Inventory levels, sales revenue, and business insights.</p>
             </div>
         </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6">
+            <button @click="activeTab = 'inventory'" :class="activeTab === 'inventory' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-medium transition-colors border border-slate-200">
+                Inventory Reports
+            </button>
+            <button @click="activeTab = 'sales'" :class="activeTab === 'sales' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-medium transition-colors border border-slate-200">
+                Sales Revenue
+            </button>
+        </div>
+
+        <!-- Inventory Section -->
+        <div x-show="activeTab === 'inventory'" x-transition>
 
         <!-- KPI Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -220,18 +233,218 @@
                 </table>
             </div>
         </div>
+        </div>
+
+        <!-- Sales Revenue Section -->
+        <div x-show="activeTab === 'sales'" x-transition>
+            <!-- Filters -->
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow mb-6">
+                <div class="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-500 block mb-1">Period</label>
+                        <select x-model="period" @change="applyFilters()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">All Time</option>
+                            <option value="month">By Month</option>
+                            <option value="year">By Year</option>
+                        </select>
+                    </div>
+                    <div x-show="period === 'month'">
+                        <label class="text-xs font-semibold text-slate-500 block mb-1">Month</label>
+                        <select x-model="month" @change="applyFilters()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Month</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div x-show="period === 'month' || period === 'year'">
+                        <label class="text-xs font-semibold text-slate-500 block mb-1">Year</label>
+                        <select x-model="year" @change="applyFilters()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Year</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-emerald-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" x-text="formatCurrency(salesData.totalRevenue)"></div>
+                            <div class="text-xs text-slate-500">Total Revenue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" x-text="formatNumber(salesData.totalOrders)"></div>
+                            <div class="text-xs text-slate-500">Total Orders</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-indigo-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-indigo-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" x-text="formatNumber(salesData.totalCustomers)"></div>
+                            <div class="text-xs text-slate-500">Total Customers</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-amber-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-amber-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-slate-900" x-text="formatCurrency(salesData.avgOrderValue)"></div>
+                            <div class="text-xs text-slate-500">Avg Order Value</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-900">Monthly Revenue (Last 12 Months)</h3>
+                            <p class="text-xs text-slate-500">Revenue and orders over time</p>
+                        </div>
+                    </div>
+                    <div class="relative h-80">
+                        <canvas x-ref="monthlyTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-900">Yearly Revenue</h3>
+                            <p class="text-xs text-slate-500">Revenue and orders by year</p>
+                        </div>
+                    </div>
+                    <div class="relative h-80">
+                        <canvas x-ref="yearlyTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-900">Top Services by Revenue</h3>
+                            <p class="text-xs text-slate-500">Best performing services</p>
+                        </div>
+                    </div>
+                    <div class="relative h-80">
+                        <canvas x-ref="topServicesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-900">Top Customers by Revenue</h3>
+                            <p class="text-xs text-slate-500">Highest spending customers</p>
+                        </div>
+                    </div>
+                    <div class="relative h-80">
+                        <canvas x-ref="topCustomersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Orders Table -->
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-900">Top 10 Orders by Value</h3>
+                        <p class="text-xs text-slate-500">Highest value orders</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b-2 border-slate-200">
+                                <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">Order ID</th>
+                                <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">Customer</th>
+                                <th class="border border-slate-200 px-3 py-2 text-right font-semibold text-slate-700">Total</th>
+                                <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="order in salesData.topOrders" :key="order.id">
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="border border-slate-200 px-3 py-2 text-slate-700 font-mono" x-text="'#' + order.id"></td>
+                                    <td class="border border-slate-200 px-3 py-2 text-slate-900 font-medium" x-text="order.customer"></td>
+                                    <td class="border border-slate-200 px-3 py-2 text-slate-700 text-right font-mono" x-text="formatCurrency(order.total)"></td>
+                                    <td class="border border-slate-200 px-3 py-2 text-slate-700" x-text="order.created_at"></td>
+                                </tr>
+                            </template>
+                            <tr x-show="salesData.topOrders.length === 0">
+                                <td colspan="4" class="border border-slate-200 px-3 py-6 text-center text-slate-500">
+                                    No orders found for the selected period
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
-        function inventoryReport(status, topByQuantity, topByValue, topByUnitPrice, distribution, suppliers) {
+        function reportsPage(status, topByQuantity, topByValue, topByUnitPrice, distribution, suppliers, salesData, initialPeriod, initialMonth, initialYear) {
             return {
+                activeTab: 'inventory',
                 status: status,
                 topByQuantity: topByQuantity,
                 topByValue: topByValue,
                 topByUnitPrice: topByUnitPrice,
                 distribution: distribution,
                 suppliers: suppliers,
+                salesData: salesData,
+                period: initialPeriod || 'all',
+                month: initialMonth || '',
+                year: initialYear || '',
                 charts: {},
 
                 formatNumber(value) {
@@ -247,9 +460,28 @@
                     this.charts = {};
                 },
 
+                applyFilters() {
+                    const url = new URL(window.location);
+                    if (this.period !== 'all') {
+                        url.searchParams.set('period', this.period);
+                        if (this.period === 'month' && this.month) {
+                            url.searchParams.set('month', this.month);
+                        }
+                        if (this.year) {
+                            url.searchParams.set('year', this.year);
+                        }
+                    } else {
+                        url.searchParams.delete('period');
+                        url.searchParams.delete('month');
+                        url.searchParams.delete('year');
+                    }
+                    window.location.href = url.toString();
+                },
+
                 initCharts() {
                     this.destroyCharts();
 
+                    // Inventory Charts
                     this.charts.status = new Chart(this.$refs.statusChart, {
                         type: 'doughnut',
                         data: {
@@ -422,6 +654,159 @@
                             }
                         }
                     });
+
+                    // Sales Revenue Charts
+                    if (this.$refs.monthlyTrendChart) {
+                        this.charts.monthlyTrend = new Chart(this.$refs.monthlyTrendChart, {
+                            type: 'line',
+                            data: {
+                                labels: this.salesData.monthlyTrend.map(d => d.label),
+                                datasets: [
+                                    {
+                                        label: 'Revenue',
+                                        data: this.salesData.monthlyTrend.map(d => d.revenue),
+                                        borderColor: '#10b981',
+                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                        fill: true,
+                                        tension: 0.4,
+                                        yAxisID: 'y',
+                                    },
+                                    {
+                                        label: 'Orders',
+                                        data: this.salesData.monthlyTrend.map(d => d.orders),
+                                        borderColor: '#3b82f6',
+                                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                        fill: true,
+                                        tension: 0.4,
+                                        yAxisID: 'y1',
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (ctx) => {
+                                                if (ctx.dataset.yAxisID === 'y') return 'Revenue: ' + this.formatCurrency(ctx.parsed.y);
+                                                return 'Orders: ' + ctx.parsed.y;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Revenue (₱)' }, grid: { color: '#f1f5f9' } },
+                                    y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Orders' }, grid: { display: false } },
+                                    x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+                                }
+                            }
+                        });
+                    }
+
+                    if (this.$refs.yearlyTrendChart) {
+                        this.charts.yearlyTrend = new Chart(this.$refs.yearlyTrendChart, {
+                            type: 'bar',
+                            data: {
+                                labels: this.salesData.yearlyTrend.map(d => d.label),
+                                datasets: [
+                                    {
+                                        label: 'Revenue',
+                                        data: this.salesData.yearlyTrend.map(d => d.revenue),
+                                        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                        borderRadius: 6,
+                                        yAxisID: 'y',
+                                    },
+                                    {
+                                        label: 'Orders',
+                                        data: this.salesData.yearlyTrend.map(d => d.orders),
+                                        backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                                        borderRadius: 6,
+                                        yAxisID: 'y1',
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (ctx) => {
+                                                if (ctx.dataset.yAxisID === 'y') return 'Revenue: ' + this.formatCurrency(ctx.parsed.y);
+                                                return 'Orders: ' + ctx.parsed.y;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Revenue (₱)' }, grid: { color: '#f1f5f9' } },
+                                    y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Orders' }, grid: { display: false } },
+                                    x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+                                }
+                            }
+                        });
+                    }
+
+                    if (this.$refs.topServicesChart) {
+                        this.charts.topServices = new Chart(this.$refs.topServicesChart, {
+                            type: 'bar',
+                            data: {
+                                labels: this.salesData.topServices.map(s => s.service),
+                                datasets: [{
+                                    label: 'Revenue',
+                                    data: this.salesData.topServices.map(s => s.revenue),
+                                    backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                                    borderRadius: 6,
+                                    maxBarThickness: 30,
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: { callbacks: { label: (ctx) => this.formatCurrency(ctx.parsed.x) } }
+                                },
+                                scales: {
+                                    x: { beginAtZero: true, ticks: { callback: (v) => '₱' + this.formatNumber(v) }, grid: { color: '#f1f5f9' } },
+                                    y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+                                }
+                            }
+                        });
+                    }
+
+                    if (this.$refs.topCustomersChart) {
+                        this.charts.topCustomers = new Chart(this.$refs.topCustomersChart, {
+                            type: 'bar',
+                            data: {
+                                labels: this.salesData.topCustomers.map(c => c.customer),
+                                datasets: [{
+                                    label: 'Revenue',
+                                    data: this.salesData.topCustomers.map(c => c.revenue),
+                                    backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                                    borderRadius: 6,
+                                    maxBarThickness: 30,
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: { callbacks: { label: (ctx) => this.formatCurrency(ctx.parsed.x) } }
+                                },
+                                scales: {
+                                    x: { beginAtZero: true, ticks: { callback: (v) => '₱' + this.formatNumber(v) }, grid: { color: '#f1f5f9' } },
+                                    y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+                                }
+                            }
+                        });
+                    }
                 }
             }
         }

@@ -97,7 +97,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="(service, index) in filteredServices" :key="service.id">
+                        <template x-for="(service, index) in filteredServices" :key="service.service_type + '-' + service.id">
                             <tr :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'" class="hover:bg-blue-50 transition-colors">
                                 <td class="border border-slate-300 px-3 py-2">
                                     <template x-if="service.image">

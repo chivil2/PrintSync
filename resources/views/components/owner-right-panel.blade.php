@@ -372,7 +372,7 @@
                 @endforeach
             </div>
             <div class="grid grid-cols-7 gap-1 text-center text-base" @click.outside="activeDay = null">
-                <template x-for="day in calendarDays" :key="day">
+                <template x-for="(day, index) in calendarDays" :key="'cal-' + index">
                     <div x-show="day !== null"
                          class="py-1.5 rounded-xl transition-colors cursor-pointer relative select-none"
                          :class="{
