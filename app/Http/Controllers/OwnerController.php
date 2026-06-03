@@ -27,7 +27,6 @@ class OwnerController extends Controller
         $data['employees'] = User::role('employee')->where('employee_status', 'active')->latest()->take(5)->get();
         $data['jobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->take(10)->get();
         $data['allJobs'] = ServiceJob::with(['customer', 'service', 'employee'])->latest()->get();
-
         $data['jobsWithDeadlines'] = ServiceJob::whereNotNull('deadline')
             ->whereYear('deadline', now()->year)
             ->whereMonth('deadline', now()->month)
