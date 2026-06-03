@@ -220,7 +220,7 @@
     <!-- Orders List -->
     <div x-show="filteredOrders.length > 0" class="flex flex-col gap-3">
         <template x-for="order in filteredOrders" :key="order.id">
-            <div class="bg-white rounded-[14px] border p-4 flex items-center gap-4 hover:shadow-md transition-all"
+            <div class="bg-white rounded-[14px] border p-4 flex items-center gap-4 hover:shadow-md transition-all relative"
                  :class="order.status === 'cancelled' ? 'border-red-200 bg-red-50/30' : 'border-gray-200 hover:border-gray-300'">
                 <a :href="'/customer/orders/' + order.id" class="flex items-center gap-4 flex-1 min-w-0">
                     <!-- Thumbnail -->
@@ -272,10 +272,10 @@
                 </a>
 
                 <!-- Cancel Button -->
-                <form x-show="order.status === 'pending'" method="POST" :action="'/customer/orders/' + order.id + '/cancel'" @click.stop>
+                <form x-show="order.status === 'pending'" method="POST" :action="'/customer/orders/' + order.id + '/cancel'" @click.stop class="absolute top-3 right-3">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-800" onclick="return confirm('Are you sure you want to cancel this order?')">Cancel</button>
+                    <button type="submit" class="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors" onclick="return confirm('Are you sure you want to cancel this order?')">Cancel</button>
                 </form>
             </div>
         </template>

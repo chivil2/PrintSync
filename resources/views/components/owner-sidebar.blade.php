@@ -95,6 +95,14 @@
                 @endif
             </a>
 
+            <a href="{{ route('owner.profile') }}" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg transition-all {{ request()->routeIs('owner.profile') ? 'bg-blue-600 text-white' : 'text-slate-900 hover:bg-slate-100' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                </svg>
+                <span class="font-medium text-sm whitespace-nowrap">Settings</span>
+            </a>
+
             <!-- Employee Management Section -->
             <div x-data="{ employeesExpanded: localStorage.getItem('ownerSidebarEmployeesExpanded') === 'true' }" x-init="$watch('employeesExpanded', value => localStorage.setItem('ownerSidebarEmployeesExpanded', value))">
                 <button @click="employeesExpanded = !employeesExpanded" class="flex items-center w-full justify-start gap-2 px-3 py-3 rounded-lg text-slate-900 hover:bg-slate-100 transition-all">

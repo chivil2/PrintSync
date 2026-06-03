@@ -151,6 +151,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('chat/{conversation}/messages', [OwnerChatController::class, 'sendMessage'])->name('chat.send');
         Route::post('chat/{conversation}/read', [OwnerChatController::class, 'markRead'])->name('chat.read');
         Route::get('chat/{conversation}/poll', [OwnerChatController::class, 'poll'])->name('chat.poll');
+
+        Route::get('profile', [OwnerController::class, 'profile'])->name('profile');
     });
 });
 

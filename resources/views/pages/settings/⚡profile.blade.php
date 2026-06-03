@@ -37,6 +37,12 @@ new #[Title('Profile settings')] class extends Component {
 
     public ?string $profilePhotoPath = null;
 
+    public ?string $company_name = null;
+
+    public ?string $tax_id = null;
+
+    public ?string $business_address = null;
+
     public function mount(): void
     {
         $user = Auth::user();
@@ -46,6 +52,12 @@ new #[Title('Profile settings')] class extends Component {
         $this->email = $user->email;
         $this->phone = $user->phone ?? '';
         $this->profilePhotoPath = $user->profile_photo_path;
+
+        if (Auth::user()->hasRole('owner')) {
+            $this->company_name = $user->company_name ?? '';
+            $this->tax_id = $user->tax_id ?? '';
+            $this->business_address = $user->business_address ?? '';
+        }
     }
 
     public function switchTab(string $tab): void
@@ -61,7 +73,15 @@ new #[Title('Profile settings')] class extends Component {
     {
         $user = Auth::user();
 
-        $validated = $this->validate($this->profileRules($user->id));
+        $rules = $this->profileRules($user->id);
+
+        if ($user->hasRole('owner')) {
+            $rules['company_name'] = ['required', 'string', 'max:255'];
+            $rules['tax_id'] = ['nullable', 'string', 'max:50'];
+            $rules['business_address'] = ['nullable', 'string', 'max:500'];
+        }
+
+        $validated = $this->validate($rules);
 
         $user->fill($validated);
 
@@ -135,18 +155,22 @@ new #[Title('Profile settings')] class extends Component {
         $this->last_name = $user->last_name;
         $this->email = $user->email;
         $this->phone = $user->phone ?? '';
+
+        if ($user->hasRole('owner')) {
+            $this->company_name = $user->company_name ?? '';
+            $this->tax_id = $user->tax_id ?? '';
+            $this->business_address = $user->business_address ?? '';
+        }
     }
 
     #[Computed]
     public function profilePhotoUrl(): ?string
     {
-        $user = Auth::user();
+        $path = Auth::user()->profile_photo_path;
 
-        if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
-            return Storage::disk('public')->url($user->profile_photo_path);
-        }
-
-        return null;
+        return $path
+            ? asset('storage/' . $path)
+            : null;
     }
 
     public function updatedPhoto(): void
@@ -442,6 +466,79 @@ class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3
                                         </div>
                                     @endif
                                 </div>
+
+                                @can('manage_users')
+                                    {{-- Business Information (Owner only) --}}
+                                    <div class="border-t border-gray-100 pt-6 mt-2">
+                                        <h3 class="text-sm font-semibold text-gray-900 mb-4">{{ __('Business Information') }}</h3>
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            {{-- Company Name --}}
+                                            <div class="flex flex-col gap-1.5">
+                                                <label for="companyName" class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                    {{ __('Company Name') }}
+                                                </label>
+                                                <div class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-150 focus-within:border-[#e8701a] focus-within:shadow-[0_0_0_3px_rgba(232,112,26,0.1)]">
+                                                    <span class="shrink-0 text-gray-400">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                        </svg>
+                                                    </span>
+                                                    <input
+                                                        id="companyName"
+                                                        type="text"
+                                                        wire:model="company_name"
+                                                        placeholder="{{ __('Company name') }}"
+                                                        autocomplete="organization"
+                                                        class="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
+                                                    />
+                                                </div>
+                                                @error('company_name')
+                                                    <p class="text-xs text-red-500">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                            {{-- Tax ID --}}
+                                            <div class="flex flex-col gap-1.5">
+                                                <label for="taxId" class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                    {{ __('Tax ID') }}
+                                                </label>
+                                                <div class="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-150 focus-within:border-[#e8701a] focus-within:shadow-[0_0_0_3px_rgba(232,112,26,0.1)]">
+                                                    <span class="shrink-0 text-gray-400">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"/>
+                                                        </svg>
+                                                    </span>
+                                                    <input
+                                                        id="taxId"
+                                                        type="text"
+                                                        wire:model="tax_id"
+                                                        placeholder="{{ __('Tax ID') }}"
+                                                        class="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {{-- Business Address --}}
+                                        <div class="flex flex-col gap-1.5 mt-4">
+                                            <label for="businessAddress" class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                {{ __('Business Address') }}
+                                            </label>
+                                            <div class="flex items-start gap-2.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-150 focus-within:border-[#e8701a] focus-within:shadow-[0_0_0_3px_rgba(232,112,26,0.1)]">
+                                                <span class="mt-1 shrink-0 text-gray-400">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    </svg>
+                                                </span>
+                                                <textarea
+                                                    id="businessAddress"
+                                                    wire:model="business_address"
+                                                    placeholder="{{ __('123 Business St, City, Country') }}"
+                                                    rows="2"
+                                                    class="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none resize-none"
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endcan
                             </div>
 
                             {{-- Footer --}}

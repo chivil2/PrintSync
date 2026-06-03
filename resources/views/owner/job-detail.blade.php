@@ -96,69 +96,151 @@
                         <h2 class="text-lg font-semibold text-zinc-900">Service Information</h2>
                     </div>
                     <div class="p-6">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <span class="text-zinc-500 text-sm">Service:</span>
-                                <p class="text-zinc-900 font-medium">{{ $job->name }}</p>
-                            </div>
-                            <div>
-                                <span class="text-zinc-500 text-sm">Type:</span>
-                                <p class="text-zinc-900 font-medium">{{ ucfirst($job->type) }}</p>
-                            </div>
-                            <div>
-                                <span class="text-zinc-500 text-sm">Status:</span>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    {{ match($job->status) {
-                                        'pending' => 'bg-yellow-100 text-yellow-700',
-                                        'in_progress' => 'bg-blue-100 text-blue-700',
-                                        'completed' => 'bg-green-100 text-green-700',
-                                        'cancelled' => 'bg-red-100 text-red-700',
-                                        default => 'bg-zinc-100 text-zinc-600',
-                                    } }}">
-                                    {{ ucfirst(str_replace('_', ' ', $job->status)) }}
-                                </span>
-                            </div>
-                            <div>
-                                <span class="text-zinc-500 text-sm">Priority:</span>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    {{ match($job->priority) {
-                                        'low' => 'bg-zinc-100 text-zinc-600',
-                                        'medium' => 'bg-blue-100 text-blue-700',
-                                        'high' => 'bg-orange-100 text-orange-700',
-                                        'urgent' => 'bg-red-100 text-red-700',
-                                        default => 'bg-zinc-100 text-zinc-600',
-                                    } }}">
-                                    {{ ucfirst($job->priority ?? 'medium') }}
-                                </span>
-                            </div>
-                            <div>
-                                <span class="text-zinc-500 text-sm">Requested:</span>
-                                <p class="text-zinc-900 font-medium">{{ $job->created_at->format('M d, Y H:i') }}</p>
-                            </div>
-                            @if($job->deadline)
+                        @php
+                            $techPriorityLabels = [
+                                'standard' => ['Standard', 'bg-sky-100 text-sky-700'],
+                                'urgent' => ['Urgent', 'bg-amber-100 text-amber-700'],
+                                'emergency' => ['Emergency', 'bg-rose-100 text-rose-700'],
+                            ];
+                            $contactLabels = [
+                                'phone' => 'Phone call',
+                                'email' => 'Email',
+                                'sms' => 'SMS / Text',
+                            ];
+                        @endphp
+
+                        @if($job->type === 'technical' && $job->technical_details)
+                            @php $tech = $job->technical_details; @endphp
+                            @php $priorityInfo = $techPriorityLabels[$tech['priority'] ?? ''] ?? ['N/A', 'bg-zinc-100 text-zinc-700']; @endphp
+
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <span class="text-zinc-500 text-sm">Deadline:</span>
-                                    <p class="text-zinc-900 font-medium">{{ $job->deadline->format('M d, Y') }}</p>
+                                    <span class="text-zinc-500 text-sm">Service:</span>
+                                    <p class="text-zinc-900 font-medium">{{ $job->name }}</p>
                                 </div>
-                            @endif
-                            @if($job->quote)
                                 <div>
-                                    <span class="text-zinc-500 text-sm">Total:</span>
-                                    <p class="text-zinc-900 font-medium">₱{{ number_format($job->quote->total, 2) }}</p>
+                                    <span class="text-zinc-500 text-sm">Type:</span>
+                                    <p class="text-zinc-900 font-medium">{{ ucfirst($job->type) }}</p>
                                 </div>
-                            @endif
-                        </div>
-                        @if($job->description)
-                            <div class="mt-4">
-                                <span class="text-zinc-500 text-sm">Description:</span>
-                                <p class="text-zinc-900 mt-1">{{ $job->description }}</p>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Status:</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {{ match($job->status) {
+                                            'pending' => 'bg-yellow-100 text-yellow-700',
+                                            'in_progress' => 'bg-blue-100 text-blue-700',
+                                            'completed' => 'bg-green-100 text-green-700',
+                                            'cancelled' => 'bg-red-100 text-red-700',
+                                            default => 'bg-zinc-100 text-zinc-600',
+                                        } }}">
+                                        {{ ucfirst(str_replace('_', ' ', $job->status)) }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Priority:</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $priorityInfo[1] }}">
+                                        {{ $priorityInfo[0] }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Requested:</span>
+                                    <p class="text-zinc-900 font-medium">{{ $job->created_at->format('M d, Y H:i') }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Contact:</span>
+                                    <p class="text-zinc-900 font-medium">{{ $contactLabels[$tech['contact_preference'] ?? ''] ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Preferred Date &amp; Time:</span>
+                                    <p class="text-zinc-900 font-medium">
+                                        @if(!empty($tech['preferred_at']))
+                                            {{ \Carbon\Carbon::parse($tech['preferred_at'])->format('M d, Y g:i A') }}
+                                        @else
+                                            —
+                                        @endif
+                                    </p>
+                                </div>
+                                @if($job->quote)
+                                    <div>
+                                        <span class="text-zinc-500 text-sm">Total:</span>
+                                        <p class="text-zinc-900 font-medium">₱{{ number_format($job->quote->total, 2) }}</p>
+                                    </div>
+                                @endif
                             </div>
-                        @endif
-                        @if($job->notes)
                             <div class="mt-4 p-3 bg-zinc-50 rounded-lg">
-                                <span class="text-sm text-zinc-500">Notes:</span>
-                                <p class="text-sm text-zinc-700 mt-1">{{ $job->notes }}</p>
+                                <span class="text-sm text-zinc-500">Problem Description</span>
+                                <p class="text-sm text-zinc-700 mt-1 whitespace-pre-line">{{ $tech['problem_description'] ?? '—' }}</p>
                             </div>
+                            @if($job->notes)
+                                <div class="mt-4 p-3 bg-zinc-50 rounded-lg">
+                                    <span class="text-sm text-zinc-500">Notes:</span>
+                                    <p class="text-sm text-zinc-700 mt-1">{{ $job->notes }}</p>
+                                </div>
+                            @endif
+                        @else
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Service:</span>
+                                    <p class="text-zinc-900 font-medium">{{ $job->name }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Type:</span>
+                                    <p class="text-zinc-900 font-medium">{{ ucfirst($job->type) }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Status:</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {{ match($job->status) {
+                                            'pending' => 'bg-yellow-100 text-yellow-700',
+                                            'in_progress' => 'bg-blue-100 text-blue-700',
+                                            'completed' => 'bg-green-100 text-green-700',
+                                            'cancelled' => 'bg-red-100 text-red-700',
+                                            default => 'bg-zinc-100 text-zinc-600',
+                                        } }}">
+                                        {{ ucfirst(str_replace('_', ' ', $job->status)) }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Priority:</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {{ match($job->priority) {
+                                            'low' => 'bg-zinc-100 text-zinc-600',
+                                            'medium' => 'bg-blue-100 text-blue-700',
+                                            'high' => 'bg-orange-100 text-orange-700',
+                                            'urgent' => 'bg-red-100 text-red-700',
+                                            default => 'bg-zinc-100 text-zinc-600',
+                                        } }}">
+                                        {{ ucfirst($job->priority ?? 'medium') }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-zinc-500 text-sm">Requested:</span>
+                                    <p class="text-zinc-900 font-medium">{{ $job->created_at->format('M d, Y H:i') }}</p>
+                                </div>
+                                @if($job->deadline)
+                                    <div>
+                                        <span class="text-zinc-500 text-sm">Deadline:</span>
+                                        <p class="text-zinc-900 font-medium">{{ $job->deadline->format('M d, Y') }}</p>
+                                    </div>
+                                @endif
+                                @if($job->quote)
+                                    <div>
+                                        <span class="text-zinc-500 text-sm">Total:</span>
+                                        <p class="text-zinc-900 font-medium">₱{{ number_format($job->quote->total, 2) }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                            @if($job->description)
+                                <div class="mt-4">
+                                    <span class="text-zinc-500 text-sm">Description:</span>
+                                    <p class="text-zinc-900 mt-1">{{ $job->description }}</p>
+                                </div>
+                            @endif
+                            @if($job->notes)
+                                <div class="mt-4 p-3 bg-zinc-50 rounded-lg">
+                                    <span class="text-sm text-zinc-500">Notes:</span>
+                                    <p class="text-sm text-zinc-700 mt-1">{{ $job->notes }}</p>
+                                </div>
+                            @endif
                         @endif
                     </div>
                 </div>

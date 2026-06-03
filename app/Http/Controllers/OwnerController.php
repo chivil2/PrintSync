@@ -516,6 +516,14 @@ class OwnerController extends Controller
     }
 
     /**
+     * Show the owner profile settings page.
+     */
+    public function profile(): View
+    {
+        return view('owner.profile');
+    }
+
+    /**
      * Display the reports page.
      */
     public function reports(Request $request): View

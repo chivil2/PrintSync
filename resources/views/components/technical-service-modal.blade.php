@@ -141,14 +141,14 @@ style="display: none;">
                     </div>
                 </div>
 
-                <div class="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                     <div class="flex items-start gap-2.5">
-                        <svg class="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p class="text-xs font-semibold text-blue-900">How it works</p>
-                            <p class="text-sm text-blue-700 mt-0.5">Tell us what's wrong, pick a priority, and we'll match you with a technician. You'll get a quote to review before any work starts.</p>
+                            <p class="text-xs font-semibold text-yellow-900">How it works</p>
+                            <p class="text-sm text-yellow-700 mt-0.5">Tell us what's wrong, pick a priority, and we'll match you with a technician. You'll get a quote to review before any work starts.</p>
                         </div>
                     </div>
                 </div>
