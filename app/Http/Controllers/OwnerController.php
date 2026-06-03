@@ -6,12 +6,14 @@ use App\Models\Quote;
 use App\Models\ServiceJob;
 use App\Models\User;
 use App\Notifications\JobAssignedNotification;
+use App\Services\DashboardDataService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\View\View;
 
 class OwnerController extends Controller
 {
@@ -495,5 +497,37 @@ class OwnerController extends Controller
         return response()->json(
             $dashboardService->getEarningsByPeriod($request->get('period', 'month'))
         );
+    }
+
+    /**
+     * Display the reports page.
+     */
+    public function getMonthlyOrderDetails(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'year' => ['required', 'integer', 'min:2000', 'max:'.(now()->year + 1)],
+            'month' => ['required', 'integer', 'min:1', 'max:12'],
+        ]);
+
+        $dashboardService = new DashboardDataService;
+        $data = $dashboardService->getMonthlyOrderDetails($validated['year'], $validated['month']);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Display the reports page.
+     */
+    public function reports(Request $request): View
+    {
+        $dashboardService = new DashboardDataService;
+        $year = (int) $request->get('year', now()->year);
+
+        return view('owner.reports', [
+            'monthlyReport' => $dashboardService->getMonthlyReport($year),
+            'yearlyReport' => $dashboardService->getYearlyReport(),
+            'selectedYear' => $year,
+            'availableYears' => range(now()->year - 5, now()->year),
+        ]);
     }
 }

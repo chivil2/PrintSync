@@ -1,893 +1,426 @@
 <x-layouts::app.owner>
-    @php
-        $statusData = [
-            'in_stock' => $statusBreakdown['in_stock'] ?? 0,
-            'low_stock' => $statusBreakdown['low_stock'] ?? 0,
-            'out_of_stock' => $statusBreakdown['out_of_stock'] ?? 0,
-        ];
-    @endphp
-
-    <div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto"
-        x-data="reportsPage(@js($statusData), @js($topByQuantity), @js($topByValue), @js($topByUnitPrice), @js($stockLevelDistribution), @js($supplierBreakdown), @js($salesData), '{{ $period }}', '{{ $month ?? '' }}', '{{ $year ?? '' }}')"
-        x-init="initCharts()">
-
+    <div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto" x-data="{ tab: 'monthly', year: {{ $selectedYear }}, selectedMonth: null, modalData: null, loading: false, showModal: false, expandedOrders: {}, toggleOrder(quoteNumber) { this.expandedOrders[quoteNumber] = !this.expandedOrders[quoteNumber]; }, async openModal(month, monthName) { this.selectedMonth = month; this.modalData = null; this.loading = true; this.showModal = true; try { const res = await fetch(`/owner/reports/monthly-orders?year=${this.year}&month=${month}`); this.modalData = await res.json(); } catch (e) { this.modalData = null; } finally { this.loading = false; } } }" @keydown.escape.window="showModal = false">
         <!-- Banner -->
         <div class="bg-gradient-to-r from-orange-500 to-blue-600 rounded-3xl p-8 text-white relative overflow-hidden mb-8">
             <div class="welcome-dots"></div>
             <div class="relative z-10">
-                <h1 class="text-4xl font-bold mb-2">Reports</h1>
-                <p class="text-orange-100">Inventory levels, sales revenue, and business insights.</p>
+                <h1 class="text-3xl font-bold">Reports</h1>
+                <p class="text-orange-100 mt-1">View and analyze your business performance.</p>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="flex gap-2 mb-6">
-            <button @click="activeTab = 'inventory'" :class="activeTab === 'inventory' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-medium transition-colors border border-slate-200">
-                Inventory Reports
-            </button>
-            <button @click="activeTab = 'sales'" :class="activeTab === 'sales' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'" class="px-6 py-3 rounded-xl font-medium transition-colors border border-slate-200">
-                Sales Revenue
-            </button>
-        </div>
-
-        <!-- Inventory Section -->
-        <div x-show="activeTab === 'inventory'" x-transition>
-
-        <!-- KPI Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center gap-3">
-                    <div class="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-blue-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-slate-900" x-text="formatNumber({{ (int) $totals['skus'] }})"></div>
-                        <div class="text-xs text-slate-500">Total SKUs</div>
-                    </div>
-                </div>
+        <!-- Tabs + Year Selector Row -->
+        <div class="flex items-center justify-between mb-6">
+            <!-- Tab Switcher -->
+            <div class="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+                <button @click="tab = 'monthly'" :class="tab === 'monthly' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'" class="px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Monthly
+                </button>
+                <button @click="tab = 'yearly'" :class="tab === 'yearly' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'" class="px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/>
+                        <path d="M9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625z"/>
+                        <path d="M16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>
+                    </svg>
+                    Yearly
+                </button>
             </div>
 
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center gap-3">
-                    <div class="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-emerald-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 7l2 12a2 2 0 002 2h8a2 2 0 002-2l2-12M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-slate-900" x-text="formatNumber({{ (int) $totals['quantity'] }})"></div>
-                        <div class="text-xs text-slate-500">Total Units in Stock</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center gap-3">
-                    <div class="bg-indigo-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-indigo-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-slate-900" x-text="formatCurrency({{ (float) $totals['value'] }})"></div>
-                        <div class="text-xs text-slate-500">Total Inventory Value</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center gap-3">
-                    <div class="bg-rose-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-rose-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.071 19h13.858c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-slate-900" x-text="formatNumber({{ (int) $totals['low_stock'] + (int) $totals['out_of_stock'] }})"></div>
-                        <div class="text-xs text-slate-500">Needs Attention</div>
-                    </div>
-                </div>
+            <!-- Year Selector (Monthly only) -->
+            <div x-show="tab === 'monthly'" x-transition class="relative">
+                <select @change="window.location.href = '?year=' + year" x-model="year" class="appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2 pr-10 text-sm font-medium text-slate-700 cursor-pointer hover:border-slate-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                    @foreach($availableYears as $y)
+                        <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>{{ $y }}</option>
+                    @endforeach
+                </select>
+                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
             </div>
         </div>
 
-        <!-- Charts Row 1 -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            @php
+                $totalRevenue = collect($monthlyReport)->sum('revenue');
+                $totalOrders = collect($monthlyReport)->sum('orders');
+            @endphp
             <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-900">Stock Status</h3>
-                        <p class="text-xs text-slate-500">Current status distribution</p>
-                    </div>
-                </div>
-                <div class="relative h-64">
-                    <canvas x-ref="statusChart"></canvas>
-                </div>
-                <div class="grid grid-cols-3 gap-2 mt-4 text-center">
-                    <div class="bg-emerald-50 rounded-xl py-2">
-                        <div class="text-lg font-bold text-emerald-700" x-text="status.in_stock"></div>
-                        <div class="text-[10px] uppercase tracking-wide text-emerald-600">In Stock</div>
-                    </div>
-                    <div class="bg-amber-50 rounded-xl py-2">
-                        <div class="text-lg font-bold text-amber-700" x-text="status.low_stock"></div>
-                        <div class="text-[10px] uppercase tracking-wide text-amber-600">Low</div>
-                    </div>
-                    <div class="bg-rose-50 rounded-xl py-2">
-                        <div class="text-lg font-bold text-rose-700" x-text="status.out_of_stock"></div>
-                        <div class="text-[10px] uppercase tracking-wide text-rose-600">Out</div>
-                    </div>
-                </div>
+                <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Total Revenue</div>
+                <div class="text-3xl font-bold text-slate-900">₱{{ number_format($totalRevenue, 2) }}</div>
             </div>
-
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow lg:col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-900">Top 10 Items by Quantity</h3>
-                        <p class="text-xs text-slate-500">Items with the highest units in stock</p>
-                    </div>
-                </div>
-                <div class="relative h-80">
-                    <canvas x-ref="quantityChart"></canvas>
-                </div>
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
+                <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Total Orders</div>
+                <div class="text-3xl font-bold text-slate-900">{{ number_format($totalOrders) }}</div>
             </div>
         </div>
 
-        <!-- Charts Row 2 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-900">Top 10 Items by Value</h3>
-                        <p class="text-xs text-slate-500">Highest stock value (quantity x unit price)</p>
-                    </div>
-                </div>
-                <div class="relative h-80">
-                    <canvas x-ref="valueChart"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-900">Stock Level Distribution</h3>
-                        <p class="text-xs text-slate-500">How units are spread across quantity buckets</p>
-                    </div>
-                </div>
-                <div class="relative h-80">
-                    <canvas x-ref="distributionChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Row 3 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-900">Top 10 by Unit Price</h3>
-                        <p class="text-xs text-slate-500">Most expensive items per unit</p>
-                    </div>
-                </div>
-                <div class="relative h-80">
-                    <canvas x-ref="unitPriceChart"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-900">Supplier Breakdown</h3>
-                        <p class="text-xs text-slate-500">Inventory value grouped by supplier</p>
-                    </div>
-                </div>
-                <div class="relative h-80">
-                    <canvas x-ref="supplierChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Low Stock Table -->
-        <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h3 class="text-sm font-semibold text-slate-900">Items Needing Attention</h3>
-                    <p class="text-xs text-slate-500">Low stock and out of stock items, ordered by quantity</p>
-                </div>
-                <a href="{{ route('owner.inventory.index') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700">View inventory &rarr;</a>
+        <!-- Monthly Table -->
+        <div x-show="tab === 'monthly'" x-transition class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-blue-950/5 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100">
+                <h3 class="text-sm font-semibold text-slate-900">Monthly Breakdown — {{ $selectedYear }}</h3>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-xs border-collapse">
+                <table class="w-full text-sm">
                     <thead>
-                        <tr class="bg-slate-50 border-b-2 border-slate-200">
-                            <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">SKU</th>
-                            <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">Name</th>
-                            <th class="border border-slate-200 px-3 py-2 text-right font-semibold text-slate-700">Quantity</th>
-                            <th class="border border-slate-200 px-3 py-2 text-right font-semibold text-slate-700">Min Level</th>
-                            <th class="border border-slate-200 px-3 py-2 text-center font-semibold text-slate-700">Status</th>
+                        <tr class="border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="text-left px-6 py-3 font-semibold">Month</th>
+                            <th class="text-right px-6 py-3 font-semibold">Revenue</th>
+                            <th class="text-right px-6 py-3 font-semibold">Orders</th>
+                            <th class="text-right px-6 py-3 font-semibold">Paid</th>
+                            <th class="text-right px-6 py-3 font-semibold">Down Payment</th>
+                            <th class="text-right px-6 py-3 font-semibold">Unpaid</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($lowStockItems as $item)
-                            <tr class="hover:bg-rose-50/50 transition-colors">
-                                <td class="border border-slate-200 px-3 py-2 text-slate-700 font-mono">{{ $item->sku }}</td>
-                                <td class="border border-slate-200 px-3 py-2 text-slate-900 font-medium">{{ $item->name }}</td>
-                                <td class="border border-slate-200 px-3 py-2 text-slate-700 text-right font-mono">{{ number_format($item->quantity) }}</td>
-                                <td class="border border-slate-200 px-3 py-2 text-slate-700 text-right font-mono">{{ number_format($item->min_stock_level) }}</td>
-                                <td class="border border-slate-200 px-3 py-2 text-center">
-                                    <span class="inline-block px-2 py-0.5 text-[11px] font-semibold rounded
-                                        @if($item->status === 'out_of_stock') bg-rose-100 text-rose-800 border border-rose-200
-                                        @else bg-amber-100 text-amber-800 border border-amber-200 @endif">
-                                        {{ str_replace('_', ' ', ucfirst($item->status)) }}
-                                    </span>
+                        @foreach($monthlyReport as $row)
+                            <tr
+                                class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150 cursor-pointer"
+                                @click="openModal({{ $row['month'] }}, '{{ DateTime::createFromFormat('!m', $row['month'])->format('F') }}')"
+                            >
+                                <td class="px-6 py-3 font-medium text-slate-900">
+                                    {{ DateTime::createFromFormat('!m', $row['month'])->format('F') }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-slate-900 font-medium">
+                                    ₱{{ number_format($row['revenue'], 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-slate-600">
+                                    {{ $row['orders'] }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-emerald-600">
+                                    ₱{{ number_format($row['paid'], 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-amber-600">
+                                    ₱{{ number_format($row['downpayment'], 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-red-500">
+                                    ₱{{ number_format($row['unpaid'], 2) }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr class="border-t border-slate-200 bg-slate-50/80">
+                            <td class="px-6 py-3 font-semibold text-slate-900">Total</td>
+                            <td class="px-6 py-3 text-right font-semibold text-slate-900">
+                                ₱{{ number_format(collect($monthlyReport)->sum('revenue'), 2) }}
+                            </td>
+                            <td class="px-6 py-3 text-right font-semibold text-slate-600">
+                                {{ collect($monthlyReport)->sum('orders') }}
+                            </td>
+                            <td class="px-6 py-3 text-right font-semibold text-emerald-600">
+                                ₱{{ number_format(collect($monthlyReport)->sum('paid'), 2) }}
+                            </td>
+                            <td class="px-6 py-3 text-right font-semibold text-amber-600">
+                                ₱{{ number_format(collect($monthlyReport)->sum('downpayment'), 2) }}
+                            </td>
+                            <td class="px-6 py-3 text-right font-semibold text-red-500">
+                                ₱{{ number_format(collect($monthlyReport)->sum('unpaid'), 2) }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Yearly Table -->
+        <div x-show="tab === 'yearly'" x-cloak x-transition class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-blue-950/5 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100">
+                <h3 class="text-sm font-semibold text-slate-900">Yearly Breakdown</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="text-left px-6 py-3 font-semibold">Year</th>
+                            <th class="text-right px-6 py-3 font-semibold">Revenue</th>
+                            <th class="text-right px-6 py-3 font-semibold">Orders</th>
+                            <th class="text-right px-6 py-3 font-semibold">Paid</th>
+                            <th class="text-right px-6 py-3 font-semibold">Down Payment</th>
+                            <th class="text-right px-6 py-3 font-semibold">Unpaid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($yearlyReport as $row)
+                            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150">
+                                <td class="px-6 py-3 font-medium text-slate-900">{{ $row['year'] }}</td>
+                                <td class="px-6 py-3 text-right text-slate-900 font-medium">
+                                    ₱{{ number_format($row['revenue'], 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-slate-600">
+                                    {{ $row['orders'] }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-emerald-600">
+                                    ₱{{ number_format($row['paid'], 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-amber-600">
+                                    ₱{{ number_format($row['downpayment'], 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right text-red-500">
+                                    ₱{{ number_format($row['unpaid'], 2) }}
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="border border-slate-200 px-3 py-6 text-center text-slate-500">
-                                    All inventory items are well stocked
-                                </td>
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-400">No yearly data available</td>
                             </tr>
                         @endforelse
                     </tbody>
+                    @if($yearlyReport)
+                        <tfoot>
+                            <tr class="border-t border-slate-200 bg-slate-50/80">
+                                <td class="px-6 py-3 font-semibold text-slate-900">Total</td>
+                                <td class="px-6 py-3 text-right font-semibold text-slate-900">
+                                    ₱{{ number_format(collect($yearlyReport)->sum('revenue'), 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right font-semibold text-slate-600">
+                                    {{ collect($yearlyReport)->sum('orders') }}
+                                </td>
+                                <td class="px-6 py-3 text-right font-semibold text-emerald-600">
+                                    ₱{{ number_format(collect($yearlyReport)->sum('paid'), 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right font-semibold text-amber-600">
+                                    ₱{{ number_format(collect($yearlyReport)->sum('downpayment'), 2) }}
+                                </td>
+                                <td class="px-6 py-3 text-right font-semibold text-red-500">
+                                    ₱{{ number_format(collect($yearlyReport)->sum('unpaid'), 2) }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    @endif
                 </table>
             </div>
         </div>
-        </div>
+    <!-- Monthly Detail Modal -->
+    <div
+        x-show="showModal"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        style="display: none;"
+    >
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40" @click="showModal = false"></div>
 
-        <!-- Sales Revenue Section -->
-        <div x-show="activeTab === 'sales'" x-transition>
-            <!-- Filters -->
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow mb-6">
-                <div class="flex flex-wrap items-center gap-4">
+        <!-- Modal Panel -->
+        <div
+            class="relative w-full max-w-3xl max-h-[85vh] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden"
+            @click.outside="showModal = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+        >
+            <!-- Header (fixed) -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                    </div>
                     <div>
-                        <label class="text-xs font-semibold text-slate-500 block mb-1">Period</label>
-                        <select x-model="period" @change="applyFilters()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="all">All Time</option>
-                            <option value="month">By Month</option>
-                            <option value="year">By Year</option>
-                        </select>
-                    </div>
-                    <div x-show="period === 'month'">
-                        <label class="text-xs font-semibold text-slate-500 block mb-1">Month</label>
-                        <select x-model="month" @change="applyFilters()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select Month</option>
-                            <option value="1">January</option>
-                            <option value="2">February</option>
-                            <option value="3">March</option>
-                            <option value="4">April</option>
-                            <option value="5">May</option>
-                            <option value="6">June</option>
-                            <option value="7">July</option>
-                            <option value="8">August</option>
-                            <option value="9">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                        </select>
-                    </div>
-                    <div x-show="period === 'month' || period === 'year'">
-                        <label class="text-xs font-semibold text-slate-500 block mb-1">Year</label>
-                        <select x-model="year" @change="applyFilters()" class="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select Year</option>
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
-                        </select>
+                        <h3 class="text-base font-semibold text-slate-900" x-text="modalData ? modalData.meta.month_name + ' ' + modalData.meta.year : (selectedMonth ? 'Loading...' : '')"></h3>
+                        <p class="text-xs text-slate-500" x-show="modalData" x-text="modalData ? modalData.meta.total_orders + ' accepted orders' : ''"></p>
                     </div>
                 </div>
+                <button @click="showModal = false" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors duration-150 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
 
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-emerald-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-emerald-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold text-slate-900" x-text="formatCurrency(salesData.totalRevenue)"></div>
-                            <div class="text-xs text-slate-500">Total Revenue</div>
-                        </div>
-                    </div>
+            <!-- Content (scrollable) -->
+            <div class="overflow-y-auto" style="max-height: calc(85vh - 140px);">
+                <!-- Loading State -->
+                <div x-show="loading" class="p-6 space-y-4">
+                    <div class="h-8 bg-slate-100 rounded-lg animate-pulse"></div>
+                    <div class="h-8 bg-slate-100 rounded-lg animate-pulse w-5/6"></div>
+                    <div class="h-8 bg-slate-100 rounded-lg animate-pulse w-4/6"></div>
+                    <div class="h-32 bg-slate-100 rounded-lg animate-pulse mt-6"></div>
                 </div>
 
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-blue-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
+                <!-- Content loaded -->
+                <div x-show="!loading && modalData" class="p-6 space-y-6">
+                    <!-- Payment Split Mini Chart -->
+                    <div x-show="modalData && modalData.payment_split.paid_total + modalData.payment_split.downpayment_total + modalData.payment_split.unpaid_total > 0">
+                        <div class="flex items-center gap-4 mb-2 text-xs font-medium">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="text-slate-600">Paid</span>
+                                <span class="text-slate-900 font-semibold" x-text="modalData ? '₱' + Number(modalData.payment_split.paid_total).toLocaleString('en-PH', {minimumFractionDigits: 2}) : ''"></span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="text-slate-600">Down Payment</span>
+                                <span class="text-slate-900 font-semibold" x-text="modalData ? '₱' + Number(modalData.payment_split.downpayment_total).toLocaleString('en-PH', {minimumFractionDigits: 2}) : ''"></span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                                <span class="text-slate-600">Unpaid</span>
+                                <span class="text-slate-900 font-semibold" x-text="modalData ? '₱' + Number(modalData.payment_split.unpaid_total).toLocaleString('en-PH', {minimumFractionDigits: 2}) : ''"></span>
+                            </div>
                         </div>
-                        <div>
-                            <div class="text-2xl font-bold text-slate-900" x-text="formatNumber(salesData.totalOrders)"></div>
-                            <div class="text-xs text-slate-500">Total Orders</div>
+                        <div class="h-2 rounded-full overflow-hidden flex bg-slate-100">
+                            <div
+                                class="bg-emerald-400 h-full transition-all duration-500"
+                                :style="modalData && (modalData.payment_split.paid_total + modalData.payment_split.downpayment_total + modalData.payment_split.unpaid_total) > 0
+                                    ? `width: ${(modalData.payment_split.paid_total / (modalData.payment_split.paid_total + modalData.payment_split.downpayment_total + modalData.payment_split.unpaid_total)) * 100}%`
+                                    : 'width: 0%'"
+                            ></div>
+                            <div
+                                class="bg-amber-400 h-full transition-all duration-500"
+                                :style="modalData && (modalData.payment_split.paid_total + modalData.payment_split.downpayment_total + modalData.payment_split.unpaid_total) > 0
+                                    ? `width: ${(modalData.payment_split.downpayment_total / (modalData.payment_split.paid_total + modalData.payment_split.downpayment_total + modalData.payment_split.unpaid_total)) * 100}%`
+                                    : 'width: 0%'"
+                            ></div>
+                            <div
+                                class="bg-red-400 h-full transition-all duration-500"
+                                :style="modalData && (modalData.payment_split.paid_total + modalData.payment_split.downpayment_total + modalData.payment_split.unpaid_total) > 0
+                                    ? `width: ${(modalData.payment_split.unpaid_total / (modalData.payment_split.paid_total + modalData.payment_split.downpayment_total + modalData.payment_split.unpaid_total)) * 100}%`
+                                    : 'width: 0%'"
+                            ></div>
                         </div>
                     </div>
-                </div>
 
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-indigo-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-indigo-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold text-slate-900" x-text="formatNumber(salesData.totalCustomers)"></div>
-                            <div class="text-xs text-slate-500">Total Customers</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-amber-50 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm text-amber-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold text-slate-900" x-text="formatCurrency(salesData.avgOrderValue)"></div>
-                            <div class="text-xs text-slate-500">Avg Order Value</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Extra Stat Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                <div class="bg-gradient-to-br from-teal-400 to-teal-500 p-5 rounded-3xl card-shadow text-white">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold" x-text="salesData.topServices[0] ? formatCurrency(salesData.topServices[0].revenue) : '₱0.00'"></div>
-                            <div class="text-xs text-white/80" x-text="'Top: ' + (salesData.topServices[0]?.service || 'N/A')"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gradient-to-br from-pink-400 to-pink-500 p-5 rounded-3xl card-shadow text-white">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold" x-text="salesData.monthlyTrend.length ? formatCurrency(salesData.monthlyTrend[salesData.monthlyTrend.length - 1].revenue) : '₱0.00'"></div>
-                            <div class="text-xs text-white/80" x-text="salesData.monthlyTrend.length ? salesData.monthlyTrend[salesData.monthlyTrend.length - 1].label : 'This Month'"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Row 1 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-slate-900">Monthly Revenue (Last 12 Months)</h3>
-                            <p class="text-xs text-slate-500">Revenue and orders over time</p>
-                        </div>
-                    </div>
-                    <div class="relative h-80">
-                        <canvas x-ref="monthlyTrendChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-slate-900">Yearly Revenue</h3>
-                            <p class="text-xs text-slate-500">Revenue and orders by year</p>
-                        </div>
-                    </div>
-                    <div class="relative h-80">
-                        <canvas x-ref="yearlyTrendChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Row 2 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-slate-900">Top Services by Revenue</h3>
-                            <p class="text-xs text-slate-500">Best performing services</p>
-                        </div>
-                    </div>
-                    <div class="relative h-80">
-                        <canvas x-ref="topServicesChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-slate-900">Top Customers by Revenue</h3>
-                            <p class="text-xs text-slate-500">Highest spending customers</p>
-                        </div>
-                    </div>
-                    <div class="relative h-80">
-                        <canvas x-ref="topCustomersChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Top Orders Table -->
-            <div class="bg-white border border-slate-100 p-5 rounded-3xl card-shadow">
-                <div class="flex items-center justify-between mb-4">
+                    <!-- Formula Breakdown -->
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-900">Top 10 Orders by Value</h3>
-                        <p class="text-xs text-slate-500">Highest value orders</p>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b-2 border-slate-200">
-                                <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">Order ID</th>
-                                <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">Customer</th>
-                                <th class="border border-slate-200 px-3 py-2 text-right font-semibold text-slate-700">Total</th>
-                                <th class="border border-slate-200 px-3 py-2 text-left font-semibold text-slate-700">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="order in salesData.topOrders" :key="order.id">
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="border border-slate-200 px-3 py-2 text-slate-700 font-mono" x-text="'#' + order.id"></td>
-                                    <td class="border border-slate-200 px-3 py-2 text-slate-900 font-medium" x-text="order.customer"></td>
-                                    <td class="border border-slate-200 px-3 py-2 text-slate-700 text-right font-mono" x-text="formatCurrency(order.total)"></td>
-                                    <td class="border border-slate-200 px-3 py-2 text-slate-700" x-text="order.created_at"></td>
-                                </tr>
+                        <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Formula Breakdown</h4>
+                        <div class="grid grid-cols-1 gap-2">
+                            <template x-for="metric in (modalData ? modalData.metrics : [])" :key="metric.key">
+                                <div class="flex items-center justify-between px-4 py-3 rounded-xl transition-colors duration-150"
+                                    :class="{
+                                        'bg-slate-50 border border-slate-100': metric.key === 'revenue' || metric.key === 'orders',
+                                        'bg-emerald-50/70 border border-emerald-100': metric.key === 'paid',
+                                        'bg-amber-50/70 border border-amber-100': metric.key === 'downpayment',
+                                        'bg-red-50/70 border border-red-100': metric.key === 'unpaid',
+                                    }"
+                                >
+                                    <div class="min-w-0">
+                                        <div class="text-xs text-slate-500 mb-0.5" x-text="metric.formula"></div>
+                                        <div class="font-semibold text-slate-900 text-sm" x-text="metric.key === 'orders' ? metric.value : '₱' + Number(metric.value).toLocaleString('en-PH', {minimumFractionDigits: 2})"></div>
+                                    </div>
+                                </div>
                             </template>
-                            <tr x-show="salesData.topOrders.length === 0">
-                                <td colspan="4" class="border border-slate-200 px-3 py-6 text-center text-slate-500">
-                                    No orders found for the selected period
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div x-show="modalData && modalData.orders.length > 0">
+                        <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3" x-text="'Orders (' + (modalData ? modalData.orders.length : 0) + ')'"></h4>
+                        <div class="border border-slate-100 rounded-xl overflow-hidden">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th class="w-8 px-2 py-2.5"></th>
+                                        <th class="text-left px-4 py-2.5 font-semibold">Quote</th>
+                                        <th class="text-left px-4 py-2.5 font-semibold">Customer</th>
+                                        <th class="text-left px-4 py-2.5 font-semibold">Date</th>
+                                        <th class="text-right px-4 py-2.5 font-semibold">Total</th>
+                                        <th class="text-center px-4 py-2.5 font-semibold">Status</th>
+                                        <th class="text-left px-4 py-2.5 font-semibold">Service</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="(order, orderIdx) in (modalData ? modalData.orders : [])" :key="order.quote_number">
+                                        <tr>
+                                            <td colspan="7" class="p-0">
+                                                <table class="w-full">
+                                                    <tbody>
+                                                        <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150 cursor-pointer" @click="toggleOrder(order.quote_number)">
+                                                            <td class="w-8 px-2 py-2.5 text-center">
+                                                                <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 mx-auto" :class="{ 'rotate-90': expandedOrders[order.quote_number] }" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                                                    <path d="M9 5l7 7-7 7"/>
+                                                                </svg>
+                                                            </td>
+                                                            <td class="px-4 py-2.5 font-medium text-slate-900" x-text="order.quote_number"></td>
+                                                            <td class="px-4 py-2.5 text-slate-600" x-text="order.customer_name"></td>
+                                                            <td class="px-4 py-2.5 text-slate-500 text-xs" x-text="order.date"></td>
+                                                            <td class="px-4 py-2.5 text-right font-medium text-slate-900" x-text="'₱' + Number(order.total).toLocaleString('en-PH', {minimumFractionDigits: 2})"></td>
+                                                            <td class="px-4 py-2.5 text-center">
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                                                                    :class="{
+                                                                        'bg-emerald-50 text-emerald-700': order.payment_status === 'paid',
+                                                                        'bg-amber-50 text-amber-700': order.payment_status === 'partially_paid',
+                                                                        'bg-red-50 text-red-600': order.payment_status === 'unpaid',
+                                                                    }"
+                                                                    x-text="order.payment_status === 'paid' ? 'Paid' : order.payment_status === 'partially_paid' ? 'Down Payment' : 'Unpaid'"
+                                                                ></span>
+                                                            </td>
+                                                            <td class="px-4 py-2.5 text-slate-500 text-xs">
+                                                                <span x-text="order.service_type_label"></span>
+                                                                <span class="text-slate-400 mx-0.5">&mdash;</span>
+                                                                <span x-text="order.service_name"></span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr x-show="expandedOrders[order.quote_number]" x-cloak>
+                                                            <td colspan="7" class="bg-slate-50/50 px-4 py-3">
+                                                                <template x-if="order.line_items && order.line_items.length > 0">
+                                                                    <div>
+                                                                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Line Items</div>
+                                                                        <table class="w-full text-xs">
+                                                                            <thead>
+                                                                                <tr class="text-slate-400 border-b border-slate-200">
+                                                                                    <th class="text-left py-1.5 font-medium">Item</th>
+                                                                                    <th class="text-right py-1.5 font-medium">Qty</th>
+                                                                                    <th class="text-right py-1.5 font-medium">Price</th>
+                                                                                    <th class="text-right py-1.5 font-medium">Subtotal</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <template x-for="item in order.line_items" :key="item.item_name + (item.description || '')">
+                                                                                    <tr class="border-b border-slate-100 last:border-0">
+                                                                                        <td class="py-1.5 text-slate-700">
+                                                                                            <span x-text="item.item_name"></span>
+                                                                                            <span x-show="item.description" class="text-slate-400 block" x-text="item.description"></span>
+                                                                                        </td>
+                                                                                        <td class="py-1.5 text-right text-slate-600" x-text="item.quantity"></td>
+                                                                                        <td class="py-1.5 text-right text-slate-600" x-text="'₱' + Number(item.unit_price).toLocaleString('en-PH', {minimumFractionDigits: 2})"></td>
+                                                                                        <td class="py-1.5 text-right font-medium text-slate-900" x-text="'₱' + Number(item.line_total).toLocaleString('en-PH', {minimumFractionDigits: 2})"></td>
+                                                                                    </tr>
+                                                                                </template>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </template>
+                                                                <template x-if="!order.line_items || order.line_items.length === 0">
+                                                                    <div class="text-xs text-slate-400 italic">No line items</div>
+                                                                </template>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Empty orders state -->
+                    <div x-show="modalData && modalData.orders.length === 0" class="text-center py-8">
+                        <svg class="w-10 h-10 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        <p class="text-sm text-slate-400">No orders for this month</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script>
-        function reportsPage(status, topByQuantity, topByValue, topByUnitPrice, distribution, suppliers, salesData, initialPeriod, initialMonth, initialYear) {
-            return {
-                activeTab: 'inventory',
-                status: status,
-                topByQuantity: topByQuantity,
-                topByValue: topByValue,
-                topByUnitPrice: topByUnitPrice,
-                distribution: distribution,
-                suppliers: suppliers,
-                salesData: salesData,
-                period: initialPeriod || 'all',
-                month: initialMonth || '',
-                year: initialYear || '',
-                charts: {},
-
-                formatNumber(value) {
-                    return new Intl.NumberFormat('en-PH').format(value);
-                },
-
-                formatCurrency(value) {
-                    return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(value);
-                },
-
-                destroyCharts() {
-                    Object.values(this.charts).forEach(chart => chart && chart.destroy());
-                    this.charts = {};
-                },
-
-                applyFilters() {
-                    const url = new URL(window.location);
-                    if (this.period !== 'all') {
-                        url.searchParams.set('period', this.period);
-                        if (this.period === 'month' && this.month) {
-                            url.searchParams.set('month', this.month);
-                        }
-                        if (this.year) {
-                            url.searchParams.set('year', this.year);
-                        }
-                    } else {
-                        url.searchParams.delete('period');
-                        url.searchParams.delete('month');
-                        url.searchParams.delete('year');
-                    }
-                    window.location.href = url.toString();
-                },
-
-                initCharts() {
-                    this.destroyCharts();
-
-                    // Inventory Charts
-                    this.charts.status = new Chart(this.$refs.statusChart, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['In Stock', 'Low Stock', 'Out of Stock'],
-                            datasets: [{
-                                data: [this.status.in_stock, this.status.low_stock, this.status.out_of_stock],
-                                backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
-                                borderWidth: 0,
-                                hoverOffset: 8,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            cutout: '65%',
-                            plugins: {
-                                legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
-                            }
-                        }
-                    });
-
-                    this.charts.quantity = new Chart(this.$refs.quantityChart, {
-                        type: 'bar',
-                        data: {
-                            labels: this.topByQuantity.map(i => i.name),
-                            datasets: [{
-                                label: 'Quantity',
-                                data: this.topByQuantity.map(i => i.quantity),
-                                backgroundColor: 'rgba(59, 130, 246, 0.85)',
-                                borderRadius: 6,
-                                maxBarThickness: 22,
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { callbacks: { label: (ctx) => this.formatNumber(ctx.parsed.x) + ' units' } }
-                            },
-                            scales: {
-                                x: { beginAtZero: true, ticks: { callback: (v) => this.formatNumber(v) }, grid: { color: '#f1f5f9' } },
-                                y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-                            }
-                        }
-                    });
-
-                    this.charts.value = new Chart(this.$refs.valueChart, {
-                        type: 'bar',
-                        data: {
-                            labels: this.topByValue.map(i => i.name),
-                            datasets: [{
-                                label: 'Value',
-                                data: this.topByValue.map(i => i.value),
-                                backgroundColor: 'rgba(99, 102, 241, 0.85)',
-                                borderRadius: 6,
-                                maxBarThickness: 22,
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { callbacks: { label: (ctx) => this.formatCurrency(ctx.parsed.x) } }
-                            },
-                            scales: {
-                                x: { beginAtZero: true, ticks: { callback: (v) => '₱' + this.formatNumber(v) }, grid: { color: '#f1f5f9' } },
-                                y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-                            }
-                        }
-                    });
-
-                    this.charts.distribution = new Chart(this.$refs.distributionChart, {
-                        type: 'bar',
-                        data: {
-                            labels: this.distribution.map(d => d.label),
-                            datasets: [{
-                                label: 'SKUs',
-                                data: this.distribution.map(d => d.count),
-                                backgroundColor: ['#f43f5e', '#fb7185', '#f59e0b', '#3b82f6', '#10b981', '#6366f1'],
-                                borderRadius: 6,
-                                maxBarThickness: 50,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { callbacks: { label: (ctx) => ctx.parsed.y + ' SKUs' } }
-                            },
-                            scales: {
-                                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: '#f1f5f9' } },
-                                x: { ticks: { font: { size: 10 } }, grid: { display: false } }
-                            }
-                        }
-                    });
-
-                    this.charts.unitPrice = new Chart(this.$refs.unitPriceChart, {
-                        type: 'bar',
-                        data: {
-                            labels: this.topByUnitPrice.map(i => i.name),
-                            datasets: [{
-                                label: 'Unit Price',
-                                data: this.topByUnitPrice.map(i => i.unit_price),
-                                backgroundColor: 'rgba(244, 63, 94, 0.85)',
-                                borderRadius: 6,
-                                maxBarThickness: 22,
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { callbacks: { label: (ctx) => this.formatCurrency(ctx.parsed.x) } }
-                            },
-                            scales: {
-                                x: { beginAtZero: true, ticks: { callback: (v) => '₱' + this.formatNumber(v) }, grid: { color: '#f1f5f9' } },
-                                y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-                            }
-                        }
-                    });
-
-                    this.charts.supplier = new Chart(this.$refs.supplierChart, {
-                        type: 'bar',
-                        data: {
-                            labels: this.suppliers.map(s => s.supplier),
-                            datasets: [
-                                {
-                                    label: 'Value',
-                                    data: this.suppliers.map(s => s.value),
-                                    backgroundColor: 'rgba(16, 185, 129, 0.85)',
-                                    borderRadius: 6,
-                                    yAxisID: 'y',
-                                    maxBarThickness: 30,
-                                },
-                                {
-                                    label: 'Items',
-                                    data: this.suppliers.map(s => s.items),
-                                    backgroundColor: 'rgba(245, 158, 11, 0.85)',
-                                    borderRadius: 6,
-                                    yAxisID: 'y1',
-                                    maxBarThickness: 30,
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
-                                tooltip: {
-                                    callbacks: {
-                                        label: (ctx) => {
-                                            if (ctx.dataset.yAxisID === 'y') return 'Value: ' + this.formatCurrency(ctx.parsed.y);
-                                            return 'Items: ' + ctx.parsed.y;
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Value (₱)' }, grid: { color: '#f1f5f9' } },
-                                y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Items' }, grid: { display: false } },
-                                x: { ticks: { font: { size: 10 } }, grid: { display: false } }
-                            }
-                        }
-                    });
-
-                    // Sales Revenue Charts
-                    if (this.$refs.monthlyTrendChart) {
-                        const peakGradient = {
-                            id: 'peakGradient',
-                            beforeDraw(chart) {
-                                const { ctx, chartArea } = chart;
-                                if (!chartArea) return;
-                                const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                                grad.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
-                                grad.addColorStop(1, 'rgba(16, 185, 129, 0.02)');
-                                chart.data.datasets[0].backgroundColor = grad;
-                            },
-                            afterDraw(chart) {
-                                const { ctx } = chart;
-                                const meta = chart.getDatasetMeta(0);
-                                if (!meta?.data?.length) return;
-                                const dataset = chart.data.datasets[0].data;
-                                let maxVal = -Infinity, maxIdx = 0;
-                                dataset.forEach((v, i) => { if (v > maxVal) { maxVal = v; maxIdx = i; } });
-                                const point = meta.data[maxIdx];
-                                if (!point) return;
-                                ctx.save();
-                                ctx.beginPath();
-                                ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
-                                ctx.fillStyle = '#10b981';
-                                ctx.fill();
-                                ctx.strokeStyle = '#fff';
-                                ctx.lineWidth = 2;
-                                ctx.stroke();
-                                ctx.restore();
-                            }
-                        };
-
-                        this.charts.monthlyTrend = new Chart(this.$refs.monthlyTrendChart, {
-                            type: 'line',
-                            data: {
-                                labels: this.salesData.monthlyTrend.map(d => d.label),
-                                datasets: [
-                                    {
-                                        label: 'Revenue',
-                                        data: this.salesData.monthlyTrend.map(d => d.revenue),
-                                        borderWidth: 0,
-                                        fill: true,
-                                        tension: 0.4,
-                                        pointRadius: 0,
-                                        pointHoverRadius: 4,
-                                        yAxisID: 'y',
-                                    },
-                                    {
-                                        label: 'Orders',
-                                        data: this.salesData.monthlyTrend.map(d => d.orders),
-                                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                                        borderRadius: 3,
-                                        type: 'bar',
-                                        yAxisID: 'y1',
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: (ctx) => {
-                                                if (ctx.dataset.yAxisID === 'y') return 'Revenue: ' + this.formatCurrency(ctx.parsed.y);
-                                                return 'Orders: ' + ctx.parsed.y;
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Revenue (₱)' }, grid: { color: '#f1f5f9' } },
-                                    y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Orders' }, grid: { display: false } },
-                                    x: { ticks: { font: { size: 10 } }, grid: { display: false } }
-                                }
-                            },
-                            plugins: [peakGradient]
-                        });
-                    }
-
-                    if (this.$refs.yearlyTrendChart) {
-                        this.charts.yearlyTrend = new Chart(this.$refs.yearlyTrendChart, {
-                            type: 'bar',
-                            data: {
-                                labels: this.salesData.yearlyTrend.map(d => d.label),
-                                datasets: [
-                                    {
-                                        label: 'Revenue',
-                                        data: this.salesData.yearlyTrend.map(d => d.revenue),
-                                        backgroundColor: 'rgba(20, 184, 166, 0.85)',
-                                        borderRadius: 6,
-                                        yAxisID: 'y',
-                                    },
-                                    {
-                                        label: 'Orders',
-                                        data: this.salesData.yearlyTrend.map(d => d.orders),
-                                        backgroundColor: 'rgba(139, 92, 246, 0.85)',
-                                        borderRadius: 6,
-                                        yAxisID: 'y1',
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: (ctx) => {
-                                                if (ctx.dataset.yAxisID === 'y') return 'Revenue: ' + this.formatCurrency(ctx.parsed.y);
-                                                return 'Orders: ' + ctx.parsed.y;
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Revenue (₱)' }, grid: { color: '#f1f5f9' } },
-                                    y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Orders' }, grid: { display: false } },
-                                    x: { ticks: { font: { size: 11 } }, grid: { display: false } }
-                                }
-                            }
-                        });
-                    }
-
-                    if (this.$refs.topServicesChart) {
-                        const centerTotal = {
-                            id: 'centerTotal',
-                            afterDraw(chart) {
-                                const { ctx, chartArea } = chart;
-                                const cx = (chartArea.left + chartArea.right) / 2;
-                                const cy = (chartArea.top + chartArea.bottom) / 2;
-                                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                ctx.save();
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                ctx.font = 'bold 16px sans-serif';
-                                ctx.fillStyle = '#0f172a';
-                                ctx.fillText('₱' + new Intl.NumberFormat('en-PH').format(total), cx, cy - 6);
-                                ctx.font = '11px sans-serif';
-                                ctx.fillStyle = '#94a3b8';
-                                ctx.fillText('Total Revenue', cx, cy + 14);
-                                ctx.restore();
-                            }
-                        };
-
-                        this.charts.topServices = new Chart(this.$refs.topServicesChart, {
-                            type: 'doughnut',
-                            data: {
-                                labels: this.salesData.topServices.map(s => s.service),
-                                datasets: [{
-                                    data: this.salesData.topServices.map(s => s.revenue),
-                                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'],
-                                    borderWidth: 0,
-                                    hoverOffset: 8,
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                cutout: '70%',
-                                plugins: {
-                                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 12 } },
-                                    tooltip: { callbacks: { label: (ctx) => ctx.label + ': ' + this.formatCurrency(ctx.parsed) } }
-                                }
-                            },
-                            plugins: [centerTotal]
-                        });
-                    }
-
-                    if (this.$refs.topCustomersChart) {
-                        this.charts.topCustomers = new Chart(this.$refs.topCustomersChart, {
-                            type: 'bar',
-                            data: {
-                                labels: this.salesData.topCustomers.map(c => c.customer),
-                                datasets: [{
-                                    label: 'Revenue',
-                                    data: this.salesData.topCustomers.map(c => c.revenue),
-                                    backgroundColor: 'rgba(244, 114, 182, 0.85)',
-                                    borderRadius: 6,
-                                    maxBarThickness: 30,
-                                }]
-                            },
-                            options: {
-                                indexAxis: 'y',
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { display: false },
-                                    tooltip: { callbacks: { label: (ctx) => this.formatCurrency(ctx.parsed.x) } }
-                                },
-                                scales: {
-                                    x: { beginAtZero: true, ticks: { callback: (v) => '₱' + this.formatNumber(v) }, grid: { color: '#f1f5f9' } },
-                                    y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    </script>
+    </div>
 </x-layouts::app.owner>

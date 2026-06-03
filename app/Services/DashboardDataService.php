@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Quote;
+use App\Models\QuoteLineItem;
 use App\Models\ServiceJob;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -151,6 +152,177 @@ class DashboardDataService
         })->where('status', 'accepted')
             ->where('payment_status', $paymentStatus)
             ->sum('total') ?? 0;
+    }
+
+    public function getMonthlyReport(int $year): array
+    {
+        $config = config('reports');
+        $model = $config['source']['model'];
+        $statuses = $config['status_filter'];
+        $dateCol = $config['date_column'];
+
+        $baseQuery = $model::whereIn('status', $statuses)
+            ->whereYear($dateCol, $year);
+
+        $revenue = (clone $baseQuery)
+            ->selectRaw('cast(strftime("%m", '.$dateCol.') as integer) as period, SUM(total) as value')
+            ->groupBy('period')
+            ->pluck('value', 'period');
+
+        $orders = (clone $baseQuery)
+            ->selectRaw('cast(strftime("%m", '.$dateCol.') as integer) as period, COUNT(id) as value')
+            ->groupBy('period')
+            ->pluck('value', 'period');
+
+        $paid = (clone $baseQuery)->where('payment_status', 'paid')
+            ->selectRaw('cast(strftime("%m", '.$dateCol.') as integer) as period, SUM(total) as value')
+            ->groupBy('period')
+            ->pluck('value', 'period');
+
+        $downpayment = (clone $baseQuery)->where('payment_status', 'partially_paid')
+            ->selectRaw('cast(strftime("%m", '.$dateCol.') as integer) as period, SUM(total) as value')
+            ->groupBy('period')
+            ->pluck('value', 'period');
+
+        $unpaid = (clone $baseQuery)->where('payment_status', 'unpaid')
+            ->selectRaw('cast(strftime("%m", '.$dateCol.') as integer) as period, SUM(total) as value')
+            ->groupBy('period')
+            ->pluck('value', 'period');
+
+        return collect(range(1, 12))->map(fn ($m) => [
+            'month' => $m,
+            'revenue' => (float) ($revenue[$m] ?? 0),
+            'orders' => (int) ($orders[$m] ?? 0),
+            'paid' => (float) ($paid[$m] ?? 0),
+            'downpayment' => (float) ($downpayment[$m] ?? 0),
+            'unpaid' => (float) ($unpaid[$m] ?? 0),
+        ])->toArray();
+    }
+
+    public function getYearlyReport(): array
+    {
+        $config = config('reports');
+        $model = $config['source']['model'];
+        $statuses = $config['status_filter'];
+        $dateCol = $config['date_column'];
+
+        $years = $model::whereIn('status', $statuses)
+            ->selectRaw('cast(strftime("%Y", '.$dateCol.') as integer) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        return $years->map(function ($year) use ($model, $statuses, $dateCol) {
+            $query = $model::whereYear($dateCol, $year)->whereIn('status', $statuses);
+
+            return [
+                'year' => $year,
+                'revenue' => (float) (clone $query)->sum('total'),
+                'orders' => (clone $query)->count(),
+                'paid' => (float) $model::whereYear($dateCol, $year)->whereIn('status', $statuses)->where('payment_status', 'paid')->sum('total'),
+                'downpayment' => (float) $model::whereYear($dateCol, $year)->whereIn('status', $statuses)->where('payment_status', 'partially_paid')->sum('total'),
+                'unpaid' => (float) $model::whereYear($dateCol, $year)->whereIn('status', $statuses)->where('payment_status', 'unpaid')->sum('total'),
+            ];
+        })->toArray();
+    }
+
+    public function getMonthlyOrderDetails(int $year, int $month): array
+    {
+        $config = config('reports');
+        $model = $config['source']['model'];
+        $statuses = $config['status_filter'];
+        $dateCol = $config['date_column'];
+
+        $orders = $model::whereIn('status', $statuses)
+            ->whereYear($dateCol, $year)
+            ->whereMonth($dateCol, $month)
+            ->with(['customer', 'serviceJob.service', 'lineItems'])
+            ->get();
+
+        $paid = $orders->where('payment_status', 'paid');
+        $downpayment = $orders->where('payment_status', 'partially_paid');
+        $unpaid = $orders->where('payment_status', 'unpaid');
+
+        $revenueTotal = (float) $orders->sum('total');
+
+        $metrics = [
+            [
+                'key' => 'revenue',
+                'label' => 'Revenue',
+                'formula' => "SUM(total) of {$orders->count()} accepted order".($orders->count() !== 1 ? 's' : ''),
+                'value' => $revenueTotal,
+                'count' => $orders->count(),
+            ],
+            [
+                'key' => 'orders',
+                'label' => 'Orders',
+                'formula' => 'COUNT(accepted quotes in this month)',
+                'value' => $orders->count(),
+                'count' => $orders->count(),
+            ],
+            [
+                'key' => 'paid',
+                'label' => 'Paid',
+                'formula' => "SUM(total) WHERE payment_status = 'paid' (".$paid->count().' order'.($paid->count() !== 1 ? 's' : '').')',
+                'value' => (float) $paid->sum('total'),
+                'count' => $paid->count(),
+            ],
+            [
+                'key' => 'downpayment',
+                'label' => 'Down Payment',
+                'formula' => "SUM(total) WHERE payment_status = 'partially_paid' (".$downpayment->count().' order'.($downpayment->count() !== 1 ? 's' : '').')',
+                'value' => (float) $downpayment->sum('total'),
+                'count' => $downpayment->count(),
+            ],
+            [
+                'key' => 'unpaid',
+                'label' => 'Unpaid',
+                'formula' => "SUM(total) WHERE payment_status = 'unpaid' (".$unpaid->count().' order'.($unpaid->count() !== 1 ? 's' : '').')',
+                'value' => (float) $unpaid->sum('total'),
+                'count' => $unpaid->count(),
+            ],
+        ];
+
+        $paymentSplit = [
+            'paid_total' => (float) $paid->sum('total'),
+            'downpayment_total' => (float) $downpayment->sum('total'),
+            'unpaid_total' => (float) $unpaid->sum('total'),
+            'paid_count' => $paid->count(),
+            'downpayment_count' => $downpayment->count(),
+            'unpaid_count' => $unpaid->count(),
+        ];
+
+        $orderList = $orders->map(fn (Quote $quote) => [
+            'quote_number' => $quote->quote_number,
+            'customer_name' => trim($quote->customer->first_name.' '.$quote->customer->last_name),
+            'date' => $quote->created_at->format('M d, Y'),
+            'total' => (float) $quote->total,
+            'payment_status' => $quote->payment_status,
+            'service_type_label' => $quote->serviceJob
+                ? ($quote->serviceJob->type === 'printing' ? 'Printing' : 'Technical')
+                : 'N/A',
+            'service_name' => $quote->serviceJob?->service->name ?? 'N/A',
+            'line_items' => $quote->lineItems->map(fn (QuoteLineItem $item) => [
+                'item_name' => $item->item_name,
+                'description' => $item->description,
+                'quantity' => (int) $item->quantity,
+                'unit_price' => (float) $item->unit_price,
+                'line_total' => (float) $item->line_total,
+            ])->values(),
+        ]);
+
+        return [
+            'meta' => [
+                'month' => $month,
+                'month_name' => now()->year($year)->month($month)->format('F'),
+                'year' => $year,
+                'total_revenue' => $revenueTotal,
+                'total_orders' => $orders->count(),
+            ],
+            'metrics' => $metrics,
+            'payment_split' => $paymentSplit,
+            'orders' => $orderList,
+        ];
     }
 
     public function getCurrentEarningsBreakdown(): array

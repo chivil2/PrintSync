@@ -11,7 +11,6 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PrintbuddyController;
 use App\Http\Controllers\QuoteController;
-use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ServiceController;
 use App\Models\PrintingService;
 use App\Models\TechnicalService;
@@ -137,7 +136,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('services/{id}/{serviceType}/edit', [ServiceController::class, 'edit'])->name('services.edit');
         Route::put('services/{id}/{serviceType}', [ServiceController::class, 'update'])->name('services.update');
         Route::delete('services/{id}/{serviceType}', [ServiceController::class, 'destroy'])->name('services.destroy');
-        Route::get('reports', [ReportsController::class, 'index'])->name('reports');
         Route::get('payments', [PaymentController::class, 'ownerIndex'])->name('payments');
         Route::post('payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
         Route::post('payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
@@ -146,6 +144,8 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('printbuddy/notes/{note}', [PrintbuddyController::class, 'destroyNote'])->name('printbuddy.notes.destroy');
         Route::post('printbuddy/api-key', [PrintbuddyController::class, 'saveApiKey'])->name('printbuddy.api-key');
 
+        Route::get('reports', [OwnerController::class, 'reports'])->name('reports');
+        Route::get('reports/monthly-orders', [OwnerController::class, 'getMonthlyOrderDetails'])->name('reports.monthly-orders');
         Route::get('chat', [OwnerChatController::class, 'index'])->name('chat.index');
         Route::get('chat/{conversation}', [OwnerChatController::class, 'show'])->name('chat.show');
         Route::post('chat/{conversation}/messages', [OwnerChatController::class, 'sendMessage'])->name('chat.send');
