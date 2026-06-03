@@ -1,0 +1,16 @@
+# dependency directories
+node_modules/
+vendor/
+
+# dot files (configs, env, git)
+.*
+.*/
+
+# dependency manifest files
+composer.json
+composer.lock
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lock
